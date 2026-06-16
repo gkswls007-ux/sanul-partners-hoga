@@ -1507,22 +1507,39 @@ function formatReportPrice(item) {
 }
 
 async function renderCustomerTrendSections(items) {
-  const groups = groupBy(items, (item) => `${item.dealType || "-"}|${getReportPyeongGroup(item)}`)
-    .map(([key, rows]) => {
-      const [dealType, pyeongGroup] = key.split("|");
-      return { dealType, pyeongGroup, count: rows.length };
-    })
-    .sort((a, b) => b.count - a.count || String(a.dealType).localeCompare(String(b.dealType), "ko") || groupOrder(a.pyeongGroup) - groupOrder(b.pyeongGroup));
-  const selected = groups.slice(0, 3);
-  const omitted = Math.max(0, groups.length - selected.length);
+  const selected = getCustomerTrendGroups(items);
 
   if (!selected.length) return `<p class="chart-note">표시할 추이 조건이 없습니다.</p>`;
   const charts = await Promise.all(selected.map(renderCustomerTrendChart));
 
   return `
     ${charts.join("")}
-    ${omitted ? `<p class="chart-note">※ 거래유형/평형대 조합이 많아 매물 수가 많은 상위 3개 조건만 표시했습니다.</p>` : ""}
   `;
+}
+
+function getCustomerTrendGroups(items) {
+  return groupBy(items, (item) => JSON.stringify([item.complex || "-", item.dealType || "-", getReportPyeongGroup(item)]))
+    .map(([key, rows]) => {
+      const [complex, dealType, pyeongGroup] = JSON.parse(key);
+      return { complex, dealType, pyeongGroup, count: rows.length };
+    })
+    .sort(
+      (a, b) =>
+        String(a.complex).localeCompare(String(b.complex), "ko") ||
+        String(a.dealType).localeCompare(String(b.dealType), "ko") ||
+        groupOrder(a.pyeongGroup) - groupOrder(b.pyeongGroup) ||
+        b.count - a.count,
+    );
+}
+
+function getCustomerTrendRows(group) {
+  return state.rows.filter(
+    (row) => row.complex === group.complex && row.dealType === group.dealType && getReportPyeongGroup(row) === group.pyeongGroup,
+  );
+}
+
+function getCustomerTrendTitle(group) {
+  return `${shortName(group.complex)} · ${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
 }
 
 function getReportPyeongGroup(item) {
@@ -1536,7 +1553,7 @@ function getReportPyeongGroup(item) {
 }
 
 async function renderCustomerTrendChart(group) {
-  const rows = state.rows.filter((row) => row.dealType === group.dealType && row.pyeongGroup === group.pyeongGroup);
+  const rows = getCustomerTrendRows(group);
   const grouped = groupBy(rows, "surveyDate")
     .map(([date, weekRows]) => {
       const prices = weekRows.map((row) => analysisPriceForDeal(row, group.dealType)).filter(Number.isFinite);
@@ -1553,7 +1570,7 @@ async function renderCustomerTrendChart(group) {
   if (grouped.length < 2) {
     return `
       <div class="chart-box">
-        <p class="chart-title">${escapeHtml(group.dealType)} · ${escapeHtml(group.pyeongGroup)} ${group.dealType === "월세" ? "환산가" : "호가"} 추이</p>
+        <p class="chart-title">${escapeHtml(getCustomerTrendTitle(group))}</p>
         <p class="chart-note">2개 이상 주차의 데이터가 없어 추이 그래프를 표시하지 않았습니다.</p>
       </div>
     `;
@@ -1576,7 +1593,7 @@ async function renderCustomerTrendChart(group) {
   const avgPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.avgPrice)}`).join(" ");
   const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
   const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
-  const title = `${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
+  const title = getCustomerTrendTitle(group);
   const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         ${ticks
@@ -1649,20 +1666,13 @@ function svgToPngDataUrl(svg, width, height) {
 }
 
 async function getCustomerTrendChartImages(items) {
-  const groups = groupBy(items, (item) => `${item.dealType || "-"}|${getReportPyeongGroup(item)}`)
-    .map(([key, rows]) => {
-      const [dealType, pyeongGroup] = key.split("|");
-      return { dealType, pyeongGroup, count: rows.length };
-    })
-    .sort((a, b) => b.count - a.count || String(a.dealType).localeCompare(String(b.dealType), "ko") || groupOrder(a.pyeongGroup) - groupOrder(b.pyeongGroup))
-    .slice(0, 3);
-
+  const groups = getCustomerTrendGroups(items);
   const charts = await Promise.all(groups.map(renderCustomerTrendChartImage));
   return charts.filter((chart) => chart?.image);
 }
 
 async function renderCustomerTrendChartImage(group) {
-  const rows = state.rows.filter((row) => row.dealType === group.dealType && row.pyeongGroup === group.pyeongGroup);
+  const rows = getCustomerTrendRows(group);
   const grouped = groupBy(rows, "surveyDate")
     .map(([date, weekRows]) => {
       const prices = weekRows.map((row) => analysisPriceForDeal(row, group.dealType)).filter(Number.isFinite);
@@ -1695,7 +1705,7 @@ async function renderCustomerTrendChartImage(group) {
   const avgPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.avgPrice)}`).join(" ");
   const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
   const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
-  const title = `${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
+  const title = getCustomerTrendTitle(group);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <rect width="${width}" height="${height}" fill="#ffffff"></rect>
