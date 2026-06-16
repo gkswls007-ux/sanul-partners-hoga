@@ -1214,13 +1214,13 @@ async function exportCustomerWord() {
           h3 { margin: 16px 0 8px; font-size: 15px; }
           .cover { page-break-after: always; }
           .cover-header { width: 100%; margin: 0 0 18px; }
-          .cover-header img { display: block; width: 480px; max-width: 480px; height: auto; border: 0; }
+          .cover-header img { display: block; width: 16cm; height: 5.3cm; border: 0; }
           .meta-grid { width: 100%; border-collapse: collapse; margin: 8px 0 18px; }
           .meta-grid th, .meta-grid td { border: 1px solid #d9e2ec; padding: 8px 10px; font-size: 12px; }
           .meta-grid th { width: 120px; background: #f8fafc; color: #334155; }
           .report-section { margin: 18px 0 20px; }
           .chart-box { margin: 10px 0 14px; padding: 10px; border: 1px solid #d9e2ec; page-break-inside: avoid; }
-          .chart-image { display: block; width: 560px; max-width: 560px; height: auto; border: 0; }
+          .chart-image { display: block; width: 15.87cm; height: 5cm; border: 0; }
           .chart-title { margin: 0 0 6px; font-weight: 800; color: #111827; }
           .chart-note { margin: 4px 0 0; color: #64748b; font-size: 11px; }
           .summary-table th, .summary-table td { font-size: 11px; padding: 5px 6px; }
@@ -1241,7 +1241,7 @@ async function exportCustomerWord() {
       </head>
       <body>
         <section class="cover">
-          <div class="cover-header">${headerImage ? `<img src="${headerImage}" alt="산울파트너스 고객 제안 매물 보고서" />` : ""}</div>
+          <div class="cover-header">${headerImage ? `<img src="${headerImage}" width="605" height="200" style="width:16cm;height:5.3cm;border:0;" alt="산울파트너스 고객 제안 매물 보고서" />` : ""}</div>
           <table class="meta-grid">
             <tr><th>고객명</th><td>${escapeHtml(customerName)}${customerPhone ? ` / ${escapeHtml(customerPhone)}` : ""}</td><th>제안 매물</th><td>${contacts.length.toLocaleString("ko-KR")}건</td></tr>
             <tr><th>작성일</th><td>${escapeHtml(reportDate)}</td><th>거래유형</th><td>${escapeHtml(dealSummary)}</td></tr>
@@ -1412,7 +1412,7 @@ async function renderCustomerTrendChart(group) {
   return `
     <div class="chart-box">
       <p class="chart-title">${escapeHtml(title)}</p>
-      ${chartImage ? `<img class="chart-image" src="${chartImage}" alt="${escapeHtml(title)}" />` : svg}
+      ${chartImage ? `<img class="chart-image" src="${chartImage}" width="600" height="189" style="width:15.87cm;height:5cm;border:0;" alt="${escapeHtml(title)}" />` : svg}
       <p class="chart-note">파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수</p>
       ${group.dealType === "월세" ? `<p class="chart-note">환산보증금 : 월세 1만원 당 보증금 200만원 (연6% 전월세 전환율 가정)</p>` : ""}
     </div>
