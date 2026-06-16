@@ -1222,8 +1222,9 @@ async function exportCustomerDocx() {
   const reportDate = new Date().toLocaleDateString("ko-KR");
   const headerImage = await imageToDataUrl("./assets/report-header.png");
   const children = [];
+  const reportFont = "페이퍼로지 8 ExtraBold";
 
-  const text = (value, options = {}) => new TextRun({ text: String(value ?? ""), font: "Malgun Gothic", ...options });
+  const text = (value, options = {}) => new TextRun({ text: String(value ?? ""), font: reportFont, ...options });
   const paragraph = (value, options = {}) =>
     new Paragraph({
       children: Array.isArray(value) ? value : [text(value, options.textOptions || {})],
@@ -1237,7 +1238,7 @@ async function exportCustomerDocx() {
       width: options.width ? { size: options.width, type: WidthType.DXA } : undefined,
       shading: options.shading ? { fill: options.shading } : undefined,
       verticalAlign: VerticalAlign.CENTER,
-      margins: { top: 120, bottom: 120, left: 120, right: 120 },
+      margins: options.margins || { top: 120, bottom: 120, left: 120, right: 120 },
       children: Array.isArray(content) ? content : [paragraph(content, { spacing: { after: 0 }, textOptions: options.textOptions || {} })],
     });
   const table = (rows, widths, options = {}) =>
@@ -1251,7 +1252,13 @@ async function exportCustomerDocx() {
               cell(item.value ?? item, {
                 width: widths[index],
                 shading: item.header ? "F8FAFC" : item.summary ? "FFF8DF" : undefined,
-                textOptions: item.header ? { bold: true, color: "334155" } : item.bold ? { bold: true } : {},
+                textOptions: {
+                  ...(options.cellTextOptions || {}),
+                  ...(item.header ? { bold: true, color: "334155", ...(options.headerTextOptions || {}) } : {}),
+                  ...(item.bold ? { bold: true } : {}),
+                  ...(item.textOptions || {}),
+                },
+                margins: options.cellMargins,
               }),
             ),
           }),
@@ -1267,7 +1274,7 @@ async function exportCustomerDocx() {
   if (headerImage) {
     children.push(
       new Paragraph({
-        children: [image(headerImage, 605, 200)],
+        children: [image(headerImage, 704, 233)],
         spacing: { after: 180 },
       }),
     );
@@ -1290,11 +1297,11 @@ async function exportCustomerDocx() {
 
   const trendCharts = await getCustomerTrendChartImages(contacts);
   if (trendCharts.length) {
-    trendCharts.forEach((chart) => {
+    trendCharts.forEach((chart, index) => {
       children.push(
-        paragraph(chart.title, { spacing: { before: 80, after: 60 }, textOptions: { bold: true, size: 22 } }),
+        paragraph(chart.title, { spacing: { before: index ? 240 : 80, after: 60 }, textOptions: { bold: true, size: 22 } }),
         new Paragraph({ children: [image(chart.image, 600, 189)], spacing: { after: 40 } }),
-        paragraph(chart.note, { spacing: { after: 140 }, textOptions: { size: 17, color: "64748B" } }),
+        paragraph(chart.note, { spacing: { after: index < trendCharts.length - 1 ? 220 : 140 }, textOptions: { size: 17, color: "64748B" } }),
       );
     });
   } else {
@@ -1326,7 +1333,13 @@ async function exportCustomerDocx() {
           formatMoveIn(item.moveIn),
         ]),
       ],
-      [1700, 800, 1100, 2500, 1300, 1960],
+      [1700, 800, 1100, 2916, 1701, 2268],
+      {
+        width: 10485,
+        cellTextOptions: { size: 16 },
+        headerTextOptions: { size: 16 },
+        cellMargins: { top: 95, bottom: 95, left: 95, right: 95 },
+      },
     ),
     paragraph("※ 본 보고서는 참고용 자료이며, 실제 계약 시 조건은 변동될 수 있습니다.", {
       spacing: { before: 160, after: 120 },
@@ -1370,7 +1383,7 @@ async function exportCustomerDocx() {
     creator: "산울파트너스",
     title: "고객 제안 매물 보고서",
     styles: {
-      default: { document: { run: { font: "Malgun Gothic", size: 20 } } },
+      default: { document: { run: { font: reportFont, size: 20 } } },
     },
     sections: [
       {
