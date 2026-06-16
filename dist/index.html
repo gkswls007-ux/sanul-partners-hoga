@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>호가 브리핑</title>
+    <link rel="stylesheet" href="./styles.css?v=202606161542" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar" aria-label="호가 브리핑 상단">
+        <div>
+          <p class="eyebrow">세종 산울동·해밀동 호가 데이터</p>
+          <h1>산울파트너스 호가 브리핑</h1>
+        </div>
+        <div class="source-box">
+          <span id="sourceDate">-</span>
+          <strong id="sourceCount">-</strong>
+        </div>
+      </section>
+
+      <nav class="view-tabs" aria-label="화면 탭">
+        <button class="tab-button active" data-tab="summary" type="button">현황 요약</button>
+        <button class="tab-button" data-tab="briefing" type="button">매물 브리핑</button>
+      </nav>
+
+      <section class="toolbar" aria-label="필터">
+        <label>
+          조사 주차
+          <select id="dateFilter"></select>
+        </label>
+        <label>
+          단지
+          <select id="complexFilter"></select>
+        </label>
+        <label>
+          거래
+          <select id="dealFilter"></select>
+        </label>
+        <label>
+          평형
+          <select id="pyeongFilter"></select>
+        </label>
+        <label>
+          타입
+          <select id="typeFilter"></select>
+        </label>
+        <label class="search">
+          검색
+          <input id="searchInput" type="search" placeholder="동, 특징, 타입 검색" />
+        </label>
+      </section>
+
+      <section id="summaryTab" class="tab-panel active">
+        <section class="overview-grid">
+          <article class="panel overview-wide">
+            <div class="panel-head">
+              <div>
+                <h2>주차별 매물 증감현황</h2>
+                <p class="panel-note">최근 주차부터 매매·월세·전세 매물 수 비교</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>조사 주차</th>
+                    <th>매매</th>
+                    <th>월세</th>
+                    <th>전세</th>
+                  </tr>
+                </thead>
+                <tbody id="weeklySummaryBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel overview-wide">
+            <div class="panel-head">
+              <div>
+                <h2>면적별 매물현황</h2>
+                <p class="panel-note">평수·타입·전용면적별 매매·월세·전세 매물 수</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>평수(공급)</th>
+                    <th>공급면적</th>
+                    <th>전용면적</th>
+                    <th>매매</th>
+                    <th>월세</th>
+                    <th>전세</th>
+                  </tr>
+                </thead>
+                <tbody id="areaInventoryBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel overview-wide">
+            <div class="panel-head">
+              <div>
+                <h2>면적별 최소호가 & 최대호가</h2>
+                <p class="panel-note">평수·타입·전용면적별 최소/최대 호가와 평당 평균</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="summary-table">
+                <thead>
+                  <tr>
+                    <th>평형대</th>
+                    <th>공급면적</th>
+                    <th>전용면적</th>
+                    <th>평수묶음</th>
+                    <th>최소 호가</th>
+                    <th>최대 호가</th>
+                    <th>평균(평당매매가)</th>
+                    <th>매물 수</th>
+                  </tr>
+                </thead>
+                <tbody id="areaPriceBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section id="briefingTab" class="tab-panel" hidden>
+      <section class="kpis" aria-label="핵심 지표">
+        <article>
+          <span>매물 수</span>
+          <strong id="kpiCount">-</strong>
+        </article>
+        <article>
+          <span id="kpiMinLabel">최저 호가</span>
+          <strong id="kpiMin">-</strong>
+        </article>
+        <article>
+          <span id="kpiAvgLabel">평균 호가</span>
+          <strong id="kpiAvg">-</strong>
+        </article>
+        <article>
+          <span>평당 평균</span>
+          <strong id="kpiPyeong">-</strong>
+        </article>
+      </section>
+
+      <section class="trend-section panel">
+        <div class="panel-head">
+          <div>
+            <h2>주차별 호가 변동 추이</h2>
+            <p class="panel-note">단지·거래·평형 조건 기준, 조사 주차 필터는 제외</p>
+          </div>
+          <div class="legend">
+            <span><i class="legend-line avg"></i><em id="trendAvgLabel">평균 호가</em></span>
+            <span><i class="legend-line min"></i><em id="trendMinLabel">최저 호가</em></span>
+            <span><i class="legend-bar"></i>매물 수</span>
+          </div>
+        </div>
+        <div id="trendChart" class="trend-chart" aria-label="주차별 호가 변동 그래프"></div>
+        <p id="convertedDepositNote" class="converted-note" hidden>환산보증금 : 월세 1만원 당 보증금 200만원 (연6% 전월세 전환율 가정)</p>
+      </section>
+
+      <section class="insight-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>단지별 호가 분포</h2>
+            <span>평균 기준</span>
+          </div>
+          <div id="complexBars" class="bars"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>평형별 분위</h2>
+            <span>최저·평균·최고</span>
+          </div>
+          <div id="pyeongCards" class="mini-cards"></div>
+        </article>
+      </section>
+
+      <section class="list-section">
+        <div class="panel-head">
+          <h2>추천 제시 매물</h2>
+          <div class="listing-controls">
+            <div class="floor-controls" aria-label="층 필터">
+              <button class="filter-button active" data-floor="전체" type="button">전체</button>
+              <button class="filter-button" data-floor="저층" type="button">저층</button>
+              <button class="filter-button" data-floor="중층" type="button">중층</button>
+              <button class="filter-button" data-floor="고층" type="button">고층</button>
+            </div>
+            <div class="sort-controls" aria-label="정렬">
+              <button class="sort-button active" data-sort="priceAsc" type="button">낮은 호가</button>
+              <button class="sort-button" data-sort="priceDesc" type="button">높은 호가</button>
+              <button class="sort-button" data-sort="pyeongPriceAsc" type="button">낮은 평당가</button>
+            </div>
+          </div>
+        </div>
+        <div id="listingGrid" class="listing-grid"></div>
+      </section>
+
+      <section class="work-section">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>물건 리스트</h2>
+              <p class="panel-note">고객에게 제안할 매물을 담아두는 목록</p>
+            </div>
+            <button id="clearBasket" class="ghost-button" type="button">비우기</button>
+          </div>
+          <div class="customer-fields">
+            <label>
+              이름
+              <input id="customerNameInput" type="text" placeholder="고객 이름" />
+            </label>
+            <label>
+              핸드폰
+              <input id="customerPhoneInput" type="text" placeholder="010-0000-0000" />
+            </label>
+          </div>
+          <div id="basketList" class="work-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>연락 리스트</h2>
+              <p class="panel-note">후속 연락할 매물과 희망 중개사 선택</p>
+            </div>
+            <div class="header-actions">
+              <button id="exportContacts" class="plan-button" type="button">중개사용 엑셀</button>
+              <button id="exportCustomerDoc" class="plan-button" type="button">고객용 워드</button>
+              <button id="clearContacts" class="ghost-button" type="button">비우기</button>
+            </div>
+          </div>
+          <div id="contactList" class="work-list"></div>
+        </article>
+      </section>
+      </section>
+    </main>
+
+    <div id="floorplanModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close-floorplan></div>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="floorplanTitle">
+        <div class="modal-head">
+          <div>
+            <p class="modal-eyebrow" id="floorplanComplex"></p>
+            <h2 id="floorplanTitle">도면 보기</h2>
+          </div>
+          <button class="modal-close" type="button" data-close-floorplan aria-label="닫기">×</button>
+        </div>
+        <div id="floorplanMeta" class="floorplan-meta"></div>
+        <div id="floorplanImages" class="floorplan-images"></div>
+      </section>
+    </div>
+
+    <script src="./app.js?v=202606161542"></script>
+  </body>
+</html>

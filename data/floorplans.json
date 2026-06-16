@@ -1,0 +1,3011 @@
+{
+  "plans": {
+    "산울2단지세종자이더시티|105A1": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "105A1",
+      "structure": "일반형",
+      "householdCount": "74세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/105A1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|105A2": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "105A2",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/105A2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|106C": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "106C",
+      "structure": "일반형",
+      "householdCount": "39세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/106C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|106B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "106B",
+      "structure": "일반형",
+      "householdCount": "29세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/106B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|109P": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "109P",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/109P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|115A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "115A",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/115A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|116B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "116B",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/116B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|125A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "125A",
+      "structure": "일반형",
+      "householdCount": "240세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/125A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|125C": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "125C",
+      "structure": "일반형",
+      "householdCount": "31세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/125C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|125TA": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "125TA",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/125TA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|126B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "126B",
+      "structure": "일반형",
+      "householdCount": "444세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/126B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|126D": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "126D",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/126D.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|127E": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "127E",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/127E.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|128TB": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "128TB",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/128TB.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|131A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "131A",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/131A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|132": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "132",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/132.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|134": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "134",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/134.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|135A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "135A",
+      "structure": "일반형",
+      "householdCount": "15세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/135A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|135P1": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "135P1",
+      "structure": "일반형",
+      "householdCount": "9세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/135P1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|135P3": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "135P3",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/135P3.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|135P2": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "135P2",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/135P2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|136B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "136B",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/136B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|141A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "141A",
+      "structure": "일반형",
+      "householdCount": "8세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/141A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|143B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "143B",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/143B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|145P1": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "145P1",
+      "structure": "복층형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/3개",
+      "images": [
+        "./assets/floorplans/sanul2/145P1_1.png",
+        "./assets/floorplans/sanul2/145P1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울2단지세종자이더시티|145P2": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "145P2",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/145P2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|147": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "147",
+      "structure": "일반형",
+      "householdCount": "30세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/147.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|150": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "150",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/150.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|151B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "151B",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/151B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|153A": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "153A",
+      "structure": "일반형",
+      "householdCount": "212세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/153A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|154B": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "154B",
+      "structure": "일반형",
+      "householdCount": "88세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/154B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|154": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "154",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/154.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|154TA": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "154TA",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/154TA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|154TC": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "154TC",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/154TC.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|155TB": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "155TB",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/155TB.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|156P": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "156P",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/156P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|158": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "158",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/158.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|170": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "170",
+      "structure": "일반형",
+      "householdCount": "8세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/170.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|171DP": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "171DP",
+      "structure": "복층형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/3개",
+      "images": [
+        "./assets/floorplans/sanul2/171DP_1.png",
+        "./assets/floorplans/sanul2/171DP_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울2단지세종자이더시티|172P": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "172P",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/3개",
+      "images": [
+        "./assets/floorplans/sanul2/172P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|177": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "177",
+      "structure": "일반형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/177.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|178P": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "178P",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "4개/3개",
+      "images": [
+        "./assets/floorplans/sanul2/178P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|188": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "188",
+      "structure": "일반형",
+      "householdCount": "15세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul2/188.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울2단지세종자이더시티|191P": {
+      "complex": "산울2단지세종자이더시티",
+      "type": "191P",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/3개",
+      "images": [
+        "./assets/floorplans/sanul2/191P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|82A": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "82A",
+      "structure": "일반형",
+      "householdCount": "477세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/82A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|82B": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "82B",
+      "structure": "일반형",
+      "householdCount": "253세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/82B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|102A": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "102A",
+      "structure": "일반형",
+      "householdCount": "83세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/102A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|102B": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "102B",
+      "structure": "복층형",
+      "householdCount": "53세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/102B_1.png",
+        "./assets/floorplans/sanul5/102B_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|116A": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "116A",
+      "structure": "일반형",
+      "householdCount": "86세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/116A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울5단지세종파밀리에더파크|116B": {
+      "complex": "산울5단지세종파밀리에더파크",
+      "type": "116B",
+      "structure": "복층형",
+      "householdCount": "43세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul5/116B_1.png",
+        "./assets/floorplans/sanul5/116B_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|80J": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "80J",
+      "structure": "일반형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/80J.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|80F": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "80F",
+      "structure": "복층형",
+      "householdCount": "15세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/80F_1.png",
+        "./assets/floorplans/sanul6/80F_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|80D2": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "80D2",
+      "structure": "복층형",
+      "householdCount": "10세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/80D2_1.png",
+        "./assets/floorplans/sanul6/80D2_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|81A": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "81A",
+      "structure": "일반형",
+      "householdCount": "114세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/81A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|81E": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "81E",
+      "structure": "복층형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/81E_1.png",
+        "./assets/floorplans/sanul6/81E_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|81I": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "81I",
+      "structure": "일반형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/81I.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|81C": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "81C",
+      "structure": "일반형",
+      "householdCount": "13세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/81C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|82L": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "82L",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/82L.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|83H": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "83H",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/83H.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|114V": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "114V",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/114V.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|114M": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "114M",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/114M.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|115B1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "115B1",
+      "structure": "일반형",
+      "householdCount": "65세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/115B1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|115C1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "115C1",
+      "structure": "일반형",
+      "householdCount": "27세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/115C1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|115U": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "115U",
+      "structure": "일반형",
+      "householdCount": "14세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/115U.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|115P": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "115P",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/115P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|115F": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "115F",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/115F.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|116D1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "116D1",
+      "structure": "일반형",
+      "householdCount": "34세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/116D1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|116A2": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "116A2",
+      "structure": "일반형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/116A2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|116J1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "116J1",
+      "structure": "일반형",
+      "householdCount": "14세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/116J1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|116J2": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "116J2",
+      "structure": "일반형",
+      "householdCount": "13세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/116J2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|116J3": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "116J3",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/116J3.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|117A1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "117A1",
+      "structure": "일반형",
+      "householdCount": "34세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/117A1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|117T": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "117T",
+      "structure": "일반형",
+      "householdCount": "26세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/117T.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|117G": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "117G",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/117G.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|123D": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "123D",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/123D.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|152C": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "152C",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/152C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|153A": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "153A",
+      "structure": "일반형",
+      "householdCount": "25세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/153A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|154B1": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "154B1",
+      "structure": "일반형",
+      "householdCount": "27세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/154B1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|154B2": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "154B2",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/154B2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울6단지세종리첸시아파밀리에(주상복합)|154P": {
+      "complex": "산울6단지세종리첸시아파밀리에(주상복합)",
+      "type": "154P",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul6/154P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|78B": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "78B",
+      "structure": "일반형",
+      "householdCount": "20세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/78B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|79A": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "79A",
+      "structure": "일반형",
+      "householdCount": "70세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/79A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|79D1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "79D1",
+      "structure": "복층형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/79D1_1.png",
+        "./assets/floorplans/sanul7/79D1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|79E": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "79E",
+      "structure": "복층형",
+      "householdCount": "10세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/79E_1.png",
+        "./assets/floorplans/sanul7/79E_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|79G": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "79G",
+      "structure": "복층형",
+      "householdCount": "8세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/79G_1.png",
+        "./assets/floorplans/sanul7/79G_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|79F": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "79F",
+      "structure": "복층형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/79F_1.png",
+        "./assets/floorplans/sanul7/79F_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|80K": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "80K",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/80K.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|80M": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "80M",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/80M_1.png",
+        "./assets/floorplans/sanul7/80M_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|98A": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "98A",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/98A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|110K": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "110K",
+      "structure": "일반형",
+      "householdCount": "30세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/110K.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|111B2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "111B2",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/111B2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|111O": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "111O",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/111O.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|112D2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "112D2",
+      "structure": "일반형",
+      "householdCount": "35세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/112D2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|112C3": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "112C3",
+      "structure": "일반형",
+      "householdCount": "33세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/112C3.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|112C4": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "112C4",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/112C4.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|112R": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "112R",
+      "structure": "복층형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/112R_1.png",
+        "./assets/floorplans/sanul7/112R_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|113C1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "113C1",
+      "structure": "일반형",
+      "householdCount": "96세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/113C1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|113C2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "113C2",
+      "structure": "일반형",
+      "householdCount": "8세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/113C2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|113L2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "113L2",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/113L2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114D1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114D1",
+      "structure": "일반형",
+      "householdCount": "123세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114D1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114A2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114A2",
+      "structure": "일반형",
+      "householdCount": "27세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114A2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114S1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114S1",
+      "structure": "일반형",
+      "householdCount": "26세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114S1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114G": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114G",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114G.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114S2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114S2",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114S2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|114E": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "114E",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/114E.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|115A1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "115A1",
+      "structure": "일반형",
+      "householdCount": "58세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/115A1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|115Q": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "115Q",
+      "structure": "일반형",
+      "householdCount": "25세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/115Q.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|115L1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "115L1",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/115L1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|116H1": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "116H1",
+      "structure": "일반형",
+      "householdCount": "13세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/116H1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|116H3": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "116H3",
+      "structure": "일반형",
+      "householdCount": "13세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/116H3.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|116H2": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "116H2",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/116H2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|117I": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "117I",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/117I.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|121A": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "121A",
+      "structure": "일반형",
+      "householdCount": "52세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/121A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|121B": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "121B",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/121B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|123C": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "123C",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/123C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|124P": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "124P",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/124P.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울7단지세종리첸시아파밀리에(주상복합)|133A": {
+      "complex": "산울7단지세종리첸시아파밀리에(주상복합)",
+      "type": "133A",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul7/133A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78A": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78A",
+      "structure": "일반형",
+      "householdCount": "709세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78A-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78A-T1",
+      "structure": "일반형",
+      "householdCount": "49세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78A-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78RA-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78RA-T1",
+      "structure": "일반형",
+      "householdCount": "79세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78RA-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78RA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78RA",
+      "structure": "일반형",
+      "householdCount": "57세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78RA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78A-S1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78A-S1",
+      "structure": "일반형",
+      "householdCount": "14세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78A-S1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|78A-S2": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "78A-S2",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/78A-S2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|79B": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "79B",
+      "structure": "일반형",
+      "householdCount": "15세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/79B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|110C1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "110C1",
+      "structure": "일반형",
+      "householdCount": "10세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/110C1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111A": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A",
+      "structure": "일반형",
+      "householdCount": "190세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111A-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A-T1",
+      "structure": "일반형",
+      "householdCount": "109세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RJ": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RJ",
+      "structure": "일반형",
+      "householdCount": "21세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RJ.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RI": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RI",
+      "structure": "일반형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RI.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111A1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A1",
+      "structure": "일반형",
+      "householdCount": "13세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RH": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RH",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RH.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111TA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111TA",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111TA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111DD": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111DD",
+      "structure": "복층형",
+      "householdCount": "11세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111DD_1.png",
+        "./assets/floorplans/haemil1/111DD_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|111A2-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A2-T1",
+      "structure": "일반형",
+      "householdCount": "10세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A2-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111A2": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A2",
+      "structure": "일반형",
+      "householdCount": "9세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RC-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RC-T1",
+      "structure": "일반형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RC-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RC": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RC",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RC.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RDA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RDA",
+      "structure": "복층형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RDA_1.png",
+        "./assets/floorplans/haemil1/111RDA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|111A-S1T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A-S1T1",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A-S1T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RA",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111RDA1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111RDA1",
+      "structure": "복층형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111RDA1_1.png",
+        "./assets/floorplans/haemil1/111RDA1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|111A-S1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111A-S1",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111A-S1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111TC": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111TC",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111TC.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111TB": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111TB",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111TB.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|111F": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "111F",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/111F.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112D-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112D-T1",
+      "structure": "일반형",
+      "householdCount": "98세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112D-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112D": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112D",
+      "structure": "일반형",
+      "householdCount": "49세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112D.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RK": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RK",
+      "structure": "일반형",
+      "householdCount": "24세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RK.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RB": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RB",
+      "structure": "일반형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RB.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112E": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112E",
+      "structure": "일반형",
+      "householdCount": "10세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112E.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RF": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RF",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RF.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RG": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RG",
+      "structure": "일반형",
+      "householdCount": "6세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RG.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RC1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RC1",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RC1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RC1-S2": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RC1-S2",
+      "structure": "일반형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RC1-S2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RC1-S1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RC1-S1",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RC1-S1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RDD": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RDD",
+      "structure": "복층형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RDD_1.png",
+        "./assets/floorplans/haemil1/112RDD_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|112RG-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RG-T1",
+      "structure": "일반형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RG-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RD": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RD",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RD.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RD-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RD-T1",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RD-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RDB": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RDB",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RDB_1.png",
+        "./assets/floorplans/haemil1/112RDB_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|112RE": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RE",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RE.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RE-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RE-T1",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RE-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|112RF-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112RF-T1",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112RF-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|113DA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113DA",
+      "structure": "복층형",
+      "householdCount": "21세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113DA_1.png",
+        "./assets/floorplans/haemil1/113DA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|113DA-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113DA-T1",
+      "structure": "복층형",
+      "householdCount": "18세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113DA-T1_1.png",
+        "./assets/floorplans/haemil1/113DA-T1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|113DA-S1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113DA-S1",
+      "structure": "복층형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113DA-S1_1.png",
+        "./assets/floorplans/haemil1/113DA-S1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|113G": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113G",
+      "structure": "복층형",
+      "householdCount": "8세대",
+      "roomsBaths": "2개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113G_1.png",
+        "./assets/floorplans/haemil1/113G_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|113DA-S1T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113DA-S1T1",
+      "structure": "복층형",
+      "householdCount": "8세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113DA-S1T1_1.png",
+        "./assets/floorplans/haemil1/113DA-S1T1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|113DH": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "113DH",
+      "structure": "복층형",
+      "householdCount": "3세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/113DH_1.png",
+        "./assets/floorplans/haemil1/113DH_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|114DC": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "114DC",
+      "structure": "복층형",
+      "householdCount": "6세대",
+      "roomsBaths": "1개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/114DC_1.png",
+        "./assets/floorplans/haemil1/114DC_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|115DB": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "115DB",
+      "structure": "복층형",
+      "householdCount": "12세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/115DB_1.png",
+        "./assets/floorplans/haemil1/115DB_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|112DI": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "112DI",
+      "structure": "복층형",
+      "householdCount": "1세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/112DI_1.png",
+        "./assets/floorplans/haemil1/112DI_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|116RDC": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "116RDC",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/116RDC_1.png",
+        "./assets/floorplans/haemil1/116RDC_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|146B-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "146B-T1",
+      "structure": "일반형",
+      "householdCount": "50세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/146B-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|146C": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "146C",
+      "structure": "일반형",
+      "householdCount": "40세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/146C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|146C-T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "146C-T1",
+      "structure": "일반형",
+      "householdCount": "40세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/146C-T1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|146B": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "146B",
+      "structure": "일반형",
+      "householdCount": "34세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/146B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀1단지마스터힐스|150DA-S1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "150DA-S1",
+      "structure": "복층형",
+      "householdCount": "6세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/150DA-S1_1.png",
+        "./assets/floorplans/haemil1/150DA-S1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|150D": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "150D",
+      "structure": "복층형",
+      "householdCount": "4세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/150D_1.png",
+        "./assets/floorplans/haemil1/150D_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|150DA-AS1T1": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "150DA-AS1T1",
+      "structure": "복층형",
+      "householdCount": "3세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/150DA-AS1T1_1.png",
+        "./assets/floorplans/haemil1/150DA-AS1T1_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|150DA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "150DA",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/150DA_1.png",
+        "./assets/floorplans/haemil1/150DA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀1단지마스터힐스|151RA": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "151RA",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/151RA.png"
+      ],
+      "imageLabels": [
+        "1층"
+      ]
+    },
+    "해밀1단지마스터힐스|157A": {
+      "complex": "해밀1단지마스터힐스",
+      "type": "157A",
+      "structure": "일반형",
+      "householdCount": "100세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil1/157A.png"
+      ],
+      "imageLabels": [
+        "1층"
+      ]
+    },
+    "해밀2단지마스터힐스|109C": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "109C",
+      "structure": "일반형",
+      "householdCount": "104세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/109C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|109A": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "109A",
+      "structure": "일반형",
+      "householdCount": "95세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/109A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|109ARA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "109ARA",
+      "structure": "일반형",
+      "householdCount": "5세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/109ARA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|110D": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "110D",
+      "structure": "일반형",
+      "householdCount": "288세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/110D.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|110EDD": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "110EDD",
+      "structure": "복층형",
+      "householdCount": "33세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/110EDD_1.png",
+        "./assets/floorplans/haemil2/110EDD_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|110ARJ": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "110ARJ",
+      "structure": "일반형",
+      "householdCount": "24세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/110ARJ.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|110DRK": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "110DRK",
+      "structure": "일반형",
+      "householdCount": "22세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/110DRK.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|110DRI": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "110DRI",
+      "structure": "일반형",
+      "householdCount": "17세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/110DRI.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|111EDA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "111EDA",
+      "structure": "복층형",
+      "householdCount": "11세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/111EDA_1.png",
+        "./assets/floorplans/haemil2/111EDA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|111B": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "111B",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/111B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|112FDF": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "112FDF",
+      "structure": "복층형",
+      "householdCount": "3세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/112FDF_1.png",
+        "./assets/floorplans/haemil2/112FDF_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|112B1": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "112B1",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/112B1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|112B2": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "112B2",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/112B2.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|112EDE": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "112EDE",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/112EDE_1.png",
+        "./assets/floorplans/haemil2/112EDE_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|112FDG": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "112FDG",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/112FDG_1.png",
+        "./assets/floorplans/haemil2/112FDG_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|114ERDC": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "114ERDC",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/114ERDC_1.png",
+        "./assets/floorplans/haemil2/114ERDC_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|132A": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "132A",
+      "structure": "일반형",
+      "householdCount": "63세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/132A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|132BRA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "132BRA",
+      "structure": "일반형",
+      "householdCount": "59세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/132BRA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|132B": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "132B",
+      "structure": "일반형",
+      "householdCount": "47세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/132B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|132C": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "132C",
+      "structure": "일반형",
+      "householdCount": "38세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/132C.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|132BRDA1": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "132BRDA1",
+      "structure": "일반형",
+      "householdCount": "27세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/132BRDA1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|136CRDA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "136CRDA",
+      "structure": "복층형",
+      "householdCount": "7세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/136CRDA_1.png",
+        "./assets/floorplans/haemil2/136CRDA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|144B": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "144B",
+      "structure": "일반형",
+      "householdCount": "94세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/144B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|144A": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "144A",
+      "structure": "일반형",
+      "householdCount": "28세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/144A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145B1": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145B1",
+      "structure": "일반형",
+      "householdCount": "50세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145B1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145FTA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145FTA",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145FTA.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145FTC": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145FTC",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145FTC.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145FTC1": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145FTC1",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145FTC1.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145FTD": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145FTD",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145FTD.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|145GTB": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "145GTB",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/145GTB.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|146ERDA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "146ERDA",
+      "structure": "복층형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/146ERDA_1.png",
+        "./assets/floorplans/haemil2/146ERDA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|146GTF": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "146GTF",
+      "structure": "일반형",
+      "householdCount": "2세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/146GTF.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|146H": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "146H",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/146H.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|147EDA": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "147EDA",
+      "structure": "복층형",
+      "householdCount": "17세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/147EDA_1.png",
+        "./assets/floorplans/haemil2/147EDA_2.png"
+      ],
+      "imageLabels": [
+        "1층",
+        "2층"
+      ]
+    },
+    "해밀2단지마스터힐스|148B": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "148B",
+      "structure": "일반형",
+      "householdCount": "1세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/148B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "해밀2단지마스터힐스|154A": {
+      "complex": "해밀2단지마스터힐스",
+      "type": "154A",
+      "structure": "일반형",
+      "householdCount": "50세대",
+      "roomsBaths": "4개/2개",
+      "images": [
+        "./assets/floorplans/haemil2/154A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|63A": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "63A",
+      "structure": "일반형",
+      "householdCount": "52세대",
+      "roomsBaths": "2개/1개",
+      "images": [
+        "./assets/floorplans/sanul8/63A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|75B": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "75B",
+      "structure": "일반형",
+      "householdCount": "201세대",
+      "roomsBaths": "2개/2개",
+      "images": [
+        "./assets/floorplans/sanul8/75B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|75A": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "75A",
+      "structure": "일반형",
+      "householdCount": "63세대",
+      "roomsBaths": "2개/2개",
+      "images": [
+        "./assets/floorplans/sanul8/75A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|101A": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "101A",
+      "structure": "일반형",
+      "householdCount": "328세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul8/101A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|114A": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "114A",
+      "structure": "일반형",
+      "householdCount": "116세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul8/114A.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    },
+    "산울8단지엘리프세종6-3|114B": {
+      "complex": "산울8단지엘리프세종6-3",
+      "type": "114B",
+      "structure": "일반형",
+      "householdCount": "116세대",
+      "roomsBaths": "3개/2개",
+      "images": [
+        "./assets/floorplans/sanul8/114B.png"
+      ],
+      "imageLabels": [
+        "1F"
+      ]
+    }
+  }
+}
