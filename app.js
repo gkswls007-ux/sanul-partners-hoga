@@ -972,6 +972,7 @@ function toSavedListing(row) {
     supplyArea: row.supplyArea,
     exclusiveArea: row.exclusiveArea,
     pyeong: row.pyeong,
+    pyeongGroup: row.pyeongGroup,
     building: row.building,
     floor: row.floor,
     floorGroup: row.floorGroup,
@@ -1213,7 +1214,7 @@ async function exportCustomerWord() {
           h3 { margin: 16px 0 8px; font-size: 15px; }
           .cover { page-break-after: always; }
           .cover-header { width: 100%; margin: 0 0 18px; }
-          .cover-header img { display: block; width: 100%; max-width: 720px; height: auto; border: 0; }
+          .cover-header img { display: block; width: 600px; max-width: 600px; height: auto; border: 0; }
           .meta-grid { width: 100%; border-collapse: collapse; margin: 8px 0 18px; }
           .meta-grid th, .meta-grid td { border: 1px solid #d9e2ec; padding: 8px 10px; font-size: 12px; }
           .meta-grid th { width: 120px; background: #f8fafc; color: #334155; }
@@ -1307,7 +1308,7 @@ function formatReportPrice(item) {
 }
 
 function renderCustomerTrendSections(items) {
-  const groups = groupBy(items, (item) => `${item.dealType || "-"}|${item.pyeongGroup || "기타"}`)
+  const groups = groupBy(items, (item) => `${item.dealType || "-"}|${getReportPyeongGroup(item)}`)
     .map(([key, rows]) => {
       const [dealType, pyeongGroup] = key.split("|");
       return { dealType, pyeongGroup, count: rows.length };
@@ -1322,6 +1323,16 @@ function renderCustomerTrendSections(items) {
     ${selected.map(renderCustomerTrendChart).join("")}
     ${omitted ? `<p class="chart-note">※ 거래유형/평형대 조합이 많아 매물 수가 많은 상위 3개 조건만 표시했습니다.</p>` : ""}
   `;
+}
+
+function getReportPyeongGroup(item) {
+  if (item.pyeongGroup) return item.pyeongGroup;
+  if (!Number.isFinite(item.pyeong)) return "기타";
+  if (item.pyeong < 20) return "10평대";
+  if (item.pyeong < 30) return "20평대";
+  if (item.pyeong < 40) return "30평대";
+  if (item.pyeong < 50) return "40평대";
+  return "50평대";
 }
 
 function renderCustomerTrendChart(group) {
