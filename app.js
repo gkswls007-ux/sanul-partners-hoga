@@ -319,7 +319,7 @@ function bindEvents() {
   });
 
   el.exportContacts?.addEventListener("click", exportContacts);
-  el.exportCustomerDoc?.addEventListener("click", exportCustomerWord);
+  el.exportCustomerDoc?.addEventListener("click", exportCustomerDocx);
 
   document.querySelectorAll("[data-close-floorplan]").forEach((button) => {
     button.addEventListener("click", closeFloorplan);
@@ -1190,6 +1190,204 @@ function relatedListingIds(item) {
   return [...ids].filter(Boolean);
 }
 
+async function exportCustomerDocx() {
+  const contacts = getVisibleCustomerContacts();
+  if (!contacts.length) return;
+  if (!window.docx) {
+    alert("워드 파일 생성 모듈을 불러오지 못했습니다. 페이지를 새로고침한 뒤 다시 시도해주세요.");
+    return;
+  }
+
+  const {
+    AlignmentType,
+    BorderStyle,
+    Document,
+    HeadingLevel,
+    ImageRun,
+    Packer,
+    PageBreak,
+    Paragraph,
+    Table,
+    TableCell,
+    TableLayoutType,
+    TableRow,
+    TextRun,
+    VerticalAlign,
+    WidthType,
+  } = window.docx;
+
+  const first = contacts[0];
+  const customerName = first.customerName || "고객";
+  const customerPhone = first.customerPhone || "";
+  const reportDate = new Date().toLocaleDateString("ko-KR");
+  const headerImage = await imageToDataUrl("./assets/report-header.png");
+  const children = [];
+
+  const text = (value, options = {}) => new TextRun({ text: String(value ?? ""), font: "Malgun Gothic", ...options });
+  const paragraph = (value, options = {}) =>
+    new Paragraph({
+      children: Array.isArray(value) ? value : [text(value, options.textOptions || {})],
+      spacing: options.spacing || { after: 120 },
+      alignment: options.alignment,
+      heading: options.heading,
+      border: options.border,
+    });
+  const cell = (content, options = {}) =>
+    new TableCell({
+      width: options.width ? { size: options.width, type: WidthType.DXA } : undefined,
+      shading: options.shading ? { fill: options.shading } : undefined,
+      verticalAlign: VerticalAlign.CENTER,
+      margins: { top: 120, bottom: 120, left: 120, right: 120 },
+      children: Array.isArray(content) ? content : [paragraph(content, { spacing: { after: 0 }, textOptions: options.textOptions || {} })],
+    });
+  const table = (rows, widths, options = {}) =>
+    new Table({
+      width: { size: options.width || 9360, type: WidthType.DXA },
+      layout: TableLayoutType.FIXED,
+      rows: rows.map(
+        (row) =>
+          new TableRow({
+            children: row.map((item, index) =>
+              cell(item.value ?? item, {
+                width: widths[index],
+                shading: item.header ? "F8FAFC" : item.summary ? "FFF8DF" : undefined,
+                textOptions: item.header ? { bold: true, color: "334155" } : item.bold ? { bold: true } : {},
+              }),
+            ),
+          }),
+      ),
+    });
+  const image = (dataUrl, width, height) =>
+    new ImageRun({
+      data: dataUrlToUint8Array(dataUrl),
+      type: "png",
+      transformation: { width, height },
+    });
+
+  if (headerImage) {
+    children.push(
+      new Paragraph({
+        children: [image(headerImage, 605, 200)],
+        spacing: { after: 180 },
+      }),
+    );
+  }
+
+  children.push(
+    table(
+      [
+        [{ value: "고객명", header: true }, `${customerName}${customerPhone ? ` / ${customerPhone}` : ""}`, { value: "제안 매물", header: true }, `${contacts.length.toLocaleString("ko-KR")}건`],
+        [{ value: "작성일", header: true }, reportDate, { value: "거래유형", header: true }, formatDealSummary(contacts)],
+      ],
+      [1500, 3600, 1500, 2760],
+    ),
+    paragraph("선택 조건별 호가 추이", {
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 220, after: 120 },
+      border: { bottom: { color: "235A8F", space: 3, style: BorderStyle.SINGLE, size: 12 } },
+    }),
+  );
+
+  const trendCharts = await getCustomerTrendChartImages(contacts);
+  if (trendCharts.length) {
+    trendCharts.forEach((chart) => {
+      children.push(
+        paragraph(chart.title, { spacing: { before: 80, after: 60 }, textOptions: { bold: true, size: 22 } }),
+        new Paragraph({ children: [image(chart.image, 600, 189)], spacing: { after: 40 } }),
+        paragraph(chart.note, { spacing: { after: 140 }, textOptions: { size: 17, color: "64748B" } }),
+      );
+    });
+  } else {
+    children.push(paragraph("표시할 추이 조건이 없습니다.", { textOptions: { color: "64748B" } }));
+  }
+
+  children.push(
+    paragraph("제안 매물 요약", {
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 200, after: 120 },
+      border: { bottom: { color: "235A8F", space: 3, style: BorderStyle.SINGLE, size: 12 } },
+    }),
+    table(
+      [
+        [
+          { value: "단지", header: true, summary: true },
+          { value: "거래", header: true, summary: true },
+          { value: "호가\n(단위: 만원)", header: true, summary: true },
+          { value: "타입/평형", header: true, summary: true },
+          { value: "동/층", header: true, summary: true },
+          { value: "입주가능일", header: true, summary: true },
+        ],
+        ...contacts.map((item) => [
+          shortName(item.complex),
+          item.dealType || "-",
+          { value: formatReportPrice(item), bold: true },
+          formatAreaDetail(item),
+          [item.building, item.floor].filter(Boolean).join(" ") || "-",
+          formatMoveIn(item.moveIn),
+        ]),
+      ],
+      [1700, 800, 1100, 2500, 1300, 1960],
+    ),
+    paragraph("※ 본 보고서는 참고용 자료이며, 실제 계약 시 조건은 변동될 수 있습니다.", {
+      spacing: { before: 160, after: 120 },
+      textOptions: { size: 17, color: "64748B" },
+    }),
+    new Paragraph({ children: [new PageBreak()] }),
+  );
+
+  for (const [index, item] of contacts.entries()) {
+    children.push(
+      paragraph(`${index + 1}. ${shortName(item.complex)}`, {
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: index ? 200 : 0, after: 100 },
+        border: { bottom: { color: "235A8F", space: 3, style: BorderStyle.SINGLE, size: 10 } },
+      }),
+      table(
+        [
+          [{ value: "거래", header: true }, item.dealType || "-", { value: "호가(단위: 만원)", header: true }, formatReportPrice(item)],
+          [{ value: "타입/평형", header: true }, formatAreaDetail(item), { value: "동/층", header: true }, [item.building, item.floor].filter(Boolean).join(" ") || "-"],
+          [{ value: "방향", header: true }, item.direction || "-", { value: "입주가능일", header: true }, formatMoveIn(item.moveIn)],
+        ],
+        [1300, 3380, 1600, 3080],
+      ),
+      paragraph(item.features || "특징 정보 없음", { spacing: { before: 80, after: 140 } }),
+    );
+
+    const plan = state.floorplans[getFloorplanKey(item)];
+    if (plan?.images?.length) {
+      for (const [imageIndex, src] of plan.images.entries()) {
+        const planImage = await imageToDataUrl(src);
+        if (!planImage) continue;
+        if (plan.images.length > 1) {
+          children.push(paragraph(plan.imageLabels?.[imageIndex] || `${imageIndex + 1}F`, { textOptions: { bold: true, color: "235A8F" } }));
+        }
+        children.push(new Paragraph({ children: [image(planImage, 520, 360)], spacing: { after: 160 }, alignment: AlignmentType.CENTER }));
+      }
+    }
+  }
+
+  const doc = new Document({
+    creator: "산울파트너스",
+    title: "고객 제안 매물 보고서",
+    styles: {
+      default: { document: { run: { font: "Malgun Gothic", size: 20 } } },
+    },
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: { top: 720, right: 720, bottom: 720, left: 720 },
+          },
+        },
+        children,
+      },
+    ],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  downloadBlob(blob, `고객제안매물_${safeFilename(customerName)}_${new Date().toISOString().slice(0, 10)}.docx`);
+}
+
 async function exportCustomerWord() {
   const contacts = getVisibleCustomerContacts();
   if (!contacts.length) return;
@@ -1450,6 +1648,91 @@ function svgToPngDataUrl(svg, width, height) {
   });
 }
 
+async function getCustomerTrendChartImages(items) {
+  const groups = groupBy(items, (item) => `${item.dealType || "-"}|${getReportPyeongGroup(item)}`)
+    .map(([key, rows]) => {
+      const [dealType, pyeongGroup] = key.split("|");
+      return { dealType, pyeongGroup, count: rows.length };
+    })
+    .sort((a, b) => b.count - a.count || String(a.dealType).localeCompare(String(b.dealType), "ko") || groupOrder(a.pyeongGroup) - groupOrder(b.pyeongGroup))
+    .slice(0, 3);
+
+  const charts = await Promise.all(groups.map(renderCustomerTrendChartImage));
+  return charts.filter((chart) => chart?.image);
+}
+
+async function renderCustomerTrendChartImage(group) {
+  const rows = state.rows.filter((row) => row.dealType === group.dealType && row.pyeongGroup === group.pyeongGroup);
+  const grouped = groupBy(rows, "surveyDate")
+    .map(([date, weekRows]) => {
+      const prices = weekRows.map((row) => analysisPriceForDeal(row, group.dealType)).filter(Number.isFinite);
+      return {
+        date,
+        count: weekRows.length,
+        avgPrice: prices.length ? avg(prices) : null,
+        minPrice: prices.length ? Math.min(...prices) : null,
+      };
+    })
+    .filter((item) => Number.isFinite(item.avgPrice) && Number.isFinite(item.minPrice))
+    .sort((a, b) => parseKoreanWeek(a.date) - parseKoreanWeek(b.date));
+
+  if (grouped.length < 2) return null;
+
+  const width = 660;
+  const height = 210;
+  const pad = { top: 22, right: 24, bottom: 46, left: 64 };
+  const chartW = width - pad.left - pad.right;
+  const chartH = height - pad.top - pad.bottom;
+  const prices = grouped.flatMap((item) => [item.avgPrice, item.minPrice]);
+  const minPrice = Math.min(...prices) * 0.96;
+  const maxPrice = Math.max(...prices) * 1.04;
+  const maxCount = Math.max(...grouped.map((item) => item.count), 1);
+  const step = chartW / Math.max(grouped.length - 1, 1);
+  const barW = Math.min(26, step * 0.42);
+  const x = (index) => pad.left + index * step;
+  const yPrice = (value) => pad.top + ((maxPrice - value) / (maxPrice - minPrice || 1)) * chartH;
+  const yCount = (value) => pad.top + chartH - (value / maxCount) * (chartH * 0.32);
+  const avgPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.avgPrice)}`).join(" ");
+  const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
+  const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
+  const title = `${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <rect width="${width}" height="${height}" fill="#ffffff"></rect>
+      ${ticks
+        .map((tick) => {
+          const y = yPrice(tick);
+          return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#edf1f5" stroke-width="1"></line>
+            <text x="${pad.left - 10}" y="${y + 4}" text-anchor="end" font-size="10" font-weight="700" fill="#64748b">${formatPrice(tick)}</text>`;
+        })
+        .join("")}
+      <line x1="${pad.left}" y1="${pad.top + chartH}" x2="${width - pad.right}" y2="${pad.top + chartH}" stroke="#d8e0e7" stroke-width="1"></line>
+      ${grouped
+        .map((item, index) => {
+          const barHeight = pad.top + chartH - yCount(item.count);
+          return `<rect x="${x(index) - barW / 2}" y="${yCount(item.count)}" width="${barW}" height="${barHeight}" rx="3" fill="#c7dedf"></rect>
+            <text x="${x(index)}" y="${height - 26}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${escapeHtml(shortWeek(item.date))}</text>
+            <text x="${x(index)}" y="${height - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${item.count.toLocaleString("ko-KR")}건</text>`;
+        })
+        .join("")}
+      <polyline points="${minPoints}" fill="none" stroke="#b77916" stroke-width="2" stroke-dasharray="5 5"></polyline>
+      <polyline points="${avgPoints}" fill="none" stroke="#245f98" stroke-width="2.4"></polyline>
+      ${grouped
+        .map(
+          (item, index) => `<circle cx="${x(index)}" cy="${yPrice(item.minPrice)}" r="3" fill="#b77916"></circle>
+            <circle cx="${x(index)}" cy="${yPrice(item.avgPrice)}" r="4" fill="#245f98"></circle>
+            <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
+        )
+        .join("")}
+    </svg>`;
+
+  return {
+    title,
+    image: await svgToPngDataUrl(svg, width, height),
+    note: `파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수`,
+  };
+}
+
 function getVisibleCustomerContacts() {
   const groups = groupBy(state.contacts, getCustomerKey);
   if (groups.length <= 1) return state.contacts;
@@ -1505,6 +1788,10 @@ async function imageToDataUrl(src) {
 
 function downloadHtmlFile(html, filename, type) {
   const blob = new Blob([html], { type });
+  downloadBlob(blob, filename);
+}
+
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -1513,6 +1800,16 @@ function downloadHtmlFile(html, filename, type) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function dataUrlToUint8Array(dataUrl) {
+  const base64 = String(dataUrl).split(",")[1] || "";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
 }
 
 function safeFilename(value) {
