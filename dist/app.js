@@ -1200,7 +1200,7 @@ async function exportCustomerWord() {
   const reportDate = new Date().toLocaleDateString("ko-KR");
   const headerImage = await imageToDataUrl("./assets/report-header.png");
   const dealSummary = formatDealSummary(contacts);
-  const trendSections = renderCustomerTrendSections(contacts);
+  const trendSections = await renderCustomerTrendSections(contacts);
   const summaryTable = renderCustomerSummaryTable(contacts);
   const cards = await Promise.all(contacts.map(renderCustomerDocListing));
   const html = `
@@ -1214,12 +1214,13 @@ async function exportCustomerWord() {
           h3 { margin: 16px 0 8px; font-size: 15px; }
           .cover { page-break-after: always; }
           .cover-header { width: 100%; margin: 0 0 18px; }
-          .cover-header img { display: block; width: 600px; max-width: 600px; height: auto; border: 0; }
+          .cover-header img { display: block; width: 480px; max-width: 480px; height: auto; border: 0; }
           .meta-grid { width: 100%; border-collapse: collapse; margin: 8px 0 18px; }
           .meta-grid th, .meta-grid td { border: 1px solid #d9e2ec; padding: 8px 10px; font-size: 12px; }
           .meta-grid th { width: 120px; background: #f8fafc; color: #334155; }
           .report-section { margin: 18px 0 20px; }
           .chart-box { margin: 10px 0 14px; padding: 10px; border: 1px solid #d9e2ec; page-break-inside: avoid; }
+          .chart-image { display: block; width: 560px; max-width: 560px; height: auto; border: 0; }
           .chart-title { margin: 0 0 6px; font-weight: 800; color: #111827; }
           .chart-note { margin: 4px 0 0; color: #64748b; font-size: 11px; }
           .summary-table th, .summary-table td { font-size: 11px; padding: 5px 6px; }
@@ -1307,7 +1308,7 @@ function formatReportPrice(item) {
   return price;
 }
 
-function renderCustomerTrendSections(items) {
+async function renderCustomerTrendSections(items) {
   const groups = groupBy(items, (item) => `${item.dealType || "-"}|${getReportPyeongGroup(item)}`)
     .map(([key, rows]) => {
       const [dealType, pyeongGroup] = key.split("|");
@@ -1318,9 +1319,10 @@ function renderCustomerTrendSections(items) {
   const omitted = Math.max(0, groups.length - selected.length);
 
   if (!selected.length) return `<p class="chart-note">표시할 추이 조건이 없습니다.</p>`;
+  const charts = await Promise.all(selected.map(renderCustomerTrendChart));
 
   return `
-    ${selected.map(renderCustomerTrendChart).join("")}
+    ${charts.join("")}
     ${omitted ? `<p class="chart-note">※ 거래유형/평형대 조합이 많아 매물 수가 많은 상위 3개 조건만 표시했습니다.</p>` : ""}
   `;
 }
@@ -1335,7 +1337,7 @@ function getReportPyeongGroup(item) {
   return "50평대";
 }
 
-function renderCustomerTrendChart(group) {
+async function renderCustomerTrendChart(group) {
   const rows = state.rows.filter((row) => row.dealType === group.dealType && row.pyeongGroup === group.pyeongGroup);
   const grouped = groupBy(rows, "surveyDate")
     .map(([date, weekRows]) => {
@@ -1377,11 +1379,8 @@ function renderCustomerTrendChart(group) {
   const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
   const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
   const title = `${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
-
-  return `
-    <div class="chart-box">
-      <p class="chart-title">${escapeHtml(title)}</p>
-      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         ${ticks
           .map((tick) => {
             const y = yPrice(tick);
@@ -1407,11 +1406,48 @@ function renderCustomerTrendChart(group) {
               <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
           )
           .join("")}
-      </svg>
+      </svg>`;
+  const chartImage = await svgToPngDataUrl(svg, width, height);
+
+  return `
+    <div class="chart-box">
+      <p class="chart-title">${escapeHtml(title)}</p>
+      ${chartImage ? `<img class="chart-image" src="${chartImage}" alt="${escapeHtml(title)}" />` : svg}
       <p class="chart-note">파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수</p>
       ${group.dealType === "월세" ? `<p class="chart-note">환산보증금 : 월세 1만원 당 보증금 200만원 (연6% 전월세 전환율 가정)</p>` : ""}
     </div>
   `;
+}
+
+function svgToPngDataUrl(svg, width, height) {
+  return new Promise((resolve) => {
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const scale = 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const context = canvas.getContext("2d");
+        context.scale(scale, scale);
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/png"));
+      } catch {
+        resolve("");
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve("");
+    };
+    image.src = url;
+  });
 }
 
 function getVisibleCustomerContacts() {
