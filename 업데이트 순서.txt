@@ -1,0 +1,17 @@
+업데이트 순서
+호가 및 실거래가_V2.xlsx 원본 엑셀 수정/저장
+C:\Users\gkswl\OneDrive\문서\호가앱 폴더 열기
+배포파일_만들기.bat 더블클릭
+검은 창에서 “업데이트 완료”, “GitHub Pages용 폴더 생성 완료” 같은 문구가 나오면 성공
+GitHub Desktop 열기
+왼쪽 아래 Summary에 예를 들어 이번주 자료 갱신 입력
+파란색 Commit to main 클릭
+위쪽 또는 오른쪽에 Push origin 클릭
+그러면 기존 주소가 자동으로 최신화돼.
+기존 주소:
+https://gkswls007-ux.github.io/sanul-partners-hoga/
+중요한 점
+Netlify에는 이제 안 올려도 돼.
+dist 폴더를 따로 업로드할 필요도 없어.
+지금은 GitHub Pages가 docs 폴더를 보고 있으니까, 배포파일_만들기.bat 실행 후 GitHub Desktop에서 Commit + Push만 하면 돼.
+만약 Push origin까지 했는데 사이트가 바로 안 바뀌면 1~3분 기다렸다가 새로고침하면 돼. 브라우저 캐시 때문에 안 바뀐 것처럼 보이면 Ctrl + F5로 새로고침하면 좋아.
