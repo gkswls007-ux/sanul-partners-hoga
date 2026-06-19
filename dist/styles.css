@@ -155,39 +155,107 @@ input {
   color: var(--ink);
 }
 
-.select-clear-wrap {
+.multi-select {
   position: relative;
   display: block;
 }
 
-.select-clear-wrap select {
-  padding-right: 40px;
+.multi-select-button {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 34px 0 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.clear-filter {
+.multi-select-button::after {
+  content: "⌄";
   position: absolute;
   top: 50%;
-  right: 8px;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #f8fafc;
+  right: 12px;
   color: var(--muted);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
   transform: translateY(-50%);
 }
 
-.clear-filter:hover {
+.multi-select-button:hover,
+.multi-select-button[aria-expanded="true"] {
   border-color: var(--blue);
-  color: var(--blue);
+}
+
+.multi-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  width: max(100%, 260px);
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  padding: 6px;
+}
+
+.multi-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.multi-option:hover {
   background: #eef6ff;
 }
 
-.clear-filter[hidden] {
+.multi-option.active {
+  background: #235a8f;
+  color: #fff;
+}
+
+.multi-option.all {
+  border-bottom: 1px solid var(--line);
+  border-radius: 4px 4px 0 0;
+  margin-bottom: 4px;
+  font-weight: 900;
+}
+
+.multi-check {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.multi-select-menu[hidden] {
   display: none;
 }
 

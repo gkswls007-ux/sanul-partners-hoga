@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>호가 브리핑</title>
-    <link rel="stylesheet" href="./styles.css?v=202606191836" />
+    <link rel="stylesheet" href="./styles.css?v=202606191847" />
   </head>
   <body>
     <main class="shell">
@@ -31,9 +31,9 @@
         </label>
         <label>
           단지
-          <span class="select-clear-wrap">
-            <select id="complexFilter"></select>
-            <button id="clearComplexFilter" class="clear-filter" type="button" aria-label="단지 선택 해제" hidden>×</button>
+          <span class="multi-select">
+            <button id="complexFilterButton" class="multi-select-button" type="button" aria-expanded="false">전체</button>
+            <span id="complexFilterMenu" class="multi-select-menu" hidden></span>
           </span>
         </label>
         <label>
@@ -46,9 +46,9 @@
         </label>
         <label>
           타입
-          <span class="select-clear-wrap">
-            <select id="typeFilter"></select>
-            <button id="clearTypeFilter" class="clear-filter" type="button" aria-label="타입 선택 해제" hidden>×</button>
+          <span class="multi-select">
+            <button id="typeFilterButton" class="multi-select-button" type="button" aria-expanded="false">전체</button>
+            <span id="typeFilterMenu" class="multi-select-menu" hidden></span>
           </span>
         </label>
         <label class="search">
@@ -261,6 +261,6 @@
     </div>
 
     <script src="./assets/docx.iife.js?v=20260616-1"></script>
-    <script src="./app.js?v=202606191836"></script>
+    <script src="./app.js?v=202606191847"></script>
   </body>
 </html>

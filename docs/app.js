@@ -8,6 +8,8 @@ const state = {
   selectedCustomerKey: "",
   sort: "priceAsc",
   floors: new Set(["저층", "중층", "고층"]),
+  selectedComplexes: new Set(),
+  selectedTypes: new Set(),
 };
 
 const labels = {
@@ -16,12 +18,12 @@ const labels = {
 
 const el = {
   date: document.querySelector("#dateFilter"),
-  complex: document.querySelector("#complexFilter"),
-  clearComplex: document.querySelector("#clearComplexFilter"),
+  complexButton: document.querySelector("#complexFilterButton"),
+  complexMenu: document.querySelector("#complexFilterMenu"),
   deal: document.querySelector("#dealFilter"),
   pyeong: document.querySelector("#pyeongFilter"),
-  type: document.querySelector("#typeFilter"),
-  clearType: document.querySelector("#clearTypeFilter"),
+  typeButton: document.querySelector("#typeFilterButton"),
+  typeMenu: document.querySelector("#typeFilterMenu"),
   search: document.querySelector("#searchInput"),
   topbar: document.querySelector(".topbar"),
   sourceDate: document.querySelector("#sourceDate"),
@@ -146,10 +148,10 @@ function fillFilters() {
   const latestDate = dates[0] || labels.all;
 
   setOptions(el.date, dates, latestDate);
-  setOptions(el.complex, unique("complex"), labels.all);
   setOptions(el.deal, unique("dealType"), "매매");
   setOptions(el.pyeong, getAvailablePyeongGroups(), labels.all);
-  setOptions(el.type, getAvailableTypes(), labels.all);
+  renderMultiSelect("complex", unique("complex"));
+  renderMultiSelect("type", getAvailableTypes());
 }
 
 function unique(key) {
@@ -189,18 +191,52 @@ function setOptions(select, values, selected) {
   select.value = selected;
 }
 
+function renderMultiSelect(name, values) {
+  const button = getMultiButton(name);
+  const menu = getMultiMenu(name);
+  const selected = getMultiSelected(name);
+  if (!button || !menu) return;
+
+  const optionValues = values.map((value) => String(typeof value === "object" ? value.value : value));
+  [...selected].forEach((value) => {
+    if (!optionValues.includes(value)) selected.delete(value);
+  });
+
+  const selectedLabels = values
+    .filter((value) => selected.has(String(typeof value === "object" ? value.value : value)))
+    .map((value) => String(typeof value === "object" ? value.label : value));
+  button.textContent = selectedLabels.length ? selectedLabels.join(", ") : labels.all;
+
+  menu.innerHTML = [
+    `<button type="button" class="multi-option all${selected.size ? "" : " active"}" data-multi-value="${escapeHtml(labels.all)}">
+      <span class="multi-check">${selected.size ? "" : "✓"}</span><span>${escapeHtml(labels.all)}</span>
+    </button>`,
+    ...values.map((value) => {
+      const optionValue = String(typeof value === "object" ? value.value : value);
+      const optionLabel = String(typeof value === "object" ? value.label : value);
+      const active = selected.has(optionValue);
+      return `<button type="button" class="multi-option${active ? " active" : ""}" data-multi-value="${escapeHtml(optionValue)}">
+        <span class="multi-check">${active ? "✓" : ""}</span><span>${escapeHtml(optionLabel)}</span>
+      </button>`;
+    }),
+  ].join("");
+}
+
 function bindEvents() {
   el.tabButtons.forEach((button) => {
     button.addEventListener("click", () => switchTab(button.dataset.tab));
   });
 
-  [el.date, el.complex, el.deal].forEach((control) => {
+  [el.date, el.deal].forEach((control) => {
     control.addEventListener("input", () => {
       refreshPyeongOptions();
       refreshTypeOptions();
       applyFilters();
     });
   });
+
+  bindMultiSelect("complex");
+  bindMultiSelect("type");
 
   el.pyeong.addEventListener("input", () => {
     refreshTypeOptions();
@@ -210,9 +246,6 @@ function bindEvents() {
   [el.type, el.search].forEach((control) => {
     control.addEventListener("input", applyFilters);
   });
-
-  el.clearComplex?.addEventListener("click", () => clearFilter("complex"));
-  el.clearType?.addEventListener("click", () => clearFilter("type"));
 
   el.sortButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -332,7 +365,74 @@ function bindEvents() {
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !el.floorplanModal.hidden) closeFloorplan();
+    if (event.key === "Escape") closeMultiSelectMenus();
   });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".multi-select")) closeMultiSelectMenus();
+  });
+}
+
+function bindMultiSelect(name) {
+  const button = getMultiButton(name);
+  const menu = getMultiMenu(name);
+  if (!button || !menu) return;
+
+  button.addEventListener("click", () => {
+    const nextOpen = menu.hidden;
+    closeMultiSelectMenus();
+    menu.hidden = !nextOpen;
+    button.setAttribute("aria-expanded", String(nextOpen));
+  });
+
+  menu.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-multi-value]");
+    if (!option) return;
+
+    const value = option.dataset.multiValue;
+    const selected = getMultiSelected(name);
+    if (value === labels.all) {
+      selected.clear();
+    } else if (selected.has(value)) {
+      selected.delete(value);
+    } else {
+      selected.add(value);
+    }
+
+    if (name === "complex") {
+      refreshPyeongOptions();
+      refreshTypeOptions();
+    }
+
+    if (name === "type") {
+      renderMultiSelect("type", getAvailableTypes());
+    }
+
+    applyFilters();
+  });
+}
+
+function closeMultiSelectMenus() {
+  [
+    [el.complexButton, el.complexMenu],
+    [el.typeButton, el.typeMenu],
+  ].forEach(([button, menu]) => {
+    if (!button || !menu) return;
+    menu.hidden = true;
+    button.setAttribute("aria-expanded", "false");
+  });
+}
+
+function getMultiSelected(name) {
+  return name === "complex" ? state.selectedComplexes : state.selectedTypes;
+}
+
+function getMultiButton(name) {
+  return name === "complex" ? el.complexButton : el.typeButton;
+}
+
+function getMultiMenu(name) {
+  return name === "complex" ? el.complexMenu : el.typeMenu;
 }
 
 function refreshPyeongOptions() {
@@ -343,22 +443,24 @@ function refreshPyeongOptions() {
 }
 
 function refreshTypeOptions() {
-  const selected = el.type.value;
   const values = getAvailableTypes();
   const optionValues = values.map((option) => option.value);
-  const nextValue = selected === labels.all || optionValues.includes(selected) ? selected : labels.all;
-  setOptions(el.type, values, nextValue);
+  [...state.selectedTypes].forEach((value) => {
+    if (!optionValues.includes(value)) state.selectedTypes.delete(value);
+  });
+  renderMultiSelect("type", values);
 }
 
 function clearFilter(name) {
   if (name === "complex") {
-    el.complex.value = labels.all;
+    state.selectedComplexes.clear();
     refreshPyeongOptions();
     refreshTypeOptions();
   }
 
   if (name === "type") {
-    el.type.value = labels.all;
+    state.selectedTypes.clear();
+    refreshTypeOptions();
   }
 
   applyFilters();
@@ -367,7 +469,7 @@ function clearFilter(name) {
 function getAvailablePyeongGroups() {
   const rows = state.rows.filter((row) => {
     const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
-    const matchesComplex = el.complex.value === labels.all || row.complex === el.complex.value;
+    const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     return matchesDate && matchesComplex && matchesDeal && row.pyeongGroup;
   });
@@ -378,7 +480,7 @@ function getAvailablePyeongGroups() {
 function getAvailableTypes() {
   const rows = state.rows.filter((row) => {
     const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
-    const matchesComplex = el.complex.value === labels.all || row.complex === el.complex.value;
+    const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
     return matchesDate && matchesComplex && matchesDeal && matchesPyeong && row.supplyArea;
@@ -400,14 +502,22 @@ function getAvailableTypes() {
   return [...map.values()].sort(compareTypeOptions);
 }
 
+function matchesSelectedComplex(row) {
+  return !state.selectedComplexes.size || state.selectedComplexes.has(row.complex);
+}
+
+function matchesSelectedType(row) {
+  return !state.selectedTypes.size || state.selectedTypes.has(String(row.supplyArea));
+}
+
 function applyFilters() {
   const query = el.search.value.trim().toLowerCase();
   state.filtered = state.rows.filter((row) => {
     const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
-    const matchesComplex = el.complex.value === labels.all || row.complex === el.complex.value;
+    const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
-    const matchesType = el.type.value === labels.all || String(row.supplyArea) === el.type.value;
+    const matchesType = matchesSelectedType(row);
     const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn, row.direction, row.representativeListingId]
       .filter(Boolean)
       .join(" ")
@@ -419,7 +529,8 @@ function applyFilters() {
 }
 
 function render() {
-  updateClearFilterButtons();
+  renderMultiSelect("complex", unique("complex"));
+  renderMultiSelect("type", getAvailableTypes());
   const dates = [...new Set(state.filtered.map((row) => row.surveyDate).filter(Boolean))];
   el.sourceDate.textContent = dates.length === 1 ? dates[0] : "선택 조건 기준";
   el.sourceCount.textContent = `${state.filtered.length.toLocaleString("ko-KR")}건`;
@@ -433,11 +544,6 @@ function render() {
   renderWorkLists();
 }
 
-function updateClearFilterButtons() {
-  if (el.clearComplex) el.clearComplex.hidden = el.complex.value === labels.all;
-  if (el.clearType) el.clearType.hidden = el.type.value === labels.all;
-}
-
 function switchTab(tabName) {
   el.tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tabName));
   el.summaryTab.hidden = tabName !== "summary";
@@ -445,7 +551,7 @@ function switchTab(tabName) {
 }
 
 function updateHeroImage() {
-  const selectedComplex = el.complex.value;
+  const selectedComplex = [...state.selectedComplexes].join(" ");
   const query = el.search.value.trim();
   const shouldShowComplex5 =
     selectedComplex.includes("산울5단지") ||
@@ -670,10 +776,10 @@ function renderTrendChart() {
 function getTrendRows() {
   const query = el.search.value.trim().toLowerCase();
   return state.rows.filter((row) => {
-    const matchesComplex = el.complex.value === labels.all || row.complex === el.complex.value;
+    const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
-    const matchesType = el.type.value === labels.all || String(row.supplyArea) === el.type.value;
+    const matchesType = matchesSelectedType(row);
     const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn]
       .filter(Boolean)
       .join(" ")
@@ -686,10 +792,10 @@ function getSummaryRows({ ignoreDate = false, ignoreDeal = false } = {}) {
   const query = el.search.value.trim().toLowerCase();
   return state.rows.filter((row) => {
     const matchesDate = ignoreDate || el.date.value === labels.all || row.surveyDate === el.date.value;
-    const matchesComplex = el.complex.value === labels.all || row.complex === el.complex.value;
+    const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = ignoreDeal || el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
-    const matchesType = el.type.value === labels.all || String(row.supplyArea) === el.type.value;
+    const matchesType = matchesSelectedType(row);
     const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn]
       .filter(Boolean)
       .join(" ")
