@@ -205,7 +205,7 @@ function renderMultiSelect(name, values) {
   const selectedLabels = values
     .filter((value) => selected.has(String(typeof value === "object" ? value.value : value)))
     .map((value) => String(typeof value === "object" ? value.label : value));
-  button.textContent = selectedLabels.length ? selectedLabels.join(", ") : labels.all;
+  button.textContent = getMultiSelectButtonLabel(selectedLabels);
 
   menu.innerHTML = [
     `<button type="button" class="multi-option all${selected.size ? "" : " active"}" data-multi-value="${escapeHtml(labels.all)}">
@@ -220,6 +220,12 @@ function renderMultiSelect(name, values) {
       </button>`;
     }),
   ].join("");
+}
+
+function getMultiSelectButtonLabel(selectedLabels) {
+  if (!selectedLabels.length) return labels.all;
+  if (selectedLabels.length === 1) return selectedLabels[0];
+  return `${selectedLabels.length.toLocaleString("ko-KR")}개 선택`;
 }
 
 function bindEvents() {

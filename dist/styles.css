@@ -227,6 +227,12 @@ input {
   cursor: pointer;
 }
 
+.multi-option span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .multi-option:hover {
   background: #eef6ff;
 }
