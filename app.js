@@ -17,9 +17,11 @@ const labels = {
 const el = {
   date: document.querySelector("#dateFilter"),
   complex: document.querySelector("#complexFilter"),
+  clearComplex: document.querySelector("#clearComplexFilter"),
   deal: document.querySelector("#dealFilter"),
   pyeong: document.querySelector("#pyeongFilter"),
   type: document.querySelector("#typeFilter"),
+  clearType: document.querySelector("#clearTypeFilter"),
   search: document.querySelector("#searchInput"),
   topbar: document.querySelector(".topbar"),
   sourceDate: document.querySelector("#sourceDate"),
@@ -209,6 +211,9 @@ function bindEvents() {
     control.addEventListener("input", applyFilters);
   });
 
+  el.clearComplex?.addEventListener("click", () => clearFilter("complex"));
+  el.clearType?.addEventListener("click", () => clearFilter("type"));
+
   el.sortButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.sort = button.dataset.sort;
@@ -345,6 +350,20 @@ function refreshTypeOptions() {
   setOptions(el.type, values, nextValue);
 }
 
+function clearFilter(name) {
+  if (name === "complex") {
+    el.complex.value = labels.all;
+    refreshPyeongOptions();
+    refreshTypeOptions();
+  }
+
+  if (name === "type") {
+    el.type.value = labels.all;
+  }
+
+  applyFilters();
+}
+
 function getAvailablePyeongGroups() {
   const rows = state.rows.filter((row) => {
     const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
@@ -400,6 +419,7 @@ function applyFilters() {
 }
 
 function render() {
+  updateClearFilterButtons();
   const dates = [...new Set(state.filtered.map((row) => row.surveyDate).filter(Boolean))];
   el.sourceDate.textContent = dates.length === 1 ? dates[0] : "선택 조건 기준";
   el.sourceCount.textContent = `${state.filtered.length.toLocaleString("ko-KR")}건`;
@@ -411,6 +431,11 @@ function render() {
   renderPyeongCards();
   renderListings();
   renderWorkLists();
+}
+
+function updateClearFilterButtons() {
+  if (el.clearComplex) el.clearComplex.hidden = el.complex.value === labels.all;
+  if (el.clearType) el.clearType.hidden = el.type.value === labels.all;
 }
 
 function switchTab(tabName) {

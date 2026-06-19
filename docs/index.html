@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>호가 브리핑</title>
-    <link rel="stylesheet" href="./styles.css?v=202606190957" />
+    <link rel="stylesheet" href="./styles.css?v=202606191836" />
   </head>
   <body>
     <main class="shell">
@@ -31,7 +31,10 @@
         </label>
         <label>
           단지
-          <select id="complexFilter"></select>
+          <span class="select-clear-wrap">
+            <select id="complexFilter"></select>
+            <button id="clearComplexFilter" class="clear-filter" type="button" aria-label="단지 선택 해제" hidden>×</button>
+          </span>
         </label>
         <label>
           거래
@@ -43,7 +46,10 @@
         </label>
         <label>
           타입
-          <select id="typeFilter"></select>
+          <span class="select-clear-wrap">
+            <select id="typeFilter"></select>
+            <button id="clearTypeFilter" class="clear-filter" type="button" aria-label="타입 선택 해제" hidden>×</button>
+          </span>
         </label>
         <label class="search">
           검색
@@ -255,6 +261,6 @@
     </div>
 
     <script src="./assets/docx.iife.js?v=20260616-1"></script>
-    <script src="./app.js?v=202606190957"></script>
+    <script src="./app.js?v=202606191836"></script>
   </body>
 </html>

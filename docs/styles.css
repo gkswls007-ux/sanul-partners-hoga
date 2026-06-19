@@ -155,6 +155,42 @@ input {
   color: var(--ink);
 }
 
+.select-clear-wrap {
+  position: relative;
+  display: block;
+}
+
+.select-clear-wrap select {
+  padding-right: 40px;
+}
+
+.clear-filter {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.clear-filter:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: #eef6ff;
+}
+
+.clear-filter[hidden] {
+  display: none;
+}
+
 .kpis {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
