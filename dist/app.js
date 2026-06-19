@@ -2123,7 +2123,13 @@ function shortWeek(value) {
 }
 
 function formatTypeLabel(row) {
-  const parts = [row.supplyArea, row.exclusiveArea ? `전용 ${formatPlainNumber(row.exclusiveArea)}` : "", row.pyeong ? `${formatPlainNumber(row.pyeong)}평` : ""].filter(Boolean);
+  const plan = state.floorplans[getFloorplanKey(row)];
+  const parts = [
+    row.supplyArea,
+    row.exclusiveArea ? `전용 ${formatPlainNumber(row.exclusiveArea)}` : "",
+    row.pyeong ? `${formatPlainNumber(row.pyeong)}평` : "",
+    plan?.householdCount || "",
+  ].filter(Boolean);
   return parts.join(" / ");
 }
 
