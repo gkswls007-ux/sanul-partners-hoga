@@ -249,7 +249,7 @@ function bindEvents() {
     applyFilters();
   });
 
-  [el.type, el.search].forEach((control) => {
+  [el.search].forEach((control) => {
     control.addEventListener("input", applyFilters);
   });
 
