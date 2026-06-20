@@ -191,6 +191,43 @@ function setOptions(select, values, selected) {
   select.value = selected;
 }
 
+function refreshDateOptions() {
+  const dates = unique("surveyDate");
+  const selected = el.date.value;
+  const counts = getDateOptionCounts();
+  setOptions(
+    el.date,
+    dates.map((date) => ({
+      value: date,
+      label: `${date} (${(counts.get(date) || 0).toLocaleString("ko-KR")}건)`,
+    })),
+    dates.includes(selected) || selected === labels.all ? selected : dates[0] || labels.all,
+  );
+  const allOption = el.date.querySelector(`option[value="${labels.all}"]`);
+  if (allOption) {
+    const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
+    allOption.textContent = `${labels.all} (${total.toLocaleString("ko-KR")}건)`;
+  }
+}
+
+function getDateOptionCounts() {
+  const query = el.search.value.trim().toLowerCase();
+  return state.rows.reduce((counts, row) => {
+    const matchesComplex = matchesSelectedComplex(row);
+    const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
+    const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
+    const matchesType = matchesSelectedType(row);
+    const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn, row.direction, row.representativeListingId]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    if (row.surveyDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query)) {
+      counts.set(row.surveyDate, (counts.get(row.surveyDate) || 0) + 1);
+    }
+    return counts;
+  }, new Map());
+}
+
 function renderMultiSelect(name, values) {
   const button = getMultiButton(name);
   const menu = getMultiMenu(name);
@@ -537,6 +574,7 @@ function applyFilters() {
 }
 
 function render() {
+  refreshDateOptions();
   renderMultiSelect("complex", unique("complex"));
   renderMultiSelect("type", getAvailableTypes());
   const dates = [...new Set(state.filtered.map((row) => row.surveyDate).filter(Boolean))];
