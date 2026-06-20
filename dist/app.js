@@ -384,7 +384,8 @@ function bindMultiSelect(name) {
   const menu = getMultiMenu(name);
   if (!button || !menu) return;
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
     const nextOpen = menu.hidden;
     closeMultiSelectMenus();
     menu.hidden = !nextOpen;
@@ -392,6 +393,7 @@ function bindMultiSelect(name) {
   });
 
   menu.addEventListener("click", (event) => {
+    event.stopPropagation();
     const option = event.target.closest("[data-multi-value]");
     if (!option) return;
 
