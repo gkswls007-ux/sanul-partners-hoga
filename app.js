@@ -62,7 +62,7 @@ const el = {
   briefingTab: document.querySelector("#briefingTab"),
   unitLookupTab: document.querySelector("#unitLookupTab"),
   unitComplex: document.querySelector("#unitComplexSelect"),
-  unitBuilding: document.querySelector("#unitBuildingSelect"),
+  unitBuilding: document.querySelector("#unitBuildingInput"),
   unitNumber: document.querySelector("#unitNumberInput"),
   unitLookupButton: document.querySelector("#unitLookupButton"),
   unitLookupResult: document.querySelector("#unitLookupResult"),
@@ -216,19 +216,7 @@ function fillUnitLookup() {
   el.unitComplex.innerHTML = complexes.length
     ? complexes.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(shortName(name))}</option>`).join("")
     : `<option value="">자료 없음</option>`;
-  refreshUnitBuildings();
   renderUnitLookupEmpty();
-}
-
-function refreshUnitBuildings() {
-  if (!el.unitBuilding) return;
-  const complex = el.unitComplex?.value || "";
-  const buildings = [...new Set(state.unitAreas.filter((row) => row.complex === complex).map((row) => row.building))]
-    .filter(Boolean)
-    .sort(compareBuilding);
-  el.unitBuilding.innerHTML = buildings.length
-    ? buildings.map((building) => `<option value="${escapeHtml(building)}">${escapeHtml(building)}</option>`).join("")
-    : `<option value="">동 없음</option>`;
 }
 
 function renderUnitLookupEmpty() {
@@ -288,6 +276,114 @@ function renderUnitLookupResult(row) {
         <strong>${formatPlainNumber(row.pyeong)}평</strong>
       </div>
     </article>
+    ${renderUnitFloorplan(row)}
+    ${renderUnitRealTransactions(row)}
+  `;
+}
+
+function getUnitFloorplan(row) {
+  const key = getFloorplanKey({ complex: row.complex, supplyArea: row.typeName || row.supplyArea });
+  return state.floorplans[key] || null;
+}
+
+function renderUnitFloorplan(row) {
+  const plan = getUnitFloorplan(row);
+  if (!plan) {
+    return `
+      <section class="unit-detail-section">
+        <h3>도면</h3>
+        <div class="empty compact">해당 타입의 도면 자료가 아직 없습니다.</div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="unit-detail-section">
+      <div class="unit-section-head">
+        <div>
+          <h3>도면</h3>
+          <p class="panel-note">${escapeHtml(plan.type)} · ${escapeHtml(plan.structure || "도면 정보")}</p>
+        </div>
+        <div class="unit-plan-meta">
+          ${plan.householdCount ? `<span>${escapeHtml(plan.householdCount)}</span>` : ""}
+          ${plan.roomsBaths ? `<span>방/욕실 ${escapeHtml(plan.roomsBaths)}</span>` : ""}
+        </div>
+      </div>
+      <div class="unit-floorplan-grid ${plan.images.length > 1 ? "duplex" : ""}">
+        ${plan.images
+          .map(
+            (src, index) => `
+              <figure>
+                ${plan.images.length > 1 ? `<figcaption>${escapeHtml(plan.imageLabels?.[index] || `${index + 1}F`)}</figcaption>` : ""}
+                <img src="${escapeHtml(src)}" alt="${escapeHtml(plan.type)} 도면 ${index + 1}" />
+              </figure>
+            `,
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function getUnitRealTransactions(row) {
+  const typeName = String(row.typeName || "").trim();
+  const exclusiveArea = Number(row.exclusiveArea);
+  const pyeong = Number(row.pyeong);
+  return state.realTransactions
+    .filter((item) => {
+      if (item.complex !== row.complex) return false;
+      const sameType = typeName && item.supplyArea === typeName;
+      const sameExclusive = Number.isFinite(exclusiveArea) && Number.isFinite(item.exclusiveArea) && Math.abs(item.exclusiveArea - exclusiveArea) < 0.5;
+      const samePyeong = Number.isFinite(pyeong) && Number.isFinite(item.pyeong) && Math.round(item.pyeong) === Math.round(pyeong);
+      return sameType || (sameExclusive && samePyeong);
+    })
+    .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
+    .slice(0, 10);
+}
+
+function renderUnitRealTransactions(row) {
+  const rows = getUnitRealTransactions(row);
+  return `
+    <section class="unit-detail-section">
+      <div class="unit-section-head">
+        <div>
+          <h3>최근 실거래</h3>
+          <p class="panel-note">같은 단지와 타입 기준 최근 실거래 ${rows.length.toLocaleString("ko-KR")}건</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="summary-table real-transaction-table unit-real-table">
+          <thead>
+            <tr>
+              <th>계약일</th>
+              <th>거래</th>
+              <th>타입/평형</th>
+              <th>층</th>
+              <th>실거래금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${
+              rows.length
+                ? rows
+                    .map(
+                      (item) => `
+                        <tr>
+                          <td>${escapeHtml(formatContractDate(item.contractDate))}</td>
+                          <td>${escapeHtml(item.dealType || "-")}</td>
+                          <td>${escapeHtml(formatRealTransactionArea(item))}</td>
+                          <td>${Number.isFinite(item.floor) ? `${item.floor}층` : "-"}</td>
+                          <td>${escapeHtml(formatRealTransactionPrice(item))}</td>
+                        </tr>
+                      `,
+                    )
+                    .join("")
+                : `<tr><td colspan="5" class="empty-cell">해당 타입의 실거래 자료가 아직 없습니다.</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   `;
 }
 
@@ -424,14 +520,16 @@ function bindEvents() {
   });
 
   el.unitComplex?.addEventListener("change", () => {
-    refreshUnitBuildings();
+    if (el.unitBuilding) el.unitBuilding.value = "";
+    if (el.unitNumber) el.unitNumber.value = "";
     renderUnitLookupEmpty();
   });
 
-  el.unitBuilding?.addEventListener("change", renderUnitLookupEmpty);
-  el.unitNumber?.addEventListener("input", renderUnitLookupEmpty);
-  el.unitNumber?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") lookupUnitArea();
+  [el.unitBuilding, el.unitNumber].forEach((control) => {
+    control?.addEventListener("input", renderUnitLookupEmpty);
+    control?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") lookupUnitArea();
+    });
   });
   el.unitLookupButton?.addEventListener("click", lookupUnitArea);
 
@@ -2470,7 +2568,9 @@ function compareTypeOptions(a, b) {
 }
 
 function normalizeBuilding(value) {
-  const text = String(value || "").trim();
+  const text = String(value || "")
+    .replace(/\s/g, "")
+    .trim();
   if (!text) return "";
   return text.endsWith("동") ? text : `${text}동`;
 }
