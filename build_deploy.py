@@ -5,6 +5,7 @@ from pathlib import Path
 
 import refresh_data
 import refresh_floorplans
+import refresh_unit_areas
 
 
 ROOT = Path(__file__).parent
@@ -21,6 +22,7 @@ def copy_file(source_name, target_name=None):
 def main():
     refresh_data.main()
     refresh_floorplans.main()
+    refresh_unit_areas.main()
 
     DIST.mkdir(exist_ok=True)
     for name in ["index.html", "app.js", "styles.css", "netlify.toml"]:

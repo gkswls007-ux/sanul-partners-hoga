@@ -786,7 +786,8 @@ input {
 
 .plan-button,
 .basket-button,
-.ghost-button {
+.ghost-button,
+.primary-button {
   justify-self: start;
   min-height: 36px;
   border-radius: 6px;
@@ -807,6 +808,12 @@ input {
   color: #fff;
 }
 
+.primary-button {
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
 .basket-button.saved {
   border-color: var(--line);
   background: #eef3f3;
@@ -821,15 +828,67 @@ input {
 
 .plan-button:hover,
 .basket-button:hover,
-.ghost-button:hover {
+.ghost-button:hover,
+.primary-button:hover {
   background: #eef6fb;
+}
+
+.primary-button:hover {
+  background: #1d4f7f;
 }
 
 .plan-button:disabled,
 .basket-button:disabled,
-.ghost-button:disabled {
+.ghost-button:disabled,
+.primary-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.unit-lookup-panel {
+  margin-top: 18px;
+}
+
+.unit-lookup-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(120px, 0.8fr) minmax(140px, 0.8fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.unit-lookup-result {
+  margin-top: 16px;
+}
+
+.unit-result-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.unit-result-card div {
+  min-height: 78px;
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--soft);
+}
+
+.unit-result-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.unit-result-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.25;
 }
 
 .basket-button:hover {
@@ -1168,7 +1227,9 @@ body.modal-open {
   .work-item,
   .work-item.contact,
   .customer-fields,
-  .customer-head {
+  .customer-head,
+  .unit-lookup-form,
+  .unit-result-card {
     grid-template-columns: 1fr;
   }
 

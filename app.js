@@ -2,6 +2,7 @@ const state = {
   rows: [],
   filtered: [],
   realTransactions: [],
+  unitAreas: [],
   floorplans: {},
   brokerMap: {},
   basket: [],
@@ -19,6 +20,7 @@ const labels = {
 
 const el = {
   date: document.querySelector("#dateFilter"),
+  mainToolbar: document.querySelector("#mainToolbar"),
   complexButton: document.querySelector("#complexFilterButton"),
   complexMenu: document.querySelector("#complexFilterMenu"),
   deal: document.querySelector("#dealFilter"),
@@ -58,6 +60,12 @@ const el = {
   tabButtons: document.querySelectorAll(".tab-button"),
   summaryTab: document.querySelector("#summaryTab"),
   briefingTab: document.querySelector("#briefingTab"),
+  unitLookupTab: document.querySelector("#unitLookupTab"),
+  unitComplex: document.querySelector("#unitComplexSelect"),
+  unitBuilding: document.querySelector("#unitBuildingSelect"),
+  unitNumber: document.querySelector("#unitNumberInput"),
+  unitLookupButton: document.querySelector("#unitLookupButton"),
+  unitLookupResult: document.querySelector("#unitLookupResult"),
   sortButtons: document.querySelectorAll(".sort-button"),
   floorButtons: document.querySelectorAll(".filter-button"),
   floorplanModal: document.querySelector("#floorplanModal"),
@@ -76,9 +84,11 @@ async function init() {
   state.realTransactions = (payload.realTransactions || []).map(normalizeRealTransaction).filter((row) => row.complex);
   state.brokerMap = payload.brokerMap || {};
   state.floorplans = await loadFloorplans();
+  state.unitAreas = await loadUnitAreas();
   loadSavedWork();
 
   fillFilters();
+  fillUnitLookup();
   bindEvents();
   applyFilters();
 }
@@ -91,6 +101,17 @@ async function loadFloorplans() {
     return payload.plans || {};
   } catch {
     return {};
+  }
+}
+
+async function loadUnitAreas() {
+  try {
+    const response = await fetch("./data/unit_areas.json");
+    if (!response.ok) return [];
+    const payload = await response.json();
+    return (payload.rows || []).map(normalizeUnitArea).filter((row) => row.complex && row.building && row.unit);
+  } catch {
+    return [];
   }
 }
 
@@ -124,6 +145,18 @@ function normalizeRealTransaction(row) {
     pyeong: toNumber(row.pyeong),
     exclusiveArea: toNumber(row.exclusiveArea),
     floor: toNumber(row.floor),
+  };
+}
+
+function normalizeUnitArea(row) {
+  return {
+    ...row,
+    complex: String(row.complex || "").trim(),
+    building: normalizeBuilding(row.building),
+    unit: normalizeUnitNumber(row.unit),
+    floor: toNumber(row.floor),
+    exclusiveArea: toNumber(row.exclusiveArea),
+    pyeong: toNumber(row.pyeong),
   };
 }
 
@@ -175,6 +208,87 @@ function fillFilters() {
   setOptions(el.pyeong, getAvailablePyeongGroups(), labels.all);
   renderMultiSelect("complex", unique("complex"));
   renderMultiSelect("type", getAvailableTypes());
+}
+
+function fillUnitLookup() {
+  if (!el.unitComplex) return;
+  const complexes = [...new Set(state.unitAreas.map((row) => row.complex).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
+  el.unitComplex.innerHTML = complexes.length
+    ? complexes.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(shortName(name))}</option>`).join("")
+    : `<option value="">자료 없음</option>`;
+  refreshUnitBuildings();
+  renderUnitLookupEmpty();
+}
+
+function refreshUnitBuildings() {
+  if (!el.unitBuilding) return;
+  const complex = el.unitComplex?.value || "";
+  const buildings = [...new Set(state.unitAreas.filter((row) => row.complex === complex).map((row) => row.building))]
+    .filter(Boolean)
+    .sort(compareBuilding);
+  el.unitBuilding.innerHTML = buildings.length
+    ? buildings.map((building) => `<option value="${escapeHtml(building)}">${escapeHtml(building)}</option>`).join("")
+    : `<option value="">동 없음</option>`;
+}
+
+function renderUnitLookupEmpty() {
+  if (!el.unitLookupResult) return;
+  el.unitLookupResult.innerHTML = `<div class="empty compact">단지와 동, 호수를 입력하면 타입 정보를 보여드립니다.</div>`;
+}
+
+function lookupUnitArea() {
+  if (!el.unitLookupResult) return;
+  const complex = el.unitComplex?.value || "";
+  const building = normalizeBuilding(el.unitBuilding?.value || "");
+  const unit = normalizeUnitNumber(el.unitNumber?.value || "");
+
+  if (!complex || !building || !unit) {
+    el.unitLookupResult.innerHTML = `<div class="empty compact">단지, 동, 호수를 모두 입력해주세요.</div>`;
+    return;
+  }
+
+  const match = state.unitAreas.find((row) => row.complex === complex && row.building === building && row.unit === unit);
+  if (!match) {
+    el.unitLookupResult.innerHTML = `
+      <div class="empty compact">
+        일치하는 자료가 없습니다. 동은 ${escapeHtml(building)}, 호수는 ${escapeHtml(unit)} 형식으로 다시 확인해주세요.
+      </div>
+    `;
+    return;
+  }
+
+  el.unitLookupResult.innerHTML = renderUnitLookupResult(match);
+}
+
+function renderUnitLookupResult(row) {
+  return `
+    <article class="unit-result-card">
+      <div>
+        <span>단지</span>
+        <strong>${escapeHtml(shortName(row.complex))}</strong>
+      </div>
+      <div>
+        <span>동·호수</span>
+        <strong>${escapeHtml(row.building)} ${escapeHtml(row.unit)}호</strong>
+      </div>
+      <div>
+        <span>타입</span>
+        <strong>${escapeHtml(row.typeName || row.supplyArea || "-")}</strong>
+      </div>
+      <div>
+        <span>공급면적</span>
+        <strong>${escapeHtml(row.supplyArea || "-")}㎡</strong>
+      </div>
+      <div>
+        <span>전용면적</span>
+        <strong>${formatPlainNumber(row.exclusiveArea)}㎡</strong>
+      </div>
+      <div>
+        <span>평수</span>
+        <strong>${formatPlainNumber(row.pyeong)}평</strong>
+      </div>
+    </article>
+  `;
 }
 
 function unique(key) {
@@ -308,6 +422,18 @@ function bindEvents() {
     refreshTypeOptions();
     applyFilters();
   });
+
+  el.unitComplex?.addEventListener("change", () => {
+    refreshUnitBuildings();
+    renderUnitLookupEmpty();
+  });
+
+  el.unitBuilding?.addEventListener("change", renderUnitLookupEmpty);
+  el.unitNumber?.addEventListener("input", renderUnitLookupEmpty);
+  el.unitNumber?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") lookupUnitArea();
+  });
+  el.unitLookupButton?.addEventListener("click", lookupUnitArea);
 
   [el.search].forEach((control) => {
     control.addEventListener("input", applyFilters);
@@ -625,6 +751,8 @@ function switchTab(tabName) {
   el.tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tabName));
   el.summaryTab.hidden = tabName !== "summary";
   el.briefingTab.hidden = tabName !== "briefing";
+  if (el.unitLookupTab) el.unitLookupTab.hidden = tabName !== "unitLookup";
+  if (el.mainToolbar) el.mainToolbar.hidden = tabName === "unitLookup";
 }
 
 function updateHeroImage() {
@@ -2339,6 +2467,26 @@ function compareTypeOptions(a, b) {
   }
 
   return compareType(a.value, b.value);
+}
+
+function normalizeBuilding(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  return text.endsWith("동") ? text : `${text}동`;
+}
+
+function normalizeUnitNumber(value) {
+  return String(value || "")
+    .replace(/호/g, "")
+    .replace(/\s/g, "")
+    .trim();
+}
+
+function compareBuilding(a, b) {
+  const numA = Number(String(a).replace(/\D/g, ""));
+  const numB = Number(String(b).replace(/\D/g, ""));
+  if (Number.isFinite(numA) && Number.isFinite(numB) && numA !== numB) return numA - numB;
+  return String(a).localeCompare(String(b), "ko");
 }
 
 function compareAreaItems(a, b) {

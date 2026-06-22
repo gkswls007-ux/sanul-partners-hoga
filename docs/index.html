@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>호가 브리핑</title>
-    <link rel="stylesheet" href="./styles.css?v=202606221304" />
+    <link rel="stylesheet" href="./styles.css?v=202606221533" />
   </head>
   <body>
     <main class="shell">
@@ -22,9 +22,10 @@
       <nav class="view-tabs" aria-label="화면 탭">
         <button class="tab-button active" data-tab="summary" type="button">현황 요약</button>
         <button class="tab-button" data-tab="briefing" type="button">매물 브리핑</button>
+        <button class="tab-button" data-tab="unitLookup" type="button">우리집타입찾기</button>
       </nav>
 
-      <section class="toolbar" aria-label="필터">
+      <section id="mainToolbar" class="toolbar" aria-label="필터">
         <label>
           조사 주차
           <select id="dateFilter"></select>
@@ -268,6 +269,35 @@
         </article>
       </section>
       </section>
+
+      <section id="unitLookupTab" class="tab-panel" hidden>
+        <section class="panel unit-lookup-panel">
+          <div class="panel-head">
+            <div>
+              <h2>우리집타입찾기</h2>
+              <p class="panel-note">단지, 동, 호수를 기준으로 공급면적·전용면적·평수를 확인합니다.</p>
+            </div>
+          </div>
+          <div class="unit-lookup-form">
+            <label>
+              단지
+              <select id="unitComplexSelect"></select>
+            </label>
+            <label>
+              동
+              <select id="unitBuildingSelect"></select>
+            </label>
+            <label>
+              호수
+              <input id="unitNumberInput" type="text" inputmode="numeric" placeholder="예: 1001" />
+            </label>
+            <button id="unitLookupButton" class="primary-button" type="button">찾기</button>
+          </div>
+          <div id="unitLookupResult" class="unit-lookup-result">
+            <div class="empty compact">단지와 동, 호수를 입력하면 타입 정보를 보여드립니다.</div>
+          </div>
+        </section>
+      </section>
     </main>
 
     <div id="floorplanModal" class="modal" hidden>
@@ -286,6 +316,6 @@
     </div>
 
     <script src="./assets/docx.iife.js?v=20260616-1"></script>
-    <script src="./app.js?v=202606221304"></script>
+    <script src="./app.js?v=202606221533"></script>
   </body>
 </html>
