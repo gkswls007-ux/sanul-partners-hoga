@@ -860,6 +860,75 @@ input {
   margin-top: 16px;
 }
 
+.unit-quick-pick {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.unit-picker {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.unit-picker-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.unit-picker-head strong {
+  font-size: 15px;
+}
+
+.unit-picker-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.unit-option-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 142px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.unit-option-button {
+  min-width: 64px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.unit-option-button:hover,
+.unit-option-button.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.unit-picker-empty {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 800;
+}
+
 .unit-result-card {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1301,6 +1370,7 @@ body.modal-open {
   .customer-fields,
   .customer-head,
   .unit-lookup-form,
+  .unit-quick-pick,
   .unit-result-card {
     grid-template-columns: 1fr;
   }

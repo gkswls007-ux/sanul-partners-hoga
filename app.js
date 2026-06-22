@@ -64,6 +64,10 @@ const el = {
   unitComplex: document.querySelector("#unitComplexSelect"),
   unitBuilding: document.querySelector("#unitBuildingInput"),
   unitNumber: document.querySelector("#unitNumberInput"),
+  unitBuildingOptions: document.querySelector("#unitBuildingOptions"),
+  unitNumberOptions: document.querySelector("#unitNumberOptions"),
+  unitBuildingHint: document.querySelector("#unitBuildingHint"),
+  unitNumberHint: document.querySelector("#unitNumberHint"),
   unitLookupButton: document.querySelector("#unitLookupButton"),
   unitLookupResult: document.querySelector("#unitLookupResult"),
   sortButtons: document.querySelectorAll(".sort-button"),
@@ -216,7 +220,84 @@ function fillUnitLookup() {
   el.unitComplex.innerHTML = complexes.length
     ? complexes.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(shortName(name))}</option>`).join("")
     : `<option value="">자료 없음</option>`;
+  renderUnitPickers();
   renderUnitLookupEmpty();
+}
+
+function renderUnitPickers() {
+  renderUnitBuildingOptions();
+  renderUnitNumberOptions();
+}
+
+function getSelectedUnitRows() {
+  const complex = el.unitComplex?.value || "";
+  return state.unitAreas.filter((row) => row.complex === complex);
+}
+
+function renderUnitBuildingOptions() {
+  if (!el.unitBuildingOptions) return;
+  const rows = getSelectedUnitRows();
+  const selected = normalizeBuilding(el.unitBuilding?.value || "");
+  const buildings = [...new Set(rows.map((row) => row.building).filter(Boolean))].sort(compareBuilding);
+
+  if (el.unitBuildingHint) {
+    el.unitBuildingHint.textContent = buildings.length ? `${buildings.length.toLocaleString("ko-KR")}개 동` : "동 자료 없음";
+  }
+
+  el.unitBuildingOptions.innerHTML = buildings.length
+    ? buildings
+        .map(
+          (building) => `
+            <button class="unit-option-button ${building === selected ? "active" : ""}" type="button" data-unit-building="${escapeHtml(building)}">
+              ${escapeHtml(building)}
+            </button>
+          `,
+        )
+        .join("")
+    : `<div class="unit-picker-empty">선택한 단지의 동 자료가 없습니다.</div>`;
+}
+
+function renderUnitNumberOptions() {
+  if (!el.unitNumberOptions) return;
+  const building = normalizeBuilding(el.unitBuilding?.value || "");
+  const selectedUnit = normalizeUnitNumber(el.unitNumber?.value || "");
+  const units = [...new Set(getSelectedUnitRows().filter((row) => row.building === building).map((row) => row.unit).filter(Boolean))].sort(
+    compareUnitNumber,
+  );
+
+  if (el.unitNumberHint) {
+    el.unitNumberHint.textContent = building && units.length ? `${units.length.toLocaleString("ko-KR")}개 호수` : "동을 먼저 선택";
+  }
+
+  if (!building) {
+    el.unitNumberOptions.innerHTML = `<div class="unit-picker-empty">동을 선택하면 해당 동의 호수를 보여드립니다.</div>`;
+    return;
+  }
+
+  el.unitNumberOptions.innerHTML = units.length
+    ? units
+        .map(
+          (unit) => `
+            <button class="unit-option-button ${unit === selectedUnit ? "active" : ""}" type="button" data-unit-number="${escapeHtml(unit)}">
+              ${escapeHtml(unit)}호
+            </button>
+          `,
+        )
+        .join("")
+    : `<div class="unit-picker-empty">해당 동의 호수 자료가 없습니다.</div>`;
+}
+
+function setUnitBuilding(building) {
+  if (el.unitBuilding) el.unitBuilding.value = String(building || "").replace(/동$/, "");
+  if (el.unitNumber) el.unitNumber.value = "";
+  renderUnitPickers();
+  renderUnitLookupEmpty();
+}
+
+function setUnitNumber(unit) {
+  if (el.unitNumber) el.unitNumber.value = normalizeUnitNumber(unit);
+  renderUnitPickers();
+  lookupUnitArea();
 }
 
 function renderUnitLookupEmpty() {
@@ -522,16 +603,30 @@ function bindEvents() {
   el.unitComplex?.addEventListener("change", () => {
     if (el.unitBuilding) el.unitBuilding.value = "";
     if (el.unitNumber) el.unitNumber.value = "";
+    renderUnitPickers();
     renderUnitLookupEmpty();
   });
 
   [el.unitBuilding, el.unitNumber].forEach((control) => {
-    control?.addEventListener("input", renderUnitLookupEmpty);
+    control?.addEventListener("input", () => {
+      renderUnitPickers();
+      renderUnitLookupEmpty();
+    });
     control?.addEventListener("keydown", (event) => {
       if (event.key === "Enter") lookupUnitArea();
     });
   });
   el.unitLookupButton?.addEventListener("click", lookupUnitArea);
+  el.unitBuildingOptions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-unit-building]");
+    if (!button) return;
+    setUnitBuilding(button.dataset.unitBuilding || "");
+  });
+  el.unitNumberOptions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-unit-number]");
+    if (!button) return;
+    setUnitNumber(button.dataset.unitNumber || "");
+  });
 
   [el.search].forEach((control) => {
     control.addEventListener("input", applyFilters);
@@ -2583,6 +2678,13 @@ function normalizeUnitNumber(value) {
 }
 
 function compareBuilding(a, b) {
+  const numA = Number(String(a).replace(/\D/g, ""));
+  const numB = Number(String(b).replace(/\D/g, ""));
+  if (Number.isFinite(numA) && Number.isFinite(numB) && numA !== numB) return numA - numB;
+  return String(a).localeCompare(String(b), "ko");
+}
+
+function compareUnitNumber(a, b) {
   const numA = Number(String(a).replace(/\D/g, ""));
   const numB = Number(String(b).replace(/\D/g, ""));
   if (Number.isFinite(numA) && Number.isFinite(numB) && numA !== numB) return numA - numB;
