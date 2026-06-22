@@ -1120,7 +1120,6 @@ function renderListingCard(row) {
   const detail = [row.supplyArea ? `${row.supplyArea}타입` : "", row.pyeong ? `${row.pyeong}평` : "", row.floorGroup]
     .filter(Boolean)
     .join(" · ");
-  const rent = row.dealType === "월세" && row.monthlyRent ? ` / 월 ${row.monthlyRent.toLocaleString("ko-KR")}` : "";
   const planKey = getFloorplanKey(row);
   const plan = state.floorplans[planKey];
   const listingKey = encodeListingKey(row);
@@ -1135,7 +1134,7 @@ function renderListingCard(row) {
         <p class="complex-name">${escapeHtml(shortName(row.complex))}</p>
         <span class="tag">${escapeHtml(row.dealType || "-")}</span>
       </div>
-      <div class="price">${formatPrice(row.price)}${rent}</div>
+      <div class="price">${formatListingCardPrice(row)}</div>
       <div class="facts">
         <div class="fact"><span>타입·평형</span><strong>${escapeHtml(detail || "-")}</strong></div>
         <div class="fact"><span>동·층</span><strong>${escapeHtml([row.building, row.floor].filter(Boolean).join(" ") || "-")}</strong></div>
@@ -1157,6 +1156,15 @@ function renderListingCard(row) {
       </div>
     </article>
   `;
+}
+
+function formatListingCardPrice(row) {
+  const rent = row.dealType === "월세" && Number.isFinite(row.monthlyRent) ? ` / 월 ${formatPrice(row.monthlyRent)}` : "";
+  const converted =
+    row.dealType === "월세" && Number.isFinite(row.convertedDeposit)
+      ? ` <small>(환산 ${formatPrice(row.convertedDeposit)})</small>`
+      : "";
+  return `${formatPrice(row.price)}${rent}${converted}`;
 }
 
 function getFloorplanKey(row) {
