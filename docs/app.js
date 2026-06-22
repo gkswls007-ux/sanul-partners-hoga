@@ -1958,6 +1958,8 @@ async function renderCustomerTrendChart(group) {
   const avgPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.avgPrice)}`).join(" ");
   const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
   const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
+  const lastIndex = grouped.length - 1;
+  const lastItem = grouped[lastIndex];
   const title = getCustomerTrendTitle(group);
   const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -1986,6 +1988,7 @@ async function renderCustomerTrendChart(group) {
               <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
           )
           .join("")}
+        <text x="${x(lastIndex)}" y="${yPrice(lastItem.minPrice) + 14}" text-anchor="end" font-size="10" font-weight="800" fill="#b77916">${formatPrice(lastItem.minPrice)}</text>
       </svg>`;
   const chartImage = await svgToPngDataUrl(svg, width, height);
 
@@ -2070,6 +2073,8 @@ async function renderCustomerTrendChartImage(group) {
   const avgPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.avgPrice)}`).join(" ");
   const minPoints = grouped.map((item, index) => `${x(index)},${yPrice(item.minPrice)}`).join(" ");
   const ticks = [0, 0.5, 1].map((ratio) => maxPrice - (maxPrice - minPrice) * ratio);
+  const lastIndex = grouped.length - 1;
+  const lastItem = grouped[lastIndex];
   const title = getCustomerTrendTitle(group);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -2099,6 +2104,7 @@ async function renderCustomerTrendChartImage(group) {
             <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
         )
         .join("")}
+      <text x="${x(lastIndex)}" y="${yPrice(lastItem.minPrice) + 14}" text-anchor="end" font-size="10" font-weight="800" fill="#b77916">${formatPrice(lastItem.minPrice)}</text>
     </svg>`;
 
   return {
