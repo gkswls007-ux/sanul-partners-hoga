@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>호가 브리핑</title>
-    <link rel="stylesheet" href="./styles.css?v=202606221005" />
+    <link rel="stylesheet" href="./styles.css?v=202606221123" />
   </head>
   <body>
     <main class="shell">
@@ -169,6 +169,30 @@
         <p id="convertedDepositNote" class="converted-note" hidden>환산보증금 : 월세 1만원 당 보증금 200만원 (연6% 전월세 전환율 가정)</p>
       </section>
 
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>최근 실거래</h2>
+            <p id="realTransactionNote" class="panel-note">현재 선택 조건 기준 최근 실거래</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="summary-table real-transaction-table">
+            <thead>
+              <tr>
+                <th>계약일</th>
+                <th>단지</th>
+                <th>거래</th>
+                <th>타입/평형</th>
+                <th>층</th>
+                <th>실거래금액</th>
+              </tr>
+            </thead>
+            <tbody id="realTransactionBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="insight-grid">
         <article class="panel">
           <div class="panel-head">
@@ -261,6 +285,6 @@
     </div>
 
     <script src="./assets/docx.iife.js?v=20260616-1"></script>
-    <script src="./app.js?v=202606221005"></script>
+    <script src="./app.js?v=202606221123"></script>
   </body>
 </html>

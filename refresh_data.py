@@ -9,6 +9,7 @@ SOURCE = Path(r"C:\Users\gkswl\OneDrive\바탕 화면\호가 및 실거래가_V2
 OUTPUT = Path(__file__).parent / "data" / "listings.json"
 SHEET_NAME = "세대별정리_row"
 BROKER_SHEET_NAME = "동일매물중개사"
+REAL_TRANSACTION_SHEET_NAME = "실거래내역"
 
 KEYMAP = {
     "조사일자": "surveyDate",
@@ -30,6 +31,23 @@ KEYMAP = {
     "입주가능일": "moveIn",
     "방향": "direction",
     "대표매물번호": "representativeListingId",
+}
+
+REAL_TRANSACTION_KEYMAP = {
+    "조사일자": "surveyDate",
+    "아파트단지명": "complex",
+    "단지번호": "complexNumber",
+    "공급면적": "supplyArea",
+    "타입번호": "typeNumber",
+    "전용면적": "exclusiveArea",
+    "평수(공급)": "pyeong",
+    "거래구분": "dealType",
+    "계약일": "contractDate",
+    "매매가": "salePrice",
+    "보증금": "deposit",
+    "월세": "monthlyRent",
+    "층": "floor",
+    "기준월": "baseMonth",
 }
 
 
@@ -83,6 +101,29 @@ def load_broker_map(workbook):
     return broker_map
 
 
+def load_real_transactions(workbook):
+    if REAL_TRANSACTION_SHEET_NAME not in workbook.sheetnames:
+        return []
+
+    sheet = workbook[REAL_TRANSACTION_SHEET_NAME]
+    rows = sheet.iter_rows(values_only=True)
+    headers = [str(header).strip() for header in next(rows)]
+    data = []
+
+    for row in rows:
+        item = {}
+        has_value = False
+        for header, value in zip(headers, row):
+            if value not in (None, ""):
+                has_value = True
+            key = REAL_TRANSACTION_KEYMAP.get(header, header)
+            item[key] = clean_value(value)
+        if has_value:
+            data.append(item)
+
+    return data
+
+
 def main():
     workbook = load_workbook(SOURCE, read_only=True, data_only=True)
     sheet = workbook[SHEET_NAME]
@@ -90,6 +131,7 @@ def main():
     headers = [str(header).strip() for header in next(rows)]
     data = []
     broker_map = load_broker_map(workbook)
+    real_transactions = load_real_transactions(workbook)
 
     for row in rows:
         item = {}
@@ -114,9 +156,11 @@ def main():
                     "rowCount": len(data),
                     "headers": headers,
                     "brokerMatchCount": len(broker_map),
+                    "realTransactionCount": len(real_transactions),
                 },
                 "rows": data,
                 "brokerMap": broker_map,
+                "realTransactions": real_transactions,
             },
             ensure_ascii=False,
             separators=(",", ":"),

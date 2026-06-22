@@ -377,6 +377,12 @@ input {
   text-align: center;
 }
 
+.real-transaction-table td:nth-child(2),
+.real-transaction-table td:nth-child(4),
+.real-transaction-table td:nth-child(6) {
+  white-space: normal;
+}
+
 .change-up {
   color: var(--red);
 }

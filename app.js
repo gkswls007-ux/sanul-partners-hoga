@@ -1,6 +1,7 @@
 const state = {
   rows: [],
   filtered: [],
+  realTransactions: [],
   floorplans: {},
   brokerMap: {},
   basket: [],
@@ -38,6 +39,8 @@ const el = {
   trendMinLabel: document.querySelector("#trendMinLabel"),
   trendChart: document.querySelector("#trendChart"),
   convertedDepositNote: document.querySelector("#convertedDepositNote"),
+  realTransactionBody: document.querySelector("#realTransactionBody"),
+  realTransactionNote: document.querySelector("#realTransactionNote"),
   complexBars: document.querySelector("#complexBars"),
   pyeongCards: document.querySelector("#pyeongCards"),
   listingGrid: document.querySelector("#listingGrid"),
@@ -70,6 +73,7 @@ async function init() {
   const response = await fetch("./data/listings.json");
   const payload = await response.json();
   state.rows = payload.rows.map(normalizeRow).filter((row) => row.complex);
+  state.realTransactions = (payload.realTransactions || []).map(normalizeRealTransaction).filter((row) => row.complex);
   state.brokerMap = payload.brokerMap || {};
   state.floorplans = await loadFloorplans();
   loadSavedWork();
@@ -101,6 +105,25 @@ function normalizeRow(row) {
     brokerCount: toNumber(row.brokerCount),
     pricePerPyeong: toNumber(row.pricePerPyeong),
     representativeListingId: normalizeListingId(row.representativeListingId),
+  };
+}
+
+function normalizeRealTransaction(row) {
+  const monthlyRent = toNumber(row.monthlyRent);
+  const deposit = toNumber(row.deposit);
+  const convertedDeposit =
+    row.dealType === "월세" && Number.isFinite(deposit) && Number.isFinite(monthlyRent)
+      ? deposit + monthlyRent * 200
+      : null;
+  return {
+    ...row,
+    salePrice: toNumber(row.salePrice),
+    deposit,
+    monthlyRent,
+    convertedDeposit,
+    pyeong: toNumber(row.pyeong),
+    exclusiveArea: toNumber(row.exclusiveArea),
+    floor: toNumber(row.floor),
   };
 }
 
@@ -584,6 +607,7 @@ function render() {
   renderKpis();
   renderOverview();
   renderTrendChart();
+  renderRealTransactions();
   renderComplexBars();
   renderPyeongCards();
   renderListings();
@@ -832,6 +856,80 @@ function getTrendRows() {
       .toLowerCase();
     return matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query);
   });
+}
+
+function renderRealTransactions() {
+  if (!el.realTransactionBody) return;
+
+  const rows = getFilteredRealTransactions()
+    .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
+    .slice(0, 8);
+
+  if (el.realTransactionNote) {
+    el.realTransactionNote.textContent = rows.length
+      ? `현재 선택 조건 기준 최근 실거래 ${rows.length.toLocaleString("ko-KR")}건`
+      : "현재 선택 조건에 맞는 실거래가 없습니다.";
+  }
+
+  el.realTransactionBody.innerHTML = rows.length
+    ? rows
+        .map(
+          (row) => `
+            <tr>
+              <td>${escapeHtml(formatContractDate(row.contractDate))}</td>
+              <td>${escapeHtml(shortName(row.complex))}</td>
+              <td>${escapeHtml(row.dealType || "-")}</td>
+              <td>${escapeHtml(formatRealTransactionArea(row))}</td>
+              <td>${Number.isFinite(row.floor) ? `${row.floor}층` : "-"}</td>
+              <td>${escapeHtml(formatRealTransactionPrice(row))}</td>
+            </tr>
+          `,
+        )
+        .join("")
+    : `<tr><td colspan="6" class="empty-cell">현재 선택 조건에 맞는 실거래 데이터가 없습니다.</td></tr>`;
+}
+
+function getFilteredRealTransactions() {
+  const query = el.search.value.trim().toLowerCase();
+  return state.realTransactions.filter((row) => {
+    const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
+    const matchesComplex = matchesSelectedComplex(row);
+    const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
+    const matchesPyeong = el.pyeong.value === labels.all || getReportPyeongGroup(row) === el.pyeong.value;
+    const matchesType = matchesSelectedType(row);
+    const haystack = [row.complex, row.supplyArea, row.dealType, row.contractDate, row.baseMonth]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query);
+  });
+}
+
+function formatRealTransactionArea(row) {
+  return [
+    row.supplyArea ? `${row.supplyArea}` : "",
+    Number.isFinite(row.exclusiveArea) ? `전용 ${formatPlainNumber(row.exclusiveArea)}` : "",
+    Number.isFinite(row.pyeong) ? `${formatPlainNumber(row.pyeong)}평` : "",
+  ]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+function formatRealTransactionPrice(row) {
+  if (row.dealType === "매매") return formatPrice(row.salePrice);
+  if (row.dealType === "전세") return formatPrice(row.deposit);
+  if (row.dealType === "월세") {
+    const deposit = Number.isFinite(row.deposit) ? formatPrice(row.deposit) : "-";
+    const rent = Number.isFinite(row.monthlyRent) ? formatPrice(row.monthlyRent) : "-";
+    const converted = Number.isFinite(row.convertedDeposit) ? `환산 ${formatPrice(row.convertedDeposit)}` : "";
+    return [deposit, `월 ${rent}`, converted].filter(Boolean).join(" / ");
+  }
+  return formatPrice(row.salePrice ?? row.deposit ?? row.convertedDeposit);
+}
+
+function formatContractDate(value) {
+  if (!value) return "-";
+  return String(value).replaceAll("-", ". ");
 }
 
 function getSummaryRows({ ignoreDate = false, ignoreDeal = false } = {}) {
