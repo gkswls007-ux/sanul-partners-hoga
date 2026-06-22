@@ -426,9 +426,7 @@ function bindEvents() {
   });
 
   el.clearContacts?.addEventListener("click", () => {
-    state.contacts = [];
-    saveWork();
-    renderWorkLists();
+    clearActiveContactGroup();
   });
 
   el.exportContacts?.addEventListener("click", exportContacts);
@@ -1276,6 +1274,19 @@ function removeContactItem(contactId) {
   renderWorkLists();
 }
 
+function clearActiveContactGroup() {
+  if (!state.contacts.length) return;
+  const groups = groupBy(state.contacts, getCustomerKey);
+  const targetKey = groups.length <= 1 ? groups[0]?.[0] : state.selectedCustomerKey || groups[0]?.[0];
+  if (!targetKey) return;
+  state.contacts = state.contacts.filter((item) => getCustomerKey(item) !== targetKey);
+  if (!state.contacts.some((item) => getCustomerKey(item) === state.selectedCustomerKey)) {
+    state.selectedCustomerKey = state.contacts.length ? getCustomerKey(state.contacts[0]) : "";
+  }
+  saveWork();
+  renderWorkLists();
+}
+
 function updateContactBroker(contactId, brokerName) {
   const item = state.contacts.find((contact) => contact.contactId === contactId);
   if (!item) return;
@@ -1403,7 +1414,12 @@ function renderContactGroup(customerKey, items, options = {}) {
 }
 
 function renderBasketItem(item) {
-  const inContacts = state.contacts.some((contact) => contact.id === item.id);
+  const customerName = el.customerName?.value.trim() || "";
+  const customerPhone = el.customerPhone?.value.trim() || "";
+  const inContacts =
+    customerName &&
+    customerPhone &&
+    state.contacts.some((contact) => contact.id === item.id && contact.customerName === customerName && contact.customerPhone === customerPhone);
   return `
     <article class="work-item">
       <div>
