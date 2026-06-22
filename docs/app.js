@@ -328,6 +328,15 @@ function bindEvents() {
     });
   });
 
+  el.trendChart?.addEventListener("click", (event) => {
+    const dot = event.target.closest("[data-real-tooltip]");
+    if (!dot) {
+      hideTrendTooltip();
+      return;
+    }
+    showTrendTooltip(dot.dataset.realTooltip, event);
+  });
+
   el.listingGrid.addEventListener("click", (event) => {
     const planButton = event.target.closest("[data-plan-key]");
     if (planButton) {
@@ -788,7 +797,16 @@ function renderTrendChart() {
   const pad = { top: 22, right: 24, bottom: 58, left: 84 };
   const chartW = width - pad.left - pad.right;
   const chartH = height - pad.top - pad.bottom;
-  const prices = grouped.flatMap((item) => [item.avgPrice, item.minPrice]);
+  const weekIndex = new Map(grouped.map((item, index) => [item.date, index]));
+  const realPoints = getFilteredRealTransactions({ ignoreDate: true })
+    .map((row) => ({
+      row,
+      week: getContractWeek(row.contractDate),
+      price: realTransactionChartPrice(row),
+    }))
+    .filter((item) => Number.isFinite(item.price) && weekIndex.has(item.week));
+  const realPointGroups = groupBy(realPoints, "week");
+  const prices = grouped.flatMap((item) => [item.avgPrice, item.minPrice]).concat(realPoints.map((item) => item.price));
   const minPrice = Math.min(...prices) * 0.96;
   const maxPrice = Math.max(...prices) * 1.04;
   const maxCount = Math.max(...grouped.map((item) => item.count), 1);
@@ -837,10 +855,35 @@ function renderTrendChart() {
           `,
         )
         .join("")}
+      ${realPointGroups
+        .flatMap(([week, points]) =>
+          points.map((point, pointIndex) => {
+            const baseX = x(weekIndex.get(week));
+            const offset = (pointIndex - (points.length - 1) / 2) * 8;
+            return `<circle class="trend-dot-real" cx="${baseX + offset}" cy="${yPrice(point.price)}" r="5" data-real-tooltip="${escapeHtml(formatRealTransactionTooltip(point.row))}"></circle>`;
+          }),
+        )
+        .join("")}
       <text class="trend-value trend-value-min" x="${x(lastIndex)}" y="${yPrice(lastItem.minPrice) + 18}" text-anchor="end">${formatPrice(lastItem.minPrice)}</text>
     </svg>
+    <div class="trend-tooltip" hidden></div>
   `;
   el.trendChart.scrollLeft = el.trendChart.scrollWidth;
+}
+
+function showTrendTooltip(text, event) {
+  const tooltip = el.trendChart?.querySelector(".trend-tooltip");
+  if (!tooltip) return;
+  const rect = el.trendChart.getBoundingClientRect();
+  tooltip.textContent = text || "-";
+  tooltip.style.left = `${event.clientX - rect.left + el.trendChart.scrollLeft + 12}px`;
+  tooltip.style.top = `${Math.max(8, event.clientY - rect.top - 32)}px`;
+  tooltip.hidden = false;
+}
+
+function hideTrendTooltip() {
+  const tooltip = el.trendChart?.querySelector(".trend-tooltip");
+  if (tooltip) tooltip.hidden = true;
 }
 
 function getTrendRows() {
@@ -889,10 +932,10 @@ function renderRealTransactions() {
     : `<tr><td colspan="6" class="empty-cell">현재 선택 조건에 맞는 실거래 데이터가 없습니다.</td></tr>`;
 }
 
-function getFilteredRealTransactions() {
+function getFilteredRealTransactions({ ignoreDate = false } = {}) {
   const query = el.search.value.trim().toLowerCase();
   return state.realTransactions.filter((row) => {
-    const matchesDate = el.date.value === labels.all || row.surveyDate === el.date.value;
+    const matchesDate = ignoreDate || el.date.value === labels.all || row.surveyDate === el.date.value;
     const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || getReportPyeongGroup(row) === el.pyeong.value;
@@ -903,6 +946,32 @@ function getFilteredRealTransactions() {
       .toLowerCase();
     return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query);
   });
+}
+
+function realTransactionChartPrice(row) {
+  if (row.dealType === "매매") return row.salePrice;
+  if (row.dealType === "전세") return row.deposit;
+  if (row.dealType === "월세") return row.convertedDeposit;
+  return row.salePrice ?? row.deposit ?? row.convertedDeposit;
+}
+
+function formatRealTransactionTooltip(row) {
+  if (row.dealType === "월세") {
+    const converted = Number.isFinite(row.convertedDeposit) ? `환산 ${formatPrice(row.convertedDeposit)}` : "환산 -";
+    const deposit = Number.isFinite(row.deposit) ? formatPrice(row.deposit) : "-";
+    const rent = Number.isFinite(row.monthlyRent) ? formatPrice(row.monthlyRent) : "-";
+    return `${converted} / ${deposit} / 월 ${rent}`;
+  }
+  return formatPrice(realTransactionChartPrice(row));
+}
+
+function getContractWeek(value) {
+  if (!value) return "";
+  const match = String(value).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (!match) return "";
+  const [, year, month, day] = match.map(Number);
+  const week = Math.max(1, Math.ceil(day / 7));
+  return `${String(year).slice(2)}년 ${month}월 ${week}주차`;
 }
 
 function formatRealTransactionArea(row) {
