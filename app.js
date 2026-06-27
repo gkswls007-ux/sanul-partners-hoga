@@ -643,6 +643,8 @@ function bindEvents() {
   el.floorButtons.forEach((button) => {
     button.addEventListener("click", () => {
       toggleFloorFilter(button.dataset.floor);
+      renderComplexBars();
+      renderPyeongCards();
       renderListings();
     });
   });
@@ -1350,8 +1352,12 @@ function areaKey(row) {
   return [row.pyeong ?? "", row.supplyArea ?? "", row.exclusiveArea ?? "", row.pyeongGroup ?? ""].join("|");
 }
 
+function getFloorFilteredRows() {
+  return state.filtered.filter((row) => state.floors.has(row.floorGroup));
+}
+
 function renderComplexBars() {
-  const grouped = groupBy(state.filtered, "complex")
+  const grouped = groupBy(getFloorFilteredRows(), "complex")
     .map(([name, rows]) => ({ name, value: avg(analysisValues(rows)), count: rows.length }))
     .filter((item) => Number.isFinite(item.value))
     .sort((a, b) => b.value - a.value)
@@ -1374,7 +1380,7 @@ function renderComplexBars() {
 }
 
 function renderPyeongCards() {
-  const grouped = groupBy(state.filtered, "pyeongGroup")
+  const grouped = groupBy(getFloorFilteredRows(), "pyeongGroup")
     .map(([name, rows]) => {
       const prices = analysisValues(rows);
       return { name, rows, prices };
