@@ -1225,7 +1225,7 @@ function getTrendRows() {
 function renderRealTransactions() {
   if (!el.realTransactionBody) return;
 
-  const rows = getFilteredRealTransactions()
+  const rows = getFilteredRealTransactions({ ignoreDate: true })
     .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
     .slice(0, 8);
 
