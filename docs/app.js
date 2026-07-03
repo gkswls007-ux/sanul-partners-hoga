@@ -1227,7 +1227,7 @@ function renderRealTransactions() {
 
   const rows = getFilteredRealTransactions({ ignoreDate: true })
     .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
-    .slice(0, 8);
+    .slice(0, 15);
 
   if (el.realTransactionNote) {
     el.realTransactionNote.textContent = rows.length
