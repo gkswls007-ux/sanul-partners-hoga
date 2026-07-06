@@ -127,7 +127,14 @@ h2 {
   top: 0;
   z-index: 3;
   display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr)) minmax(220px, 1.5fr);
+  grid-template-columns:
+    minmax(90px, 0.65fr)
+    minmax(160px, 1fr)
+    minmax(220px, 1.3fr)
+    minmax(100px, 0.7fr)
+    minmax(100px, 0.7fr)
+    minmax(170px, 1.05fr)
+    minmax(200px, 1.25fr);
   gap: 12px;
   padding: 16px;
   margin: 18px 0;

@@ -1,4 +1,6 @@
 const state = {
+  datasets: {},
+  activeRegion: "세종",
   rows: [],
   filtered: [],
   realTransactions: [],
@@ -19,6 +21,7 @@ const labels = {
 };
 
 const el = {
+  region: document.querySelector("#regionFilter"),
   date: document.querySelector("#dateFilter"),
   mainToolbar: document.querySelector("#mainToolbar"),
   complexButton: document.querySelector("#complexFilterButton"),
@@ -29,6 +32,7 @@ const el = {
   typeMenu: document.querySelector("#typeFilterMenu"),
   search: document.querySelector("#searchInput"),
   topbar: document.querySelector(".topbar"),
+  regionEyebrow: document.querySelector("#regionEyebrow"),
   sourceDate: document.querySelector("#sourceDate"),
   sourceCount: document.querySelector("#sourceCount"),
   kpiMinLabel: document.querySelector("#kpiMinLabel"),
@@ -58,6 +62,7 @@ const el = {
   areaInventoryBody: document.querySelector("#areaInventoryBody"),
   areaPriceBody: document.querySelector("#areaPriceBody"),
   tabButtons: document.querySelectorAll(".tab-button"),
+  unitLookupTabButton: document.querySelector("#unitLookupTabButton"),
   summaryTab: document.querySelector("#summaryTab"),
   briefingTab: document.querySelector("#briefingTab"),
   unitLookupTab: document.querySelector("#unitLookupTab"),
@@ -82,19 +87,84 @@ const el = {
 init();
 
 async function init() {
-  const response = await fetch("./data/listings.json");
-  const payload = await response.json();
-  state.rows = payload.rows.map(normalizeRow).filter((row) => row.complex);
-  state.realTransactions = (payload.realTransactions || []).map(normalizeRealTransaction).filter((row) => row.complex);
-  state.brokerMap = payload.brokerMap || {};
-  state.floorplans = await loadFloorplans();
-  state.unitAreas = await loadUnitAreas();
+  const [sejong, suwon, floorplans, unitAreas] = await Promise.all([
+    loadDataset("./data/listings.json", "세종"),
+    loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
+    loadFloorplans(),
+    loadUnitAreas(),
+  ]);
+  state.datasets.세종 = sejong;
+  if (suwon?.rows.length) state.datasets.수원 = suwon;
+  state.floorplans = floorplans;
+  state.unitAreas = unitAreas;
   loadSavedWork();
 
-  fillFilters();
+  fillRegionFilter();
+  activateRegion("세종", { render: false });
   fillUnitLookup();
   bindEvents();
   applyFilters();
+}
+
+async function loadDataset(src, region, options = {}) {
+  try {
+    const response = await fetch(src, { cache: "no-store" });
+    if (!response.ok) {
+      if (options.optional) return null;
+      throw new Error(`${region} 데이터를 불러오지 못했습니다.`);
+    }
+    const payload = await response.json();
+    return {
+      rows: (payload.rows || []).map((row) => normalizeRow({ ...row, region })).filter((row) => row.complex),
+      realTransactions: (payload.realTransactions || [])
+        .map((row) => normalizeRealTransaction({ ...row, region }))
+        .filter((row) => row.complex),
+      brokerMap: payload.brokerMap || {},
+      meta: payload.meta || {},
+    };
+  } catch (error) {
+    if (options.optional) return null;
+    throw error;
+  }
+}
+
+function fillRegionFilter() {
+  if (!el.region) return;
+  el.region.innerHTML = Object.keys(state.datasets)
+    .map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(region)}</option>`)
+    .join("");
+  el.region.value = state.activeRegion;
+}
+
+function activateRegion(region, options = {}) {
+  const dataset = state.datasets[region];
+  if (!dataset) return;
+
+  state.activeRegion = region;
+  state.rows = dataset.rows;
+  state.realTransactions = dataset.realTransactions;
+  state.brokerMap = dataset.brokerMap;
+  state.filtered = [];
+  state.selectedComplexes.clear();
+  state.selectedTypes.clear();
+  state.floors = new Set(["저층", "중층", "고층"]);
+  state.basket = [];
+  state.selectedCustomerKey = "";
+  if (el.search) el.search.value = "";
+  if (el.region) el.region.value = region;
+
+  fillFilters();
+  updateRegionUi();
+  if (options.render !== false) applyFilters();
+}
+
+function updateRegionUi() {
+  const isSejong = state.activeRegion === "세종";
+  if (el.regionEyebrow) {
+    el.regionEyebrow.textContent = isSejong ? "세종 산울동·해밀동 호가 데이터" : "수원 구운동·호매실동 호가 데이터";
+  }
+  if (el.unitLookupTabButton) el.unitLookupTabButton.hidden = !isSejong;
+  if (!isSejong && el.unitLookupTab && !el.unitLookupTab.hidden) switchTab("summary");
 }
 
 async function loadFloorplans() {
@@ -584,6 +654,8 @@ function bindEvents() {
     button.addEventListener("click", () => switchTab(button.dataset.tab));
   });
 
+  el.region?.addEventListener("change", () => activateRegion(el.region.value));
+
   [el.date, el.deal].forEach((control) => {
     control.addEventListener("input", () => {
       refreshPyeongOptions();
@@ -943,6 +1015,7 @@ function render() {
 }
 
 function switchTab(tabName) {
+  if (tabName === "unitLookup" && state.activeRegion !== "세종") tabName = "summary";
   el.tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tabName));
   el.summaryTab.hidden = tabName !== "summary";
   el.briefingTab.hidden = tabName !== "briefing";
@@ -951,6 +1024,10 @@ function switchTab(tabName) {
 }
 
 function updateHeroImage() {
+  if (state.activeRegion !== "세종") {
+    el.topbar.style.removeProperty("--hero-image");
+    return;
+  }
   const selectedComplex = [...state.selectedComplexes].join(" ");
   const query = el.search.value.trim();
   const shouldShowComplex5 =
@@ -1497,8 +1574,9 @@ function getFloorplanKey(row) {
 }
 
 function getListingId(row) {
-  if (row.representativeListingId) return `rep-${row.representativeListingId}`;
-  return `listing-${[
+  const region = row.region || "세종";
+  if (row.representativeListingId) return `${region}-rep-${row.representativeListingId}`;
+  return `${region}-listing-${[
     row.surveyDate,
     row.complex,
     row.dealType,
@@ -1602,8 +1680,9 @@ function removeContactItem(contactId) {
 }
 
 function clearActiveContactGroup() {
-  if (!state.contacts.length) return;
-  const groups = groupBy(state.contacts, getCustomerKey);
+  const activeContacts = getActiveContacts();
+  if (!activeContacts.length) return;
+  const groups = groupBy(activeContacts, getCustomerKey);
   const targetKey = groups.length <= 1 ? groups[0]?.[0] : state.selectedCustomerKey || groups[0]?.[0];
   if (!targetKey) return;
   state.contacts = state.contacts.filter((item) => getCustomerKey(item) !== targetKey);
@@ -1626,11 +1705,11 @@ function updateContactBroker(contactId, brokerName) {
 function updateContactCustomer(customerKey, field, value) {
   if (!["customerName", "customerPhone"].includes(field)) return;
   state.contacts
-    .filter((item) => getCustomerKey(item) === customerKey)
+    .filter((item) => (item.region || "세종") === state.activeRegion && getCustomerKey(item) === customerKey)
     .forEach((item) => {
       item[field] = value.trim();
     });
-  const updated = state.contacts.find((item) => item[field] === value.trim());
+  const updated = state.contacts.find((item) => (item.region || "세종") === state.activeRegion && item[field] === value.trim());
   state.selectedCustomerKey = updated ? getCustomerKey(updated) : "";
   saveWork();
   renderWorkLists();
@@ -1656,6 +1735,7 @@ function reorderContactItem(sourceId, targetId) {
 function toSavedListing(row) {
   return {
     id: getListingId(row),
+    region: row.region || state.activeRegion,
     surveyDate: row.surveyDate,
     complex: row.complex,
     dealType: row.dealType,
@@ -1678,20 +1758,25 @@ function toSavedListing(row) {
 }
 
 function renderWorkLists() {
+  const contacts = getActiveContacts();
   if (el.basketList) {
     el.basketList.innerHTML = state.basket.length
       ? state.basket.map(renderBasketItem).join("")
       : `<div class="empty compact">담아둔 매물이 없습니다.</div>`;
   }
   if (el.contactList) {
-    el.contactList.innerHTML = state.contacts.length
-      ? renderContactGroups()
+    el.contactList.innerHTML = contacts.length
+      ? renderContactGroups(contacts)
       : `<div class="empty compact">저장된 연락 리스트가 없습니다.</div>`;
   }
 }
 
-function renderContactGroups() {
-  const groups = groupBy(state.contacts, getCustomerKey);
+function getActiveContacts() {
+  return state.contacts.filter((item) => (item.region || "세종") === state.activeRegion);
+}
+
+function renderContactGroups(contacts = getActiveContacts()) {
+  const groups = groupBy(contacts, getCustomerKey);
   if (groups.length === 1) {
     const [customerKey, items] = groups[0];
     state.selectedCustomerKey = customerKey;
@@ -1801,8 +1886,9 @@ function getCustomerKey(item) {
 }
 
 function exportContacts() {
-  if (!state.contacts.length) return;
-  if (state.contacts.some((item) => !item.brokerName)) {
+  const contacts = getActiveContacts();
+  if (!contacts.length) return;
+  if (contacts.some((item) => !item.brokerName)) {
     alert("연락 리스트의 중개사를 모두 선택한 뒤 엑셀 저장을 눌러주세요.");
     return;
   }
@@ -1827,7 +1913,7 @@ function exportContacts() {
     "저장일시",
   ];
   const excelTextColumns = new Set([1, 4, 5, 12, 13, 17]);
-  const rows = state.contacts.map((item) => [
+  const rows = contacts.map((item) => [
     item.customerName || "",
     item.customerPhone || "",
     item.status || "미연락",
@@ -2458,8 +2544,9 @@ async function renderCustomerTrendChartImage(group) {
 }
 
 function getVisibleCustomerContacts() {
-  const groups = groupBy(state.contacts, getCustomerKey);
-  if (groups.length <= 1) return state.contacts;
+  const contacts = getActiveContacts();
+  const groups = groupBy(contacts, getCustomerKey);
+  if (groups.length <= 1) return contacts;
   const selected = groups.find(([customerKey]) => customerKey === state.selectedCustomerKey) || groups[0];
   return selected?.[1] || [];
 }

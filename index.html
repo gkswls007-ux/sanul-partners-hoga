@@ -10,7 +10,7 @@
     <main class="shell">
       <section class="topbar" aria-label="호가 브리핑 상단">
         <div>
-          <p class="eyebrow">세종 산울동·해밀동 호가 데이터</p>
+          <p id="regionEyebrow" class="eyebrow">세종 산울동·해밀동 호가 데이터</p>
           <h1>산울파트너스 호가 브리핑</h1>
         </div>
         <div class="source-box">
@@ -22,10 +22,14 @@
       <nav class="view-tabs" aria-label="화면 탭">
         <button class="tab-button active" data-tab="summary" type="button">현황 요약</button>
         <button class="tab-button" data-tab="briefing" type="button">매물 브리핑</button>
-        <button class="tab-button" data-tab="unitLookup" type="button">우리집타입찾기</button>
+        <button id="unitLookupTabButton" class="tab-button" data-tab="unitLookup" type="button">우리집타입찾기</button>
       </nav>
 
       <section id="mainToolbar" class="toolbar" aria-label="필터">
+        <label>
+          지역
+          <select id="regionFilter"></select>
+        </label>
         <label>
           조사 주차
           <select id="dateFilter"></select>
