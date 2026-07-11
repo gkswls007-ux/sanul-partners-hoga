@@ -2836,23 +2836,22 @@ function drawSignageOverview(ctx) {
   const selectedRows = latestRows.filter((row) => row.dealType === dealType);
   const counts = Object.fromEntries(["매매", "전세", "월세"].map((deal) => [deal, latestRows.filter((row) => row.dealType === deal).length]));
 
-  drawSignageHeader(ctx, "이번 주 호가 브리핑", `${latestDate} · 선택 단지 ${state.signage.selectedComplexes.size}곳`);
+  drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} · ${pyeongGroup} ${dealType}`);
   drawSectionTitle(ctx, "매물 현황", 420);
   const metrics = [
     ["매매", `${counts.매매.toLocaleString("ko-KR")}건`, "#1f5d91"],
     ["전세", `${counts.전세.toLocaleString("ko-KR")}건`, "#188478"],
     ["월세", `${counts.월세.toLocaleString("ko-KR")}건`, "#ad7a1f"],
-    ["선택 단지", `${state.signage.selectedComplexes.size}곳`, "#4b5d72"],
   ];
-  metrics.forEach((item, index) => drawMetricCard(ctx, 70 + (index % 2) * 485, 485 + Math.floor(index / 2) * 185, 445, 150, ...item));
+  metrics.forEach((item, index) => drawMetricCard(ctx, 70 + index * 315, 485, 290, 150, ...item));
 
-  drawSectionTitle(ctx, `${dealType} · ${pyeongGroup} 매물 수`, 890);
+  drawSectionTitle(ctx, `${dealType} · ${pyeongGroup} 매물 수`, 775);
   const groups = groupBy(selectedRows, "pyeongGroup")
     .map(([name, rows]) => ({ name, count: rows.length }))
     .sort((a, b) => groupOrder(a.name) - groupOrder(b.name));
   const maxCount = Math.max(...groups.map((item) => item.count), 1);
   groups.slice(0, 5).forEach((item, index) => {
-    const y = 965 + index * 92;
+    const y = 850 + index * 92;
     drawText(ctx, item.name, 75, y + 36, 28, 800, "#233349");
     roundedRect(ctx, 260, y, 650, 54, 12, "#dce8e8");
     roundedRect(ctx, 260, y, Math.max(18, (650 * item.count) / maxCount), 54, 12, "#23877b");
@@ -2949,28 +2948,9 @@ function drawSignageHeader(ctx, title, subtitle) {
   ctx.fillRect(0, 0, 1080, 330);
   ctx.fillStyle = "#15324a";
   ctx.fillRect(0, 0, 1080, 18);
-  drawHouseMark(ctx, 75, 64);
-  drawText(ctx, "산울파트너스", 190, 104, 34, 900, "#15324a");
-  drawText(ctx, "공인중개사사무소", 190, 142, 20, 800, "#15324a");
-  drawText(ctx, title, 70, 235, 52, 900, "#10283f");
-  drawText(ctx, subtitle, 70, 290, 24, 700, "#435466");
-}
-
-function drawHouseMark(ctx, x, y) {
-  ctx.save();
-  ctx.strokeStyle = "#15324a";
-  ctx.lineWidth = 13;
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(x, y + 48);
-  ctx.lineTo(x + 48, y);
-  ctx.lineTo(x + 96, y + 48);
-  ctx.moveTo(x + 18, y + 38);
-  ctx.lineTo(x + 18, y + 100);
-  ctx.lineTo(x + 78, y + 100);
-  ctx.lineTo(x + 78, y + 38);
-  ctx.stroke();
-  ctx.restore();
+  drawText(ctx, "산울동 주요 단지 최신 등록 매물 기준", 70, 102, 28, 800, "#4f5d69");
+  drawText(ctx, title, 70, 205, 68, 900, "#10283f");
+  drawText(ctx, subtitle, 70, 274, 31, 900, "#17314a");
 }
 
 function drawSectionTitle(ctx, title, y) {
@@ -3053,8 +3033,8 @@ function drawSignageEmpty(ctx, message) {
 function drawSignageFooter(ctx) {
   ctx.fillStyle = "#15324a";
   ctx.fillRect(0, 1845, 1080, 75);
-  drawText(ctx, "산울파트너스 공인중개사사무소", 60, 1893, 24, 900, "#ffffff");
-  drawText(ctx, "044-414-9659", 1020, 1893, 25, 900, "#ffffff", "right");
+  drawText(ctx, "세종 산울동 매물 정보", 60, 1893, 24, 900, "#ffffff");
+  drawText(ctx, "010-8253-9659", 1020, 1893, 25, 900, "#ffffff", "right");
 }
 
 function drawText(ctx, text, x, y, size, weight = 700, color = "#1d252f", align = "left") {
