@@ -14,6 +14,10 @@ const state = {
   floors: new Set(["저층", "중층", "고층"]),
   selectedComplexes: new Set(),
   selectedTypes: new Set(),
+  signage: {
+    screen: "overview",
+    selectedComplexes: new Set(),
+  },
 };
 
 const labels = {
@@ -66,6 +70,15 @@ const el = {
   summaryTab: document.querySelector("#summaryTab"),
   briefingTab: document.querySelector("#briefingTab"),
   unitLookupTab: document.querySelector("#unitLookupTab"),
+  signageTab: document.querySelector("#signageTab"),
+  signageScreenButtons: document.querySelector("#signageScreenButtons"),
+  signageDeal: document.querySelector("#signageDeal"),
+  signagePyeong: document.querySelector("#signagePyeong"),
+  signageComplexOptions: document.querySelector("#signageComplexOptions"),
+  clearSignageComplexes: document.querySelector("#clearSignageComplexes"),
+  downloadSignage: document.querySelector("#downloadSignage"),
+  signageSaveStatus: document.querySelector("#signageSaveStatus"),
+  signageCanvas: document.querySelector("#signageCanvas"),
   unitComplex: document.querySelector("#unitComplexSelect"),
   unitBuilding: document.querySelector("#unitBuildingInput"),
   unitNumber: document.querySelector("#unitNumberInput"),
@@ -102,6 +115,7 @@ async function init() {
   fillRegionFilter();
   activateRegion("세종", { render: false });
   fillUnitLookup();
+  fillSignageControls();
   bindEvents();
   applyFilters();
 }
@@ -155,6 +169,7 @@ function activateRegion(region, options = {}) {
 
   fillFilters();
   updateRegionUi();
+  fillSignageControls();
   if (options.render !== false) applyFilters();
 }
 
@@ -825,6 +840,28 @@ function bindEvents() {
   el.exportContacts?.addEventListener("click", exportContacts);
   el.exportCustomerDoc?.addEventListener("click", exportCustomerDocx);
 
+  el.signageScreenButtons?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-signage-screen]");
+    if (!button) return;
+    state.signage.screen = button.dataset.signageScreen;
+    el.signageScreenButtons.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item === button));
+    renderSignage();
+  });
+  [el.signageDeal, el.signagePyeong].forEach((control) => control?.addEventListener("change", renderSignage));
+  el.signageComplexOptions?.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-signage-complex]");
+    if (!input) return;
+    if (input.checked) state.signage.selectedComplexes.add(input.value);
+    else state.signage.selectedComplexes.delete(input.value);
+    renderSignage();
+  });
+  el.clearSignageComplexes?.addEventListener("click", () => {
+    state.signage.selectedComplexes.clear();
+    renderSignageComplexOptions();
+    renderSignage();
+  });
+  el.downloadSignage?.addEventListener("click", downloadSignagePng);
+
   document.querySelectorAll("[data-close-floorplan]").forEach((button) => {
     button.addEventListener("click", closeFloorplan);
   });
@@ -1020,7 +1057,9 @@ function switchTab(tabName) {
   el.summaryTab.hidden = tabName !== "summary";
   el.briefingTab.hidden = tabName !== "briefing";
   if (el.unitLookupTab) el.unitLookupTab.hidden = tabName !== "unitLookup";
-  if (el.mainToolbar) el.mainToolbar.hidden = tabName === "unitLookup";
+  if (el.signageTab) el.signageTab.hidden = tabName !== "signage";
+  if (el.mainToolbar) el.mainToolbar.hidden = tabName === "unitLookup" || tabName === "signage";
+  if (tabName === "signage") renderSignage();
 }
 
 function updateHeroImage() {
@@ -2693,6 +2732,378 @@ function openFloorplan(planKey, listingKey) {
 function closeFloorplan() {
   el.floorplanModal.hidden = true;
   document.body.classList.remove("modal-open");
+}
+
+function fillSignageControls() {
+  if (!el.signageDeal || !el.signagePyeong || !el.signageComplexOptions) return;
+
+  const complexes = [...new Set(state.rows.map((row) => row.complex).filter(Boolean))].sort((a, b) =>
+    shortName(a).localeCompare(shortName(b), "ko", { numeric: true }),
+  );
+  const available = new Set(complexes);
+  [...state.signage.selectedComplexes].forEach((name) => {
+    if (!available.has(name)) state.signage.selectedComplexes.delete(name);
+  });
+
+  if (!state.signage.selectedComplexes.size && complexes.length) {
+    const preferred = complexes.filter((name) => /산울2단지|산울5단지/.test(name));
+    (preferred.length ? preferred : complexes.slice(0, 2)).slice(0, 2).forEach((name) => state.signage.selectedComplexes.add(name));
+  }
+
+  const dealTypes = [...new Set(state.rows.map((row) => row.dealType).filter(Boolean))].sort(
+    (a, b) => ["매매", "전세", "월세"].indexOf(a) - ["매매", "전세", "월세"].indexOf(b),
+  );
+  const previousDeal = el.signageDeal.value;
+  el.signageDeal.innerHTML = dealTypes.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+  el.signageDeal.value = dealTypes.includes(previousDeal) ? previousDeal : dealTypes.includes("매매") ? "매매" : dealTypes[0] || "";
+
+  const pyeongs = [...new Set(state.rows.map((row) => row.pyeongGroup).filter(Boolean))].sort(
+    (a, b) => groupOrder(a) - groupOrder(b),
+  );
+  const previousPyeong = el.signagePyeong.value;
+  el.signagePyeong.innerHTML = [labels.all, ...pyeongs]
+    .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+    .join("");
+  el.signagePyeong.value = [labels.all, ...pyeongs].includes(previousPyeong)
+    ? previousPyeong
+    : pyeongs.includes("30평대")
+      ? "30평대"
+      : labels.all;
+
+  renderSignageComplexOptions();
+  renderSignage();
+}
+
+function renderSignageComplexOptions() {
+  if (!el.signageComplexOptions) return;
+  const complexes = [...new Set(state.rows.map((row) => row.complex).filter(Boolean))].sort((a, b) =>
+    shortName(a).localeCompare(shortName(b), "ko", { numeric: true }),
+  );
+  el.signageComplexOptions.innerHTML = complexes
+    .map(
+      (name) => `
+        <label class="signage-complex-option">
+          <input type="checkbox" value="${escapeHtml(name)}" data-signage-complex ${
+            state.signage.selectedComplexes.has(name) ? "checked" : ""
+          } />
+          <span>${escapeHtml(shortName(name))}</span>
+        </label>
+      `,
+    )
+    .join("");
+}
+
+function renderSignage() {
+  const canvas = el.signageCanvas;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#f2f5f7";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (!state.signage.selectedComplexes.size) {
+    drawSignageHeader(ctx, "표시할 단지를 선택해주세요", "단지를 한 개 이상 선택하면 미리보기가 만들어집니다.");
+    return;
+  }
+
+  if (state.signage.screen === "comparison") drawSignageComparison(ctx);
+  else if (state.signage.screen === "trend") drawSignageTrend(ctx);
+  else drawSignageOverview(ctx);
+}
+
+function getSignageLatestDate() {
+  return unique("surveyDate")[0] || "";
+}
+
+function getSignageRows({ latestOnly = true, ignoreDeal = false, ignorePyeong = false } = {}) {
+  const latestDate = getSignageLatestDate();
+  const dealType = el.signageDeal?.value;
+  const pyeongGroup = el.signagePyeong?.value;
+  return state.rows.filter((row) => {
+    const matchesDate = !latestOnly || row.surveyDate === latestDate;
+    const matchesComplex = state.signage.selectedComplexes.has(row.complex);
+    const matchesDeal = ignoreDeal || !dealType || row.dealType === dealType;
+    const matchesPyeong = ignorePyeong || !pyeongGroup || pyeongGroup === labels.all || row.pyeongGroup === pyeongGroup;
+    return matchesDate && matchesComplex && matchesDeal && matchesPyeong;
+  });
+}
+
+function drawSignageOverview(ctx) {
+  const latestDate = getSignageLatestDate();
+  const latestRows = getSignageRows({ ignoreDeal: true });
+  const dealType = el.signageDeal?.value || "매매";
+  const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const selectedRows = latestRows.filter((row) => row.dealType === dealType);
+  const counts = Object.fromEntries(["매매", "전세", "월세"].map((deal) => [deal, latestRows.filter((row) => row.dealType === deal).length]));
+
+  drawSignageHeader(ctx, "이번 주 호가 브리핑", `${latestDate} · 선택 단지 ${state.signage.selectedComplexes.size}곳`);
+  drawSectionTitle(ctx, "매물 현황", 420);
+  const metrics = [
+    ["매매", `${counts.매매.toLocaleString("ko-KR")}건`, "#1f5d91"],
+    ["전세", `${counts.전세.toLocaleString("ko-KR")}건`, "#188478"],
+    ["월세", `${counts.월세.toLocaleString("ko-KR")}건`, "#ad7a1f"],
+    ["선택 단지", `${state.signage.selectedComplexes.size}곳`, "#4b5d72"],
+  ];
+  metrics.forEach((item, index) => drawMetricCard(ctx, 70 + (index % 2) * 485, 485 + Math.floor(index / 2) * 185, 445, 150, ...item));
+
+  drawSectionTitle(ctx, `${dealType} · ${pyeongGroup} 매물 수`, 890);
+  const groups = groupBy(selectedRows, "pyeongGroup")
+    .map(([name, rows]) => ({ name, count: rows.length }))
+    .sort((a, b) => groupOrder(a.name) - groupOrder(b.name));
+  const maxCount = Math.max(...groups.map((item) => item.count), 1);
+  groups.slice(0, 5).forEach((item, index) => {
+    const y = 965 + index * 92;
+    drawText(ctx, item.name, 75, y + 36, 28, 800, "#233349");
+    roundedRect(ctx, 260, y, 650, 54, 12, "#dce8e8");
+    roundedRect(ctx, 260, y, Math.max(18, (650 * item.count) / maxCount), 54, 12, "#23877b");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 940, y + 37, 27, 900, "#233349", "right");
+  });
+
+  const complexes = getSignageComplexStats(selectedRows).slice(0, 4);
+  drawSectionTitle(ctx, "선택 단지 요약", 1470);
+  complexes.forEach((item, index) => {
+    const y = 1540 + index * 76;
+    drawText(ctx, shortName(item.name), 75, y + 30, 25, 800, "#233349");
+    drawText(ctx, `${item.count}건`, 690, y + 30, 24, 800, "#607086", "right");
+    drawText(ctx, item.avg ? `평균 ${formatPrice(item.avg)}` : "자료 없음", 945, y + 30, 25, 900, "#1f5d91", "right");
+  });
+  drawSignageFooter(ctx);
+}
+
+function drawSignageComparison(ctx) {
+  const dealType = el.signageDeal?.value || "매매";
+  const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const stats = getSignageComplexStats(getSignageRows()).slice(0, 4);
+  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} 호가 현황`, `${getSignageLatestDate()} · 단위: 만원`);
+
+  if (!stats.length) {
+    drawSignageEmpty(ctx, "선택 조건에 맞는 매물이 없습니다.");
+    drawSignageFooter(ctx);
+    return;
+  }
+
+  stats.forEach((item, index) => {
+    const y = 430 + index * 330;
+    roundedRect(ctx, 65, y, 950, 285, 24, "#ffffff", "#d6dfe7");
+    roundedRect(ctx, 65, y, 20, 285, 10, index % 2 ? "#23877b" : "#1f5d91");
+    drawText(ctx, shortName(item.name), 120, y + 65, 36, 900, "#152b42");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 950, y + 62, 27, 800, "#607086", "right");
+    drawComparisonValue(ctx, "최저", item.min, 130, y + 145, "#23877b");
+    drawComparisonValue(ctx, "평균", item.avg, 420, y + 145, "#1f5d91");
+    drawComparisonValue(ctx, "최고", item.max, 710, y + 145, "#25364d");
+  });
+  if (state.signage.selectedComplexes.size > 4) drawText(ctx, "화면에는 선택한 단지 중 4곳까지 표시됩니다.", 540, 1770, 24, 700, "#778495", "center");
+  drawSignageFooter(ctx);
+}
+
+function drawSignageTrend(ctx) {
+  const dealType = el.signageDeal?.value || "매매";
+  const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const complexes = [...state.signage.selectedComplexes].slice(0, 3);
+  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} 호가 추이`, "최근 10주 평균·최저 호가와 매물 수");
+
+  let rendered = 0;
+  complexes.forEach((name) => {
+    const rows = state.rows.filter(
+      (row) =>
+        row.complex === name &&
+        row.dealType === dealType &&
+        (pyeongGroup === labels.all || row.pyeongGroup === pyeongGroup),
+    );
+    const weeks = groupBy(rows, "surveyDate")
+      .map(([date, weekRows]) => {
+        const values = weekRows.map((row) => analysisPriceForDeal(row, dealType)).filter(Number.isFinite);
+        return values.length ? { date, count: weekRows.length, min: Math.min(...values), avg: avg(values) } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => parseKoreanWeek(a.date) - parseKoreanWeek(b.date))
+      .slice(-10);
+    if (!weeks.length) return;
+    drawSignageMiniChart(ctx, name, weeks, 70, 410 + rendered * 450, 940, 385);
+    rendered += 1;
+  });
+
+  if (!rendered) drawSignageEmpty(ctx, "선택 조건의 주차별 자료가 없습니다.");
+  if (state.signage.selectedComplexes.size > 3) drawText(ctx, "호가 추이 화면에는 선택한 단지 중 3곳까지 표시됩니다.", 540, 1770, 24, 700, "#778495", "center");
+  drawSignageFooter(ctx);
+}
+
+function getSignageComplexStats(rows) {
+  return groupBy(rows, "complex")
+    .map(([name, items]) => {
+      const dealType = el.signageDeal?.value || "매매";
+      const prices = items.map((row) => analysisPriceForDeal(row, dealType)).filter(Number.isFinite);
+      return {
+        name,
+        count: items.length,
+        min: prices.length ? Math.min(...prices) : null,
+        avg: prices.length ? avg(prices) : null,
+        max: prices.length ? Math.max(...prices) : null,
+      };
+    })
+    .sort((a, b) => b.count - a.count || shortName(a.name).localeCompare(shortName(b.name), "ko"));
+}
+
+function drawSignageHeader(ctx, title, subtitle) {
+  ctx.fillStyle = "#f2c94c";
+  ctx.fillRect(0, 0, 1080, 330);
+  ctx.fillStyle = "#15324a";
+  ctx.fillRect(0, 0, 1080, 18);
+  drawHouseMark(ctx, 75, 64);
+  drawText(ctx, "산울파트너스", 190, 104, 34, 900, "#15324a");
+  drawText(ctx, "공인중개사사무소", 190, 142, 20, 800, "#15324a");
+  drawText(ctx, title, 70, 235, 52, 900, "#10283f");
+  drawText(ctx, subtitle, 70, 290, 24, 700, "#435466");
+}
+
+function drawHouseMark(ctx, x, y) {
+  ctx.save();
+  ctx.strokeStyle = "#15324a";
+  ctx.lineWidth = 13;
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(x, y + 48);
+  ctx.lineTo(x + 48, y);
+  ctx.lineTo(x + 96, y + 48);
+  ctx.moveTo(x + 18, y + 38);
+  ctx.lineTo(x + 18, y + 100);
+  ctx.lineTo(x + 78, y + 100);
+  ctx.lineTo(x + 78, y + 38);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawSectionTitle(ctx, title, y) {
+  drawText(ctx, title, 70, y, 32, 900, "#152b42");
+  ctx.fillStyle = "#1f5d91";
+  ctx.fillRect(70, y + 22, 940, 4);
+}
+
+function drawMetricCard(ctx, x, y, width, height, label, value, color) {
+  roundedRect(ctx, x, y, width, height, 20, "#ffffff", "#d6dfe7");
+  drawText(ctx, label, x + 28, y + 45, 24, 800, "#68788b");
+  drawText(ctx, value, x + 28, y + 111, 45, 900, color);
+}
+
+function drawComparisonValue(ctx, label, value, x, y, color) {
+  drawText(ctx, label, x, y, 23, 800, "#758294");
+  drawText(ctx, formatPrice(value), x, y + 68, 40, 900, color);
+}
+
+function drawSignageMiniChart(ctx, name, weeks, x, y, width, height) {
+  roundedRect(ctx, x, y, width, height, 24, "#ffffff", "#d6dfe7");
+  drawText(ctx, shortName(name), x + 35, y + 55, 31, 900, "#152b42");
+  const plot = { x: x + 60, y: y + 105, width: width - 110, height: 205 };
+  const values = weeks.flatMap((item) => [item.avg, item.min]);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const padding = Math.max((maxValue - minValue) * 0.2, maxValue * 0.03, 1);
+  const low = minValue - padding;
+  const high = maxValue + padding;
+  const maxCount = Math.max(...weeks.map((item) => item.count), 1);
+  const point = (item, index, key) => ({
+    x: plot.x + (weeks.length === 1 ? plot.width / 2 : (plot.width * index) / (weeks.length - 1)),
+    y: plot.y + plot.height - ((item[key] - low) / (high - low || 1)) * plot.height,
+  });
+
+  ctx.strokeStyle = "#e5ebf0";
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 3; i += 1) {
+    const lineY = plot.y + (plot.height * i) / 2;
+    ctx.beginPath();
+    ctx.moveTo(plot.x, lineY);
+    ctx.lineTo(plot.x + plot.width, lineY);
+    ctx.stroke();
+  }
+  weeks.forEach((item, index) => {
+    const px = point(item, index, "avg").x;
+    const barHeight = (item.count / maxCount) * 85;
+    roundedRect(ctx, px - 19, plot.y + plot.height - barHeight, 38, barHeight, 8, "rgba(35,135,123,0.22)");
+  });
+  drawChartLine(ctx, weeks.map((item, index) => point(item, index, "avg")), "#1f5d91", false);
+  drawChartLine(ctx, weeks.map((item, index) => point(item, index, "min")), "#b27a17", true);
+  const latest = weeks.at(-1);
+  drawText(ctx, `최저 ${formatPrice(latest.min)}  ·  평균 ${formatPrice(latest.avg)}  ·  매물 ${latest.count}건`, x + 35, y + height - 30, 22, 800, "#526276");
+}
+
+function drawChartLine(ctx, points, color, dashed) {
+  if (!points.length) return;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 6;
+  ctx.setLineDash(dashed ? [14, 12] : []);
+  ctx.beginPath();
+  points.forEach((point, index) => (index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y)));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  points.forEach((point) => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawSignageEmpty(ctx, message) {
+  roundedRect(ctx, 70, 520, 940, 240, 24, "#ffffff", "#d6dfe7");
+  drawText(ctx, message, 540, 655, 30, 800, "#68788b", "center");
+}
+
+function drawSignageFooter(ctx) {
+  ctx.fillStyle = "#15324a";
+  ctx.fillRect(0, 1845, 1080, 75);
+  drawText(ctx, "산울파트너스 공인중개사사무소", 60, 1893, 24, 900, "#ffffff");
+  drawText(ctx, "044-414-9659", 1020, 1893, 25, 900, "#ffffff", "right");
+}
+
+function drawText(ctx, text, x, y, size, weight = 700, color = "#1d252f", align = "left") {
+  ctx.save();
+  ctx.font = `${weight} ${size}px "Segoe UI", "Noto Sans KR", sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(String(text), x, y);
+  ctx.restore();
+}
+
+function roundedRect(ctx, x, y, width, height, radius, fill, stroke = null) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function downloadSignagePng() {
+  if (!el.signageCanvas) return;
+  const screenNames = { overview: "시장요약", comparison: "단지별호가", trend: "호가추이" };
+  const fileName = `사이니지_${screenNames[state.signage.screen] || "화면"}_${new Date().toISOString().slice(0, 10)}.png`;
+  el.signageCanvas.toBlob((blob) => {
+    if (!blob) {
+      if (el.signageSaveStatus) el.signageSaveStatus.textContent = "이미지를 만들지 못했습니다.";
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = url;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    if (el.signageSaveStatus) el.signageSaveStatus.textContent = "PNG 저장을 시작했습니다.";
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, "image/png");
 }
 
 function sortListings(a, b) {

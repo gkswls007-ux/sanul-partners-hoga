@@ -23,6 +23,7 @@
         <button class="tab-button active" data-tab="summary" type="button">현황 요약</button>
         <button class="tab-button" data-tab="briefing" type="button">매물 브리핑</button>
         <button id="unitLookupTabButton" class="tab-button" data-tab="unitLookup" type="button">우리집타입찾기</button>
+        <button class="tab-button" data-tab="signage" type="button">사이니지</button>
       </nav>
 
       <section id="mainToolbar" class="toolbar" aria-label="필터">
@@ -315,6 +316,62 @@
           </div>
           <div id="unitLookupResult" class="unit-lookup-result">
             <div class="empty compact">단지와 동, 호수를 입력하면 타입 정보를 보여드립니다.</div>
+          </div>
+        </section>
+      </section>
+
+      <section id="signageTab" class="tab-panel" hidden>
+        <section class="panel signage-workspace">
+          <div class="panel-head">
+            <div>
+              <h2>사이니지 이미지 만들기</h2>
+              <p class="panel-note">9:16 화면에 표시할 단지와 내용을 선택하고 PNG 이미지로 저장합니다.</p>
+            </div>
+            <div class="signage-header-actions">
+              <span id="signageSaveStatus" aria-live="polite"></span>
+              <button id="downloadSignage" class="primary-button signage-download" type="button">PNG 저장</button>
+            </div>
+          </div>
+
+          <div class="signage-layout">
+            <aside class="signage-controls">
+              <fieldset>
+                <legend>화면 종류</legend>
+                <div id="signageScreenButtons" class="segmented-control">
+                  <button class="active" data-signage-screen="overview" type="button">시장 요약</button>
+                  <button data-signage-screen="comparison" type="button">단지별 호가</button>
+                  <button data-signage-screen="trend" type="button">호가 추이</button>
+                </div>
+              </fieldset>
+
+              <div class="signage-filter-grid">
+                <label>
+                  거래
+                  <select id="signageDeal"></select>
+                </label>
+                <label>
+                  평형대
+                  <select id="signagePyeong"></select>
+                </label>
+              </div>
+
+              <fieldset>
+                <div class="signage-fieldset-head">
+                  <legend>표시할 단지</legend>
+                  <button id="clearSignageComplexes" class="text-button" type="button">선택 해제</button>
+                </div>
+                <div id="signageComplexOptions" class="signage-complex-options"></div>
+                <p class="control-note">선택한 단지만 화면에 표시됩니다. 보기 편하도록 최대 4개 단지를 권장합니다.</p>
+              </fieldset>
+            </aside>
+
+            <div class="signage-preview-wrap">
+              <div class="signage-preview-head">
+                <strong>미리보기</strong>
+                <span>1080 × 1920 · PNG</span>
+              </div>
+              <canvas id="signageCanvas" width="1080" height="1920" aria-label="사이니지 미리보기"></canvas>
+            </div>
           </div>
         </section>
       </section>
