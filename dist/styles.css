@@ -1475,6 +1475,15 @@ body.modal-open {
   background: var(--soft);
 }
 
+.signage-complex-option:has(input:disabled) {
+  cursor: not-allowed;
+  color: var(--muted);
+}
+
+.signage-complex-option:has(input:disabled):hover {
+  background: transparent;
+}
+
 .signage-complex-option input {
   width: 17px;
   min-height: 17px;

@@ -75,6 +75,7 @@ const el = {
   signageDeal: document.querySelector("#signageDeal"),
   signagePyeong: document.querySelector("#signagePyeong"),
   signageComplexOptions: document.querySelector("#signageComplexOptions"),
+  signageComplexNote: document.querySelector("#signageComplexNote"),
   clearSignageComplexes: document.querySelector("#clearSignageComplexes"),
   downloadSignage: document.querySelector("#downloadSignage"),
   signageSaveStatus: document.querySelector("#signageSaveStatus"),
@@ -851,8 +852,17 @@ function bindEvents() {
   el.signageComplexOptions?.addEventListener("change", (event) => {
     const input = event.target.closest("[data-signage-complex]");
     if (!input) return;
-    if (input.checked) state.signage.selectedComplexes.add(input.value);
-    else state.signage.selectedComplexes.delete(input.value);
+    if (input.checked) {
+      if (state.signage.selectedComplexes.size >= 4) {
+        input.checked = false;
+        if (el.signageSaveStatus) el.signageSaveStatus.textContent = "사이니지에는 단지를 최대 4개까지 표시할 수 있습니다.";
+      } else {
+        state.signage.selectedComplexes.add(input.value);
+      }
+    } else {
+      state.signage.selectedComplexes.delete(input.value);
+    }
+    renderSignageComplexOptions();
     renderSignage();
   });
   el.clearSignageComplexes?.addEventListener("click", () => {
@@ -2779,18 +2789,23 @@ function renderSignageComplexOptions() {
   const complexes = [...new Set(state.rows.map((row) => row.complex).filter(Boolean))].sort((a, b) =>
     shortName(a).localeCompare(shortName(b), "ko", { numeric: true }),
   );
+  const selectedCount = state.signage.selectedComplexes.size;
+  const atLimit = selectedCount >= 4;
   el.signageComplexOptions.innerHTML = complexes
     .map(
       (name) => `
         <label class="signage-complex-option">
           <input type="checkbox" value="${escapeHtml(name)}" data-signage-complex ${
             state.signage.selectedComplexes.has(name) ? "checked" : ""
-          } />
+          } ${atLimit && !state.signage.selectedComplexes.has(name) ? "disabled" : ""} />
           <span>${escapeHtml(shortName(name))}</span>
         </label>
       `,
     )
     .join("");
+  if (el.signageComplexNote) {
+    el.signageComplexNote.textContent = `선택한 단지만 화면에 표시됩니다. 현재 ${selectedCount}개 선택 · 최대 4개까지 표시됩니다.`;
+  }
 }
 
 function renderSignage() {
@@ -2815,6 +2830,23 @@ function getSignageLatestDate() {
   return unique("surveyDate")[0] || "";
 }
 
+function getSignagePriceLabel(dealType) {
+  return dealType === "월세" ? "환산가" : "호가";
+}
+
+function getSignageRegionLabel() {
+  return state.activeRegion === "수원" ? "수원 주요 단지 최신 등록 매물 기준" : "세종 산울·해밀동 주요 단지 최신 등록 매물 기준";
+}
+
+function getSignageFooterLabel() {
+  return state.activeRegion === "수원" ? "수원 매물 정보" : "세종 산울·해밀동 매물 정보";
+}
+
+function drawSignageConversionNote(ctx, dealType, y = 1810) {
+  if (dealType !== "월세") return;
+  drawText(ctx, "환산가: 월세 1만원당 보증금 200만원 (연 6% 전월세 전환율 가정)", 70, y, 20, 700, "#68788b");
+}
+
 function getSignageRows({ latestOnly = true, ignoreDeal = false, ignorePyeong = false } = {}) {
   const latestDate = getSignageLatestDate();
   const dealType = el.signageDeal?.value;
@@ -2832,8 +2864,18 @@ function drawSignageOverview(ctx) {
   const latestDate = getSignageLatestDate();
   const dealType = el.signageDeal?.value || "매매";
   const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const priceLabel = getSignagePriceLabel(dealType);
   const selectedRows = getSignageRows();
   const allPyeongRows = getSignageRows({ ignorePyeong: true });
+
+  drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} · ${pyeongGroup} ${dealType}`);
+  if (!selectedRows.length) {
+    drawSignageEmpty(ctx, "선택한 조건에 맞는 최신 등록 매물이 없습니다.");
+    drawSignageConversionNote(ctx, dealType);
+    drawSignageFooter(ctx);
+    return;
+  }
+
   const currentWeeks = getSignageWeeklyStats(
     state.rows.filter(
       (row) =>
@@ -2849,12 +2891,11 @@ function drawSignageOverview(ctx) {
   const lowest = latestPrices.length ? Math.min(...latestPrices) : null;
   const average = latestPrices.length ? avg(latestPrices) : null;
   const averageDelta = latestWeek && previousWeek ? latestWeek.avg - previousWeek.avg : null;
-  const priceLabel = dealType === "월세" ? "환산가" : "호가";
 
-  drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} · ${pyeongGroup} ${dealType}`);
   drawSectionTitle(ctx, "요약", 420);
+  drawText(ctx, "선택 단지 합산 기준", 1010, 420, 21, 800, "#758294", "right");
   const metrics = [
-    [`${dealType} 매물`, `${selectedRows.length.toLocaleString("ko-KR")}건`, "#1f5d91"],
+    [`${dealType} 매물 (합산)`, `${selectedRows.length.toLocaleString("ko-KR")}건`, "#1f5d91"],
     [`최저 ${priceLabel} (만원)`, formatPrice(lowest), "#188478"],
     [`평균 ${priceLabel} (만원)`, formatPrice(average), "#25364d"],
     ["전주 대비 (만원)", formatSignageDelta(averageDelta), averageDelta === null || averageDelta >= 0 ? "#1f5d91" : "#b5564d"],
@@ -2862,12 +2903,14 @@ function drawSignageOverview(ctx) {
   metrics.forEach((item, index) => drawMetricCard(ctx, 65 + index * 242, 485, 225, 150, ...item));
 
   drawSectionTitle(ctx, `${dealType} · 평형별 매물 현황`, 745);
+  const pyeongDescription = pyeongGroup === labels.all ? "선택 단지의 전체 평형 구성" : `선택 단지의 전체 평형 구성 · ${pyeongGroup} 강조`;
+  drawText(ctx, pyeongDescription, 70, 790, 21, 700, "#758294");
   const groups = groupBy(allPyeongRows, "pyeongGroup")
     .map(([name, rows]) => ({ name, count: rows.length }))
     .sort((a, b) => groupOrder(a.name) - groupOrder(b.name));
   const maxCount = Math.max(...groups.map((item) => item.count), 1);
   groups.slice(0, 5).forEach((item, index) => {
-    const y = 820 + index * 82;
+    const y = 830 + index * 82;
     drawText(ctx, item.name, 75, y + 36, 28, 800, "#233349");
     roundedRect(ctx, 260, y, 650, 54, 12, "#dce8e8");
     roundedRect(ctx, 260, y, Math.max(18, (650 * item.count) / maxCount), 54, 12, item.name === pyeongGroup ? "#1f5d91" : "#23877b");
@@ -2876,10 +2919,41 @@ function drawSignageOverview(ctx) {
 
   const complexes = getSignageComplexStats(selectedRows).slice(0, 4);
   const summaryPyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
-  drawSectionTitle(ctx, `${summaryPyeong} ${dealType} 매물 호가 요약`, 1360);
+  drawSectionTitle(ctx, `${summaryPyeong} ${dealType} 매물 ${priceLabel} 요약`, 1360);
+  drawSignageComplexSummary(ctx, complexes, priceLabel);
+  drawSignageConversionNote(ctx, dealType);
+  drawSignageFooter(ctx);
+}
+
+function drawSignageComplexSummary(ctx, complexes, priceLabel) {
+  if (complexes.length === 1) {
+    const item = complexes[0];
+    roundedRect(ctx, 70, 1425, 940, 250, 24, "#ffffff", "#d6dfe7");
+    drawText(ctx, shortName(item.name), 110, 1490, 36, 900, "#152b42");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 970, 1490, 30, 800, "#607086", "right");
+    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 120, 1560, "#23877b");
+    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, 1560, "#1f5d91");
+    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 720, 1560, "#25364d");
+    return;
+  }
+
+  if (complexes.length === 2) {
+    complexes.forEach((item, index) => {
+      const x = 70 + index * 475;
+      roundedRect(ctx, x, 1425, 465, 250, 22, "#ffffff", "#d6dfe7");
+      drawText(ctx, shortName(item.name), x + 30, 1480, 28, 900, "#152b42");
+      drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, x + 430, 1480, 24, 800, "#607086", "right");
+      drawText(ctx, `최저 ${priceLabel}`, x + 30, 1545, 20, 800, "#758294");
+      drawText(ctx, formatPrice(item.min), x + 30, 1598, 36, 900, "#23877b");
+      drawText(ctx, `평균 ${priceLabel}`, x + 260, 1545, 20, 800, "#758294");
+      drawText(ctx, formatPrice(item.avg), x + 260, 1598, 36, 900, "#1f5d91");
+    });
+    return;
+  }
+
   drawText(ctx, "매물", 600, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, "최저(만원)", 790, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, "평균(만원)", 1000, 1415, 21, 800, "#758294", "right");
+  drawText(ctx, `최저 ${priceLabel}(만원)`, 790, 1415, 21, 800, "#758294", "right");
+  drawText(ctx, `평균 ${priceLabel}(만원)`, 1000, 1415, 21, 800, "#758294", "right");
   complexes.forEach((item, index) => {
     const y = 1460 + index * 76;
     drawText(ctx, shortName(item.name), 75, y + 30, 25, 800, "#233349");
@@ -2887,17 +2961,18 @@ function drawSignageOverview(ctx) {
     drawText(ctx, formatPrice(item.min), 790, y + 30, 23, 900, "#23877b", "right");
     drawText(ctx, formatPrice(item.avg), 1000, y + 30, 23, 900, "#1f5d91", "right");
   });
-  drawSignageFooter(ctx);
 }
 
 function drawSignageComparison(ctx) {
   const dealType = el.signageDeal?.value || "매매";
   const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const priceLabel = getSignagePriceLabel(dealType);
   const stats = getSignageComplexStats(getSignageRows()).slice(0, 4);
-  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} 호가 현황`, `${getSignageLatestDate()} · 단위: 만원`);
+  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} ${priceLabel} 현황`, `${getSignageLatestDate()} · 단위: 만원`);
 
   if (!stats.length) {
     drawSignageEmpty(ctx, "선택 조건에 맞는 매물이 없습니다.");
+    drawSignageConversionNote(ctx, dealType);
     drawSignageFooter(ctx);
     return;
   }
@@ -2908,19 +2983,23 @@ function drawSignageComparison(ctx) {
     roundedRect(ctx, 65, y, 20, 285, 10, index % 2 ? "#23877b" : "#1f5d91");
     drawText(ctx, shortName(item.name), 120, y + 65, 36, 900, "#152b42");
     drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 950, y + 62, 27, 800, "#607086", "right");
-    drawComparisonValue(ctx, "최저", item.min, 130, y + 145, "#23877b");
-    drawComparisonValue(ctx, "평균", item.avg, 420, y + 145, "#1f5d91");
-    drawComparisonValue(ctx, "최고", item.max, 710, y + 145, "#25364d");
+    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 130, y + 145, "#23877b");
+    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, y + 145, "#1f5d91");
+    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 710, y + 145, "#25364d");
   });
-  if (state.signage.selectedComplexes.size > 4) drawText(ctx, "화면에는 선택한 단지 중 4곳까지 표시됩니다.", 540, 1770, 24, 700, "#778495", "center");
+  drawSignageConversionNote(ctx, dealType);
   drawSignageFooter(ctx);
 }
 
 function drawSignageTrend(ctx) {
   const dealType = el.signageDeal?.value || "매매";
   const pyeongGroup = el.signagePyeong?.value || labels.all;
-  const complexes = [...state.signage.selectedComplexes].slice(0, 3);
-  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} 호가 추이`, "최근 10주 평균·최저 호가와 매물 수");
+  const priceLabel = getSignagePriceLabel(dealType);
+  const complexes = [...state.signage.selectedComplexes].slice(0, 4);
+  const compact = complexes.length === 4;
+  const cardHeight = compact ? 305 : 385;
+  const cardGap = compact ? 35 : 45;
+  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} ${priceLabel} 추이`, `최근 10주 평균·최저 ${priceLabel}와 매물 수`);
 
   let rendered = 0;
   complexes.forEach((name) => {
@@ -2932,12 +3011,12 @@ function drawSignageTrend(ctx) {
     );
     const weeks = getSignageWeeklyStats(rows, dealType).slice(-10);
     if (!weeks.length) return;
-    drawSignageMiniChart(ctx, name, weeks, 70, 410 + rendered * 450, 940, 385);
+    drawSignageMiniChart(ctx, name, weeks, 70, 410 + rendered * (cardHeight + cardGap), 940, cardHeight, priceLabel);
     rendered += 1;
   });
 
   if (!rendered) drawSignageEmpty(ctx, "선택 조건의 주차별 자료가 없습니다.");
-  if (state.signage.selectedComplexes.size > 3) drawText(ctx, "호가 추이 화면에는 선택한 단지 중 3곳까지 표시됩니다.", 540, 1770, 24, 700, "#778495", "center");
+  drawSignageConversionNote(ctx, dealType);
   drawSignageFooter(ctx);
 }
 
@@ -2978,7 +3057,7 @@ function drawSignageHeader(ctx, title, subtitle) {
   ctx.fillRect(0, 0, 1080, 330);
   ctx.fillStyle = "#15324a";
   ctx.fillRect(0, 0, 1080, 18);
-  drawText(ctx, "산울동 주요 단지 최신 등록 매물 기준", 70, 102, 28, 800, "#4f5d69");
+  drawText(ctx, getSignageRegionLabel(), 70, 102, 28, 800, "#4f5d69");
   drawText(ctx, title, 70, 205, 68, 900, "#10283f");
   drawText(ctx, subtitle, 70, 274, 31, 900, "#17314a");
 }
@@ -3000,17 +3079,24 @@ function drawComparisonValue(ctx, label, value, x, y, color) {
   drawText(ctx, formatPrice(value), x, y + 68, 40, 900, color);
 }
 
-function drawSignageMiniChart(ctx, name, weeks, x, y, width, height) {
+function drawSignageMiniChart(ctx, name, weeks, x, y, width, height, priceLabel) {
   roundedRect(ctx, x, y, width, height, 24, "#ffffff", "#d6dfe7");
   drawText(ctx, shortName(name), x + 35, y + 55, 31, 900, "#152b42");
   const latest = weeks.at(-1);
   const previous = weeks.at(-2);
+  const first = weeks[0];
   const delta = previous ? latest.avg - previous.avg : null;
-  drawText(ctx, `최근 평균 ${formatPrice(latest.avg)}`, x + 35, y + 105, 27, 900, "#1f5d91");
-  drawText(ctx, `전주 대비 ${formatSignageDelta(delta)}`, x + 360, y + 105, 24, 800, delta === null || delta >= 0 ? "#1f5d91" : "#b5564d");
-  drawText(ctx, `최저 ${formatPrice(latest.min)} · 매물 ${latest.count}건`, x + width - 35, y + 105, 24, 800, "#68788b", "right");
+  const totalDelta = first ? latest.avg - first.avg : null;
+  const totalPercent = first?.avg ? (totalDelta / first.avg) * 100 : null;
+  const compact = height <= 320;
+  const trendText = weeks.length < 2
+    ? "비교 기준 주차 없음"
+    : `10주 전 대비 ${formatSignageDelta(totalDelta)}${Number.isFinite(totalPercent) ? ` (${totalPercent > 0 ? "+" : ""}${totalPercent.toFixed(1)}%)` : ""}`;
+  drawText(ctx, `최근 평균 ${formatPrice(latest.avg)}`, x + 35, y + 105, compact ? 24 : 27, 900, "#1f5d91");
+  drawText(ctx, trendText, x + 330, y + 105, compact ? 20 : 23, 800, totalDelta === null || totalDelta >= 0 ? "#1f5d91" : "#b5564d");
+  drawText(ctx, `최저 ${formatPrice(latest.min)} · 매물 ${latest.count}건`, x + width - 35, y + 105, compact ? 20 : 24, 800, "#68788b", "right");
 
-  const plot = { x: x + 60, y: y + 145, width: width - 110, height: 175 };
+  const plot = { x: x + 60, y: y + 140, width: width - 110, height: Math.max(96, height - 205) };
   const values = weeks.flatMap((item) => [item.avg, item.min]);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
@@ -3042,9 +3128,11 @@ function drawSignageMiniChart(ctx, name, weeks, x, y, width, height) {
   const latestIndex = weeks.length - 1;
   const latestAveragePoint = point(latest, latestIndex, "avg");
   const latestMinimumPoint = point(latest, latestIndex, "min");
-  drawText(ctx, formatPrice(latest.avg), latestAveragePoint.x - 12, latestAveragePoint.y - 16, 22, 900, "#1f5d91", "right");
-  drawText(ctx, formatPrice(latest.min), latestMinimumPoint.x - 12, latestMinimumPoint.y + 28, 22, 900, "#b27a17", "right");
-  drawText(ctx, "파란선 평균 호가 · 점선 최저 호가 · 막대 매물 수", x + 35, y + height - 30, 21, 700, "#526276");
+  drawText(ctx, formatPrice(latest.avg), latestAveragePoint.x - 12, latestAveragePoint.y - 14, compact ? 19 : 22, 900, "#1f5d91", "right");
+  drawText(ctx, formatPrice(latest.min), latestMinimumPoint.x - 12, latestMinimumPoint.y + 25, compact ? 19 : 22, 900, "#b27a17", "right");
+  drawText(ctx, first.date, x + 35, y + height - 30, compact ? 18 : 20, 700, "#68788b");
+  drawText(ctx, latest.date, x + width - 35, y + height - 30, compact ? 18 : 20, 700, "#68788b", "right");
+  drawText(ctx, `파란선: 평균 ${priceLabel} · 점선: 최저 ${priceLabel} · 막대: 매물 수`, x + width / 2, y + height - 30, compact ? 17 : 20, 700, "#526276", "center");
 }
 
 function drawChartLine(ctx, points, color, dashed) {
@@ -3074,7 +3162,7 @@ function drawSignageEmpty(ctx, message) {
 function drawSignageFooter(ctx) {
   ctx.fillStyle = "#15324a";
   ctx.fillRect(0, 1845, 1080, 75);
-  drawText(ctx, "세종 산울동 매물 정보", 60, 1893, 24, 900, "#ffffff");
+  drawText(ctx, getSignageFooterLabel(), 60, 1893, 24, 900, "#ffffff");
   drawText(ctx, "010-8253-9659", 1020, 1893, 25, 900, "#ffffff", "right");
 }
 
@@ -3109,7 +3197,10 @@ function roundedRect(ctx, x, y, width, height, radius, fill, stroke = null) {
 function downloadSignagePng() {
   if (!el.signageCanvas) return;
   const screenNames = { overview: "시장요약", comparison: "단지별호가", trend: "호가추이" };
-  const fileName = `사이니지_${screenNames[state.signage.screen] || "화면"}_${new Date().toISOString().slice(0, 10)}.png`;
+  const dealType = el.signageDeal?.value || "전체";
+  const pyeongGroup = el.signagePyeong?.value || labels.all;
+  const savedDate = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date());
+  const fileName = `사이니지_${screenNames[state.signage.screen] || "화면"}_${dealType}_${pyeongGroup}_${savedDate}.png`;
   el.signageCanvas.toBlob((blob) => {
     if (!blob) {
       if (el.signageSaveStatus) el.signageSaveStatus.textContent = "이미지를 만들지 못했습니다.";
