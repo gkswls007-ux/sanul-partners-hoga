@@ -2852,12 +2852,12 @@ function drawSignageOverview(ctx) {
   const priceLabel = dealType === "월세" ? "환산가" : "호가";
 
   drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} · ${pyeongGroup} ${dealType}`);
-  drawSectionTitle(ctx, "선택 조건 요약", 420);
+  drawSectionTitle(ctx, "요약", 420);
   const metrics = [
     [`${dealType} 매물`, `${selectedRows.length.toLocaleString("ko-KR")}건`, "#1f5d91"],
-    [`최저 ${priceLabel}`, formatPrice(lowest), "#188478"],
-    [`평균 ${priceLabel}`, formatPrice(average), "#25364d"],
-    ["전주 대비", formatSignageDelta(averageDelta), averageDelta === null || averageDelta >= 0 ? "#1f5d91" : "#b5564d"],
+    [`최저 ${priceLabel} (만원)`, formatPrice(lowest), "#188478"],
+    [`평균 ${priceLabel} (만원)`, formatPrice(average), "#25364d"],
+    ["전주 대비 (만원)", formatSignageDelta(averageDelta), averageDelta === null || averageDelta >= 0 ? "#1f5d91" : "#b5564d"],
   ];
   metrics.forEach((item, index) => drawMetricCard(ctx, 65 + index * 242, 485, 225, 150, ...item));
 
@@ -2875,10 +2875,11 @@ function drawSignageOverview(ctx) {
   });
 
   const complexes = getSignageComplexStats(selectedRows).slice(0, 4);
-  drawSectionTitle(ctx, "선택 단지별 호가 요약", 1360);
+  const summaryPyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
+  drawSectionTitle(ctx, `${summaryPyeong} ${dealType} 매물 호가 요약`, 1360);
   drawText(ctx, "매물", 600, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, "최저", 790, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, "평균", 1000, 1415, 21, 800, "#758294", "right");
+  drawText(ctx, "최저(만원)", 790, 1415, 21, 800, "#758294", "right");
+  drawText(ctx, "평균(만원)", 1000, 1415, 21, 800, "#758294", "right");
   complexes.forEach((item, index) => {
     const y = 1460 + index * 76;
     drawText(ctx, shortName(item.name), 75, y + 30, 25, 800, "#233349");
