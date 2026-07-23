@@ -1935,7 +1935,7 @@ function getCustomerKey(item) {
 }
 
 function exportContacts() {
-  const contacts = getActiveContacts();
+  const contacts = getVisibleCustomerContacts();
   if (!contacts.length) return;
   if (contacts.some((item) => !item.brokerName)) {
     alert("연락 리스트의 중개사를 모두 선택한 뒤 엑셀 저장을 눌러주세요.");
@@ -2004,7 +2004,8 @@ function exportContacts() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `연락리스트_${new Date().toISOString().slice(0, 10)}.xls`;
+  const customerName = sanitizeFilename(contacts[0]?.customerName || "고객");
+  link.download = `연락리스트_${customerName}_${new Date().toISOString().slice(0, 10)}.xls`;
   document.body.append(link);
   link.click();
   link.remove();
@@ -3413,6 +3414,12 @@ function formatCount(value) {
 function formatPlainNumber(value) {
   if (!Number.isFinite(Number(value))) return escapeHtml(value ?? "-");
   return Math.round(Number(value)).toLocaleString("ko-KR");
+}
+
+function sanitizeFilename(value) {
+  return String(value || "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim();
 }
 
 function escapeHtml(value) {
