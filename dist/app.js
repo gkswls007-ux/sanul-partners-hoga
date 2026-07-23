@@ -2842,9 +2842,9 @@ function getSignageFooterLabel() {
   return state.activeRegion === "수원" ? "수원 매물 정보" : "세종 산울·해밀동 매물 정보";
 }
 
-function drawSignageConversionNote(ctx, dealType, y = 1810) {
+function drawSignageConversionNote(ctx, dealType, y = 1745) {
   if (dealType !== "월세") return;
-  drawText(ctx, "환산가: 월세 1만원당 보증금 200만원 (연 6% 전월세 전환율 가정)", 70, y, 20, 700, "#68788b");
+  drawText(ctx, "월세 환산가: 월세 1만원당 보증금 200만원 (연 6% 전월세 전환율 가정)", 70, y, 22, 800, "#4f6073");
 }
 
 function getSignageRows({ latestOnly = true, ignoreDeal = false, ignorePyeong = false } = {}) {
@@ -2868,8 +2868,8 @@ function drawSignageOverview(ctx) {
   const selectedRows = getSignageRows();
   const allPyeongRows = getSignageRows({ ignorePyeong: true });
 
-  drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} · ${pyeongGroup} ${dealType}`);
   if (!selectedRows.length) {
+    drawSignageHeader(ctx, "이번 주 매물 현황", `${latestDate} 기준 · ${pyeongGroup} ${dealType}`);
     drawSignageEmpty(ctx, "선택한 조건에 맞는 최신 등록 매물이 없습니다.");
     drawSignageConversionNote(ctx, dealType);
     drawSignageFooter(ctx);
@@ -2891,75 +2891,88 @@ function drawSignageOverview(ctx) {
   const lowest = latestPrices.length ? Math.min(...latestPrices) : null;
   const average = latestPrices.length ? avg(latestPrices) : null;
   const averageDelta = latestWeek && previousWeek ? latestWeek.avg - previousWeek.avg : null;
+  const headlinePyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
+
+  drawSignageHeader(
+    ctx,
+    `${headlinePyeong} ${dealType} 평균 ${formatSignageMoney(average)}`,
+    `${latestDate} 기준 · 매물 ${selectedRows.length.toLocaleString("ko-KR")}건 · 전주 대비 ${formatSignageDelta(averageDelta)}`,
+  );
 
   drawSectionTitle(ctx, "요약", 420);
-  drawText(ctx, "선택 단지 합산 기준", 1010, 420, 21, 800, "#758294", "right");
+  drawText(ctx, "선택 단지 합산 · 최신 등록 매물 기준", 1010, 420, 23, 800, "#526276", "right");
   const metrics = [
-    [`${dealType} 매물 (합산)`, `${selectedRows.length.toLocaleString("ko-KR")}건`, "#1f5d91"],
-    [`최저 ${priceLabel} (만원)`, formatPrice(lowest), "#188478"],
-    [`평균 ${priceLabel} (만원)`, formatPrice(average), "#25364d"],
-    ["전주 대비 (만원)", formatSignageDelta(averageDelta), averageDelta === null || averageDelta >= 0 ? "#1f5d91" : "#b5564d"],
+    [`${dealType} 매물`, `${selectedRows.length.toLocaleString("ko-KR")}건`, "#1f5d91"],
+    [`최저 ${priceLabel}`, formatSignageMoney(lowest), "#13766d"],
+    [`평균 ${priceLabel}`, formatSignageMoney(average), "#25364d"],
+    ["전주 대비", formatSignageDelta(averageDelta), averageDelta === null || averageDelta >= 0 ? "#1f5d91" : "#a8443d"],
   ];
-  metrics.forEach((item, index) => drawMetricCard(ctx, 65 + index * 242, 485, 225, 150, ...item));
+  const metricPositions = [
+    [70, 485],
+    [555, 485],
+    [70, 660],
+    [555, 660],
+  ];
+  metrics.forEach((item, index) => drawMetricCard(ctx, ...metricPositions[index], 455, 145, ...item));
 
-  drawSectionTitle(ctx, `${dealType} · 평형별 매물 현황`, 745);
+  drawSectionTitle(ctx, `${dealType} · 평형별 매물 현황`, 895);
   const pyeongDescription = pyeongGroup === labels.all ? "선택 단지의 전체 평형 구성" : `선택 단지의 전체 평형 구성 · ${pyeongGroup} 강조`;
-  drawText(ctx, pyeongDescription, 70, 790, 21, 700, "#758294");
+  drawText(ctx, pyeongDescription, 70, 942, 23, 800, "#526276");
   const groups = groupBy(allPyeongRows, "pyeongGroup")
     .map(([name, rows]) => ({ name, count: rows.length }))
     .sort((a, b) => groupOrder(a.name) - groupOrder(b.name));
   const maxCount = Math.max(...groups.map((item) => item.count), 1);
   groups.slice(0, 5).forEach((item, index) => {
-    const y = 830 + index * 82;
-    drawText(ctx, item.name, 75, y + 36, 28, 800, "#233349");
-    roundedRect(ctx, 260, y, 650, 54, 12, "#dce8e8");
-    roundedRect(ctx, 260, y, Math.max(18, (650 * item.count) / maxCount), 54, 12, item.name === pyeongGroup ? "#1f5d91" : "#23877b");
-    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 940, y + 37, 27, 900, "#233349", "right");
+    const y = 982 + index * 72;
+    drawText(ctx, item.name, 75, y + 34, 29, 900, "#233349");
+    roundedRect(ctx, 260, y, 650, 50, 12, "#d5e2e4");
+    roundedRect(ctx, 260, y, Math.max(18, (650 * item.count) / maxCount), 50, 12, item.name === pyeongGroup ? "#1f5d91" : "#19796f");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 960, y + 35, 28, 900, "#233349", "right");
   });
 
   const complexes = getSignageComplexStats(selectedRows).slice(0, 4);
   const summaryPyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
-  drawSectionTitle(ctx, `${summaryPyeong} ${dealType} 매물 ${priceLabel} 요약`, 1360);
-  drawSignageComplexSummary(ctx, complexes, priceLabel);
+  drawSectionTitle(ctx, `${summaryPyeong} ${dealType} 매물 ${priceLabel} 요약`, 1370);
+  drawSignageComplexSummary(ctx, complexes, priceLabel, 1430);
   drawSignageConversionNote(ctx, dealType);
   drawSignageFooter(ctx);
 }
 
-function drawSignageComplexSummary(ctx, complexes, priceLabel) {
+function drawSignageComplexSummary(ctx, complexes, priceLabel, baseY = 1430) {
   if (complexes.length === 1) {
     const item = complexes[0];
-    roundedRect(ctx, 70, 1425, 940, 250, 24, "#ffffff", "#d6dfe7");
-    drawText(ctx, shortName(item.name), 110, 1490, 36, 900, "#152b42");
-    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 970, 1490, 30, 800, "#607086", "right");
-    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 120, 1560, "#23877b");
-    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, 1560, "#1f5d91");
-    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 720, 1560, "#25364d");
+    roundedRect(ctx, 70, baseY, 940, 255, 18, "#ffffff", "#bdcad5");
+    drawFittedText(ctx, shortName(item.name), 110, baseY + 65, 610, 38, 30, 900, "#152b42");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 970, baseY + 65, 31, 900, "#526276", "right");
+    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 120, baseY + 135, "#13766d", 250);
+    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, baseY + 135, "#1f5d91", 250);
+    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 720, baseY + 135, "#25364d", 250);
     return;
   }
 
   if (complexes.length === 2) {
     complexes.forEach((item, index) => {
       const x = 70 + index * 475;
-      roundedRect(ctx, x, 1425, 465, 250, 22, "#ffffff", "#d6dfe7");
-      drawText(ctx, shortName(item.name), x + 30, 1480, 28, 900, "#152b42");
-      drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, x + 430, 1480, 24, 800, "#607086", "right");
-      drawText(ctx, `최저 ${priceLabel}`, x + 30, 1545, 20, 800, "#758294");
-      drawText(ctx, formatPrice(item.min), x + 30, 1598, 36, 900, "#23877b");
-      drawText(ctx, `평균 ${priceLabel}`, x + 260, 1545, 20, 800, "#758294");
-      drawText(ctx, formatPrice(item.avg), x + 260, 1598, 36, 900, "#1f5d91");
+      roundedRect(ctx, x, baseY, 465, 255, 18, "#ffffff", "#bdcad5");
+      drawFittedText(ctx, shortName(item.name), x + 30, baseY + 58, 300, 30, 24, 900, "#152b42");
+      drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, x + 430, baseY + 58, 25, 900, "#526276", "right");
+      drawText(ctx, `최저 ${priceLabel}`, x + 30, baseY + 126, 23, 800, "#526276");
+      drawFittedText(ctx, formatSignageMoney(item.min), x + 30, baseY + 178, 190, 35, 27, 900, "#13766d");
+      drawText(ctx, `평균 ${priceLabel}`, x + 255, baseY + 126, 23, 800, "#526276");
+      drawFittedText(ctx, formatSignageMoney(item.avg), x + 255, baseY + 178, 180, 35, 27, 900, "#1f5d91");
     });
     return;
   }
 
-  drawText(ctx, "매물", 600, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, `최저 ${priceLabel}(만원)`, 790, 1415, 21, 800, "#758294", "right");
-  drawText(ctx, `평균 ${priceLabel}(만원)`, 1000, 1415, 21, 800, "#758294", "right");
+  drawText(ctx, "매물", 590, baseY + 10, 22, 900, "#526276", "right");
+  drawText(ctx, `최저 ${priceLabel}`, 790, baseY + 10, 22, 900, "#526276", "right");
+  drawText(ctx, `평균 ${priceLabel}`, 1000, baseY + 10, 22, 900, "#526276", "right");
   complexes.forEach((item, index) => {
-    const y = 1460 + index * 76;
-    drawText(ctx, shortName(item.name), 75, y + 30, 25, 800, "#233349");
-    drawText(ctx, `${item.count}건`, 600, y + 30, 23, 800, "#607086", "right");
-    drawText(ctx, formatPrice(item.min), 790, y + 30, 23, 900, "#23877b", "right");
-    drawText(ctx, formatPrice(item.avg), 1000, y + 30, 23, 900, "#1f5d91", "right");
+    const y = baseY + 48 + index * 68;
+    drawFittedText(ctx, shortName(item.name), 75, y + 28, 450, 27, 22, 900, "#233349");
+    drawText(ctx, `${item.count}건`, 590, y + 28, 24, 900, "#526276", "right");
+    drawFittedText(ctx, formatSignageMoney(item.min), 790, y + 28, 170, 24, 20, 900, "#13766d", "right");
+    drawFittedText(ctx, formatSignageMoney(item.avg), 1000, y + 28, 190, 24, 20, 900, "#1f5d91", "right");
   });
 }
 
@@ -2968,7 +2981,12 @@ function drawSignageComparison(ctx) {
   const pyeongGroup = el.signagePyeong?.value || labels.all;
   const priceLabel = getSignagePriceLabel(dealType);
   const stats = getSignageComplexStats(getSignageRows()).slice(0, 4);
-  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} ${priceLabel} 현황`, `${getSignageLatestDate()} · 단위: 만원`);
+  const comparisonPyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
+  drawSignageHeader(
+    ctx,
+    `${comparisonPyeong} ${dealType} 단지별 ${priceLabel}`,
+    `${getSignageLatestDate()} 기준 · 최저·평균·최고 비교`,
+  );
 
   if (!stats.length) {
     drawSignageEmpty(ctx, "선택 조건에 맞는 매물이 없습니다.");
@@ -2977,15 +2995,20 @@ function drawSignageComparison(ctx) {
     return;
   }
 
+  const cardHeight = stats.length === 1 ? 800 : stats.length === 2 ? 500 : stats.length === 3 ? 370 : 285;
+  const cardGap = stats.length === 1 ? 0 : stats.length === 2 ? 55 : 40;
+  const startY = stats.length === 1 ? 455 : 410;
+  const valueSize = cardHeight >= 500 ? 50 : cardHeight >= 350 ? 44 : 39;
   stats.forEach((item, index) => {
-    const y = 430 + index * 330;
-    roundedRect(ctx, 65, y, 950, 285, 24, "#ffffff", "#d6dfe7");
-    roundedRect(ctx, 65, y, 20, 285, 10, index % 2 ? "#23877b" : "#1f5d91");
-    drawText(ctx, shortName(item.name), 120, y + 65, 36, 900, "#152b42");
-    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 950, y + 62, 27, 800, "#607086", "right");
-    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 130, y + 145, "#23877b");
-    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, y + 145, "#1f5d91");
-    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 710, y + 145, "#25364d");
+    const y = startY + index * (cardHeight + cardGap);
+    const valueY = y + Math.round(cardHeight * 0.5);
+    roundedRect(ctx, 65, y, 950, cardHeight, 18, "#ffffff", "#bdcad5");
+    roundedRect(ctx, 65, y, 20, cardHeight, 10, index % 2 ? "#19796f" : "#1f5d91");
+    drawFittedText(ctx, shortName(item.name), 120, y + 75, 650, 41, 31, 900, "#152b42");
+    drawText(ctx, `${item.count.toLocaleString("ko-KR")}건`, 950, y + 72, 31, 900, "#526276", "right");
+    drawComparisonValue(ctx, `최저 ${priceLabel}`, item.min, 130, valueY, "#13766d", 250, valueSize);
+    drawComparisonValue(ctx, `평균 ${priceLabel}`, item.avg, 420, valueY, "#1f5d91", 250, valueSize);
+    drawComparisonValue(ctx, `최고 ${priceLabel}`, item.max, 710, valueY, "#25364d", 250, valueSize);
   });
   drawSignageConversionNote(ctx, dealType);
   drawSignageFooter(ctx);
@@ -2997,9 +3020,15 @@ function drawSignageTrend(ctx) {
   const priceLabel = getSignagePriceLabel(dealType);
   const complexes = [...state.signage.selectedComplexes].slice(0, 4);
   const compact = complexes.length === 4;
-  const cardHeight = compact ? 305 : 385;
-  const cardGap = compact ? 35 : 45;
-  drawSignageHeader(ctx, `${pyeongGroup} ${dealType} ${priceLabel} 추이`, `최근 10주 평균·최저 ${priceLabel}와 매물 수`);
+  const cardHeight = complexes.length === 1 ? 700 : complexes.length === 2 ? 520 : compact ? 305 : 385;
+  const cardGap = complexes.length === 2 ? 45 : compact ? 35 : 45;
+  const startY = complexes.length === 1 ? 500 : 400;
+  const trendPyeong = pyeongGroup === labels.all ? "전체 평형" : pyeongGroup;
+  drawSignageHeader(
+    ctx,
+    `${trendPyeong} ${dealType} ${priceLabel} 흐름`,
+    `${getSignageLatestDate()} 기준 · 최근 10주 평균·최저 ${priceLabel}와 매물 수`,
+  );
 
   let rendered = 0;
   complexes.forEach((name) => {
@@ -3011,7 +3040,7 @@ function drawSignageTrend(ctx) {
     );
     const weeks = getSignageWeeklyStats(rows, dealType).slice(-10);
     if (!weeks.length) return;
-    drawSignageMiniChart(ctx, name, weeks, 70, 410 + rendered * (cardHeight + cardGap), 940, cardHeight, priceLabel);
+    drawSignageMiniChart(ctx, name, weeks, 70, startY + rendered * (cardHeight + cardGap), 940, cardHeight, priceLabel);
     rendered += 1;
   });
 
@@ -3033,7 +3062,17 @@ function getSignageWeeklyStats(rows, dealType) {
 function formatSignageDelta(value) {
   if (!Number.isFinite(value)) return "비교 없음";
   if (value === 0) return "변동 없음";
-  return `${value > 0 ? "+" : ""}${formatPrice(value)}`;
+  return `${value > 0 ? "+" : "-"}${formatSignageMoney(Math.abs(value))}`;
+}
+
+function formatSignageMoney(value) {
+  if (!Number.isFinite(value)) return "-";
+  const rounded = Math.round(value);
+  const eok = Math.floor(rounded / 10000);
+  const man = Math.abs(rounded % 10000);
+  if (eok && man) return `${eok}억 ${man.toLocaleString("ko-KR")}만원`;
+  if (eok) return `${eok}억원`;
+  return `${rounded.toLocaleString("ko-KR")}만원`;
 }
 
 function getSignageComplexStats(rows) {
@@ -3053,35 +3092,34 @@ function getSignageComplexStats(rows) {
 }
 
 function drawSignageHeader(ctx, title, subtitle) {
-  ctx.fillStyle = "#f2c94c";
-  ctx.fillRect(0, 0, 1080, 330);
+  ctx.fillStyle = "#f1cf5d";
+  ctx.fillRect(0, 0, 1080, 350);
   ctx.fillStyle = "#15324a";
   ctx.fillRect(0, 0, 1080, 18);
-  drawText(ctx, getSignageRegionLabel(), 70, 102, 28, 800, "#4f5d69");
-  drawText(ctx, title, 70, 205, 68, 900, "#10283f");
-  drawText(ctx, subtitle, 70, 274, 31, 900, "#17314a");
+  drawText(ctx, getSignageRegionLabel(), 70, 92, 29, 900, "#465668");
+  drawFittedText(ctx, title, 70, 202, 940, 66, 45, 900, "#10283f");
+  drawFittedText(ctx, subtitle, 70, 292, 940, 32, 25, 900, "#17314a");
 }
 
 function drawSectionTitle(ctx, title, y) {
-  drawText(ctx, title, 70, y, 32, 900, "#152b42");
+  drawText(ctx, title, 70, y, 36, 900, "#152b42");
   ctx.fillStyle = "#1f5d91";
-  ctx.fillRect(70, y + 22, 940, 4);
+  ctx.fillRect(70, y + 25, 940, 5);
 }
 
 function drawMetricCard(ctx, x, y, width, height, label, value, color) {
-  roundedRect(ctx, x, y, width, height, 20, "#ffffff", "#d6dfe7");
-  drawText(ctx, label, x + 28, y + 45, 24, 800, "#68788b");
-  drawText(ctx, value, x + 28, y + 111, 45, 900, color);
+  roundedRect(ctx, x, y, width, height, 18, "#ffffff", "#bdcad5");
+  drawText(ctx, label, x + 28, y + 43, 25, 900, "#526276");
+  drawFittedText(ctx, value, x + 28, y + 111, width - 56, 50, 34, 900, color);
 }
 
-function drawComparisonValue(ctx, label, value, x, y, color) {
-  drawText(ctx, label, x, y, 23, 800, "#758294");
-  drawText(ctx, formatPrice(value), x, y + 68, 40, 900, color);
+function drawComparisonValue(ctx, label, value, x, y, color, maxWidth = 260, valueSize = 39) {
+  drawText(ctx, label, x, y, valueSize >= 50 ? 28 : 25, 900, "#526276");
+  drawFittedText(ctx, formatSignageMoney(value), x, y + 72, maxWidth, valueSize, Math.max(29, valueSize - 12), 900, color);
 }
 
 function drawSignageMiniChart(ctx, name, weeks, x, y, width, height, priceLabel) {
-  roundedRect(ctx, x, y, width, height, 24, "#ffffff", "#d6dfe7");
-  drawText(ctx, shortName(name), x + 35, y + 55, 31, 900, "#152b42");
+  roundedRect(ctx, x, y, width, height, 18, "#ffffff", "#bdcad5");
   const latest = weeks.at(-1);
   const previous = weeks.at(-2);
   const first = weeks[0];
@@ -3089,14 +3127,15 @@ function drawSignageMiniChart(ctx, name, weeks, x, y, width, height, priceLabel)
   const totalDelta = first ? latest.avg - first.avg : null;
   const totalPercent = first?.avg ? (totalDelta / first.avg) * 100 : null;
   const compact = height <= 320;
+  drawFittedText(ctx, shortName(name), x + 35, y + 52, width - 70, compact ? 31 : 35, 27, 900, "#152b42");
   const trendText = weeks.length < 2
     ? "비교 기준 주차 없음"
     : `10주 전 대비 ${formatSignageDelta(totalDelta)}${Number.isFinite(totalPercent) ? ` (${totalPercent > 0 ? "+" : ""}${totalPercent.toFixed(1)}%)` : ""}`;
-  drawText(ctx, `최근 평균 ${formatPrice(latest.avg)}`, x + 35, y + 105, compact ? 24 : 27, 900, "#1f5d91");
-  drawText(ctx, trendText, x + 330, y + 105, compact ? 20 : 23, 800, totalDelta === null || totalDelta >= 0 ? "#1f5d91" : "#b5564d");
-  drawText(ctx, `최저 ${formatPrice(latest.min)} · 매물 ${latest.count}건`, x + width - 35, y + 105, compact ? 20 : 24, 800, "#68788b", "right");
+  drawFittedText(ctx, `평균 ${formatSignageMoney(latest.avg)}`, x + 35, y + 96, 420, compact ? 23 : 27, 20, 900, "#1f5d91");
+  drawFittedText(ctx, `최저 ${formatSignageMoney(latest.min)} · ${latest.count}건`, x + width - 35, y + 96, 420, compact ? 21 : 25, 19, 900, "#526276", "right");
+  drawFittedText(ctx, trendText, x + 35, y + 130, width - 70, compact ? 20 : 23, 18, 900, totalDelta === null || totalDelta >= 0 ? "#1f5d91" : "#a8443d");
 
-  const plot = { x: x + 60, y: y + 140, width: width - 110, height: Math.max(96, height - 205) };
+  const plot = { x: x + 60, y: y + 150, width: width - 110, height: Math.max(90, height - 225) };
   const values = weeks.flatMap((item) => [item.avg, item.min]);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
@@ -3132,7 +3171,7 @@ function drawSignageMiniChart(ctx, name, weeks, x, y, width, height, priceLabel)
   drawText(ctx, formatPrice(latest.min), latestMinimumPoint.x - 12, latestMinimumPoint.y + 25, compact ? 19 : 22, 900, "#b27a17", "right");
   drawText(ctx, first.date, x + 35, y + height - 30, compact ? 18 : 20, 700, "#68788b");
   drawText(ctx, latest.date, x + width - 35, y + height - 30, compact ? 18 : 20, 700, "#68788b", "right");
-  drawText(ctx, `파란선: 평균 ${priceLabel} · 점선: 최저 ${priceLabel} · 막대: 매물 수`, x + width / 2, y + height - 30, compact ? 17 : 20, 700, "#526276", "center");
+  drawText(ctx, `단위 만원 · 파란선 평균 · 점선 최저 · 막대 매물 수`, x + width / 2, y + height - 30, compact ? 18 : 21, 800, "#405267", "center");
 }
 
 function drawChartLine(ctx, points, color, dashed) {
@@ -3161,9 +3200,24 @@ function drawSignageEmpty(ctx, message) {
 
 function drawSignageFooter(ctx) {
   ctx.fillStyle = "#15324a";
-  ctx.fillRect(0, 1845, 1080, 75);
-  drawText(ctx, getSignageFooterLabel(), 60, 1893, 24, 900, "#ffffff");
-  drawText(ctx, "010-8253-9659", 1020, 1893, 25, 900, "#ffffff", "right");
+  ctx.fillRect(0, 1780, 1080, 140);
+  drawText(ctx, "산울파트너스 공인중개사사무소", 60, 1840, 29, 900, "#ffffff");
+  drawText(ctx, `${getSignageFooterLabel()} · 등록 호가 기준 · 층/타입에 따라 다름`, 60, 1878, 20, 800, "#dbe5ed");
+  drawText(ctx, "010-8253-9659", 1020, 1844, 40, 900, "#ffffff", "right");
+  drawText(ctx, "매물 접수·상담", 1020, 1880, 22, 900, "#f1cf5d", "right");
+}
+
+function drawFittedText(ctx, text, x, y, maxWidth, size, minSize, weight = 700, color = "#1d252f", align = "left") {
+  const value = String(text);
+  let fittedSize = size;
+  ctx.save();
+  while (fittedSize > minSize) {
+    ctx.font = `${weight} ${fittedSize}px "Segoe UI", "Noto Sans KR", sans-serif`;
+    if (ctx.measureText(value).width <= maxWidth) break;
+    fittedSize -= 1;
+  }
+  ctx.restore();
+  drawText(ctx, value, x, y, fittedSize, weight, color, align);
 }
 
 function drawText(ctx, text, x, y, size, weight = 700, color = "#1d252f", align = "left") {
