@@ -24,6 +24,24 @@ const labels = {
   all: "전체",
 };
 
+const regionLabels = {
+  세종: {
+    eyebrow: "세종 산울동·해밀동 호가 데이터",
+    signage: "세종 산울·해밀동 주요 단지 최신 등록 매물 기준",
+    footer: "세종 산울·해밀동 매물 정보",
+  },
+  수원: {
+    eyebrow: "수원 구운동·호매실동 호가 데이터",
+    signage: "수원 주요 단지 최신 등록 매물 기준",
+    footer: "수원 매물 정보",
+  },
+  대전: {
+    eyebrow: "대전 주요 단지 호가 데이터",
+    signage: "대전 주요 단지 최신 등록 매물 기준",
+    footer: "대전 매물 정보",
+  },
+};
+
 const el = {
   region: document.querySelector("#regionFilter"),
   date: document.querySelector("#dateFilter"),
@@ -101,14 +119,16 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, suwon, floorplans, unitAreas] = await Promise.all([
+  const [sejong, suwon, daejeon, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
+    loadDataset("./data/listings-daejeon.json", "대전", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
   if (suwon?.rows.length) state.datasets.수원 = suwon;
+  if (daejeon?.rows.length) state.datasets.대전 = daejeon;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();
@@ -177,7 +197,7 @@ function activateRegion(region, options = {}) {
 function updateRegionUi() {
   const isSejong = state.activeRegion === "세종";
   if (el.regionEyebrow) {
-    el.regionEyebrow.textContent = isSejong ? "세종 산울동·해밀동 호가 데이터" : "수원 구운동·호매실동 호가 데이터";
+    el.regionEyebrow.textContent = regionLabels[state.activeRegion]?.eyebrow || `${state.activeRegion} 호가 데이터`;
   }
   if (el.unitLookupTabButton) el.unitLookupTabButton.hidden = !isSejong;
   if (!isSejong && el.unitLookupTab && !el.unitLookupTab.hidden) switchTab("summary");
@@ -2836,11 +2856,11 @@ function getSignagePriceLabel(dealType) {
 }
 
 function getSignageRegionLabel() {
-  return state.activeRegion === "수원" ? "수원 주요 단지 최신 등록 매물 기준" : "세종 산울·해밀동 주요 단지 최신 등록 매물 기준";
+  return regionLabels[state.activeRegion]?.signage || `${state.activeRegion} 주요 단지 최신 등록 매물 기준`;
 }
 
 function getSignageFooterLabel() {
-  return state.activeRegion === "수원" ? "수원 매물 정보" : "세종 산울·해밀동 매물 정보";
+  return regionLabels[state.activeRegion]?.footer || `${state.activeRegion} 매물 정보`;
 }
 
 function drawSignageConversionNote(ctx, dealType, y = 1745) {

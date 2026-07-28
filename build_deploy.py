@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import refresh_data
+import refresh_daejeon_data
 import refresh_floorplans
 import refresh_suwon_data
 import refresh_unit_areas
@@ -23,6 +24,7 @@ def copy_file(source_name, target_name=None):
 def main():
     refresh_data.main()
     refresh_suwon_data.main()
+    refresh_daejeon_data.main()
     refresh_floorplans.main()
     refresh_unit_areas.main()
 
