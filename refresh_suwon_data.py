@@ -12,6 +12,15 @@ LISTING_SHEET = "매물요약"
 BROKER_SHEET = "동일매물_중개사"
 REAL_TRANSACTION_SHEET = "타입별_실거래가"
 SUWON_KEYMAP = {**KEYMAP, "입주유형": "moveIn"}
+VALID_DEAL_TYPES = {"매매", "전세", "월세"}
+
+
+def is_valid_listing_row(row):
+    return (
+        bool(row.get("surveyDate"))
+        and bool(row.get("complex"))
+        and row.get("dealType") in VALID_DEAL_TYPES
+    )
 
 
 def read_rows(sheet, keymap, listing_ids=False):
@@ -69,7 +78,11 @@ def merge_listing_history(incoming_rows):
         return incoming_rows
 
     incoming_dates = {row.get("surveyDate") for row in incoming_rows if row.get("surveyDate")}
-    preserved_rows = [row for row in existing_rows if row.get("surveyDate") not in incoming_dates]
+    preserved_rows = [
+        row
+        for row in existing_rows
+        if is_valid_listing_row(row) and row.get("surveyDate") not in incoming_dates
+    ]
     return preserved_rows + incoming_rows
 
 
@@ -84,7 +97,9 @@ def main():
     if missing_sheets:
         raise ValueError(f"수원 원본에 필요한 시트가 없습니다: {', '.join(missing_sheets)}")
 
-    headers, incoming_rows = read_rows(workbook[LISTING_SHEET], SUWON_KEYMAP, listing_ids=True)
+    headers, source_rows = read_rows(workbook[LISTING_SHEET], SUWON_KEYMAP, listing_ids=True)
+    incoming_rows = [row for row in source_rows if is_valid_listing_row(row)]
+    skipped_row_count = len(source_rows) - len(incoming_rows)
     rows = merge_listing_history(incoming_rows)
     _, real_transactions = read_rows(workbook[REAL_TRANSACTION_SHEET], REAL_TRANSACTION_KEYMAP)
     broker_map = load_broker_map(workbook)
@@ -98,6 +113,7 @@ def main():
                     "source": f"{SOURCE.name} / {LISTING_SHEET}",
                     "rowCount": len(rows),
                     "currentRowCount": len(incoming_rows),
+                    "skippedRowCount": skipped_row_count,
                     "headers": headers,
                     "brokerMatchCount": len(broker_map),
                     "realTransactionCount": len(real_transactions),
@@ -111,7 +127,11 @@ def main():
         ),
         encoding="utf-8",
     )
-    print(f"수원 {len(incoming_rows):,}건 반영, 누적 {len(rows):,}건: {OUTPUT}")
+    skipped_note = f", 비매물 {skipped_row_count:,}건 제외" if skipped_row_count else ""
+    print(
+        f"수원 {len(incoming_rows):,}건 반영{skipped_note}, "
+        f"누적 {len(rows):,}건: {OUTPUT}"
+    )
 
 
 if __name__ == "__main__":
