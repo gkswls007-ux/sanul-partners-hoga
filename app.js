@@ -45,6 +45,16 @@ const regionLabels = {
     signage: "고운동 주요 단지 최신 등록 매물 기준",
     footer: "고운동 매물 정보",
   },
+  한솔동: {
+    eyebrow: "세종 한솔동 호가 데이터",
+    signage: "한솔동 주요 단지 최신 등록 매물 기준",
+    footer: "한솔동 매물 정보",
+  },
+  종촌동: {
+    eyebrow: "세종 종촌동 호가 데이터",
+    signage: "종촌동 주요 단지 최신 등록 매물 기준",
+    footer: "종촌동 매물 정보",
+  },
 };
 
 const el = {
@@ -124,11 +134,13 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, suwon, daejeon, goun, floorplans, unitAreas] = await Promise.all([
+  const [sejong, suwon, daejeon, goun, hansol, jongchon, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
     loadDataset("./data/listings-daejeon.json", "대전", { optional: true }),
     loadDataset("./data/listings-goun.json", "고운동", { optional: true }),
+    loadDataset("./data/listings-hansol.json", "한솔동", { optional: true }),
+    loadDataset("./data/listings-jongchon.json", "종촌동", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
@@ -136,6 +148,8 @@ async function init() {
   if (daejeon?.rows.length) state.datasets.대전 = daejeon;
   if (suwon?.rows.length) state.datasets.수원 = suwon;
   if (goun?.rows.length) state.datasets.고운동 = goun;
+  if (hansol?.rows.length) state.datasets.한솔동 = hansol;
+  if (jongchon?.rows.length) state.datasets.종촌동 = jongchon;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();

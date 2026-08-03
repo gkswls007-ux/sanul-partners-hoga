@@ -7,6 +7,8 @@ import refresh_data
 import refresh_daejeon_data
 import refresh_floorplans
 import refresh_goun_data
+import refresh_hansol_data
+import refresh_jongchon_data
 import refresh_suwon_data
 import refresh_unit_areas
 
@@ -27,6 +29,8 @@ def main():
     refresh_suwon_data.main()
     refresh_daejeon_data.main()
     refresh_goun_data.main()
+    refresh_hansol_data.main()
+    refresh_jongchon_data.main()
     refresh_floorplans.main()
     refresh_unit_areas.main()
 
