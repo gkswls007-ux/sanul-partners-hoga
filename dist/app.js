@@ -40,6 +40,11 @@ const regionLabels = {
     signage: "대전 주요 단지 최신 등록 매물 기준",
     footer: "대전 매물 정보",
   },
+  고운동: {
+    eyebrow: "세종 고운동 호가 데이터",
+    signage: "고운동 주요 단지 최신 등록 매물 기준",
+    footer: "고운동 매물 정보",
+  },
 };
 
 const el = {
@@ -119,16 +124,18 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, suwon, daejeon, floorplans, unitAreas] = await Promise.all([
+  const [sejong, suwon, daejeon, goun, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
     loadDataset("./data/listings-daejeon.json", "대전", { optional: true }),
+    loadDataset("./data/listings-goun.json", "고운동", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
-  if (suwon?.rows.length) state.datasets.수원 = suwon;
   if (daejeon?.rows.length) state.datasets.대전 = daejeon;
+  if (suwon?.rows.length) state.datasets.수원 = suwon;
+  if (goun?.rows.length) state.datasets.고운동 = goun;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();
