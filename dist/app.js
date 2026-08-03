@@ -1213,7 +1213,6 @@ function renderAreaPriceRange() {
         pyeong: sample.pyeong,
         supplyArea: sample.supplyArea,
         exclusiveArea: sample.exclusiveArea,
-        pyeongGroup: sample.pyeongGroup || "-",
         count: rows.length,
         minPrice: prices.length ? Math.min(...prices) : null,
         maxPrice: prices.length ? Math.max(...prices) : null,
@@ -1224,7 +1223,7 @@ function renderAreaPriceRange() {
     .sort(compareAreaItems);
 
   if (!grouped.length) {
-    el.areaPriceBody.innerHTML = `<tr><td colspan="8" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
+    el.areaPriceBody.innerHTML = `<tr><td colspan="7" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
     return;
   }
 
@@ -1235,7 +1234,6 @@ function renderAreaPriceRange() {
           <td>${formatPlainNumber(item.pyeong)}</td>
           <td>${escapeHtml(item.supplyArea ?? "-")}</td>
           <td>${formatPlainNumber(item.exclusiveArea)}</td>
-          <td>${escapeHtml(item.pyeongGroup)}</td>
           <td>${formatPrice(item.minPrice)}</td>
           <td>${formatPrice(item.maxPrice)}</td>
           <td>${formatPlainNumber(item.avgPricePerPyeong)}</td>
