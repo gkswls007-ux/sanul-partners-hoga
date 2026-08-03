@@ -204,8 +204,6 @@ function activateRegion(region, options = {}) {
   state.selectedComplexes.clear();
   state.selectedTypes.clear();
   state.floors = new Set(["저층", "중층", "고층"]);
-  state.basket = [];
-  state.selectedCustomerKey = "";
   if (el.search) el.search.value = "";
   if (el.region) el.region.value = region;
 
@@ -1793,11 +1791,11 @@ function updateContactBroker(contactId, brokerName) {
 function updateContactCustomer(customerKey, field, value) {
   if (!["customerName", "customerPhone"].includes(field)) return;
   state.contacts
-    .filter((item) => (item.region || "세종") === state.activeRegion && getCustomerKey(item) === customerKey)
+    .filter((item) => getCustomerKey(item) === customerKey)
     .forEach((item) => {
       item[field] = value.trim();
     });
-  const updated = state.contacts.find((item) => (item.region || "세종") === state.activeRegion && item[field] === value.trim());
+  const updated = state.contacts.find((item) => item[field] === value.trim());
   state.selectedCustomerKey = updated ? getCustomerKey(updated) : "";
   saveWork();
   renderWorkLists();
@@ -1860,7 +1858,7 @@ function renderWorkLists() {
 }
 
 function getActiveContacts() {
-  return state.contacts.filter((item) => (item.region || "세종") === state.activeRegion);
+  return state.contacts;
 }
 
 function renderContactGroups(contacts = getActiveContacts()) {
@@ -1925,7 +1923,7 @@ function renderBasketItem(item) {
       <div>
         <strong>${escapeHtml(shortName(item.complex))}</strong>
         <p>${escapeHtml(formatListingLine(item))}</p>
-        <small>${escapeHtml([item.direction, formatMoveIn(item.moveIn), item.features].filter(Boolean).join(" · "))}</small>
+        <small>${escapeHtml([item.region || "세종", item.direction, formatMoveIn(item.moveIn), item.features].filter(Boolean).join(" · "))}</small>
       </div>
       <div class="work-controls">
         <button type="button" class="plan-button" data-save-contact="${escapeHtml(item.id)}" ${inContacts ? "disabled" : ""}>${inContacts ? "연락 리스트 담김" : "연락 리스트로"}</button>
@@ -1951,7 +1949,7 @@ function renderContactItem(item) {
       <div>
         <strong>${escapeHtml(shortName(item.complex))}</strong>
         <p>${escapeHtml(formatListingLine(item))}</p>
-        <small>${escapeHtml([`대표매물번호 ${item.representativeListingId || "-"}`, item.direction, formatMoveIn(item.moveIn), item.savedAt].filter(Boolean).join(" · "))}</small>
+        <small>${escapeHtml([item.region || "세종", `대표매물번호 ${item.representativeListingId || "-"}`, item.direction, formatMoveIn(item.moveIn), item.savedAt].filter(Boolean).join(" · "))}</small>
       </div>
       <div class="work-controls">
         <select data-contact-broker="${escapeHtml(item.contactId)}" ${brokers.length ? "" : "disabled"}>${brokerOptions}</select>
@@ -1966,7 +1964,8 @@ function renderContactItem(item) {
 
 function getBrokerOptions(item) {
   if (!item.representativeListingId) return [];
-  return state.brokerMap[item.representativeListingId] || [];
+  const dataset = state.datasets[item.region || "세종"];
+  return dataset?.brokerMap?.[item.representativeListingId] || [];
 }
 
 function getCustomerKey(item) {
@@ -1987,6 +1986,7 @@ function exportContacts() {
     "선택 중개사",
     "선택중개사매물번호",
     "관련 매물번호",
+    "지역",
     "단지",
     "거래",
     "호가",
@@ -2000,7 +2000,7 @@ function exportContacts() {
     "매물특징",
     "저장일시",
   ];
-  const excelTextColumns = new Set([1, 4, 5, 12, 13, 17]);
+  const excelTextColumns = new Set([1, 4, 5, 13, 14, 18]);
   const rows = contacts.map((item) => [
     item.customerName || "",
     item.customerPhone || "",
@@ -2008,6 +2008,7 @@ function exportContacts() {
     item.brokerName || "",
     (item.individualListingIds || []).join(", "),
     relatedListingIds(item).join(", "),
+    item.region || "세종",
     shortName(item.complex),
     item.dealType || "",
     formatPrice(item.price),
@@ -2401,13 +2402,14 @@ async function renderCustomerTrendSections(items) {
 }
 
 function getCustomerTrendGroups(items) {
-  return groupBy(items, (item) => JSON.stringify([item.complex || "-", item.dealType || "-", getReportPyeongGroup(item)]))
+  return groupBy(items, (item) => JSON.stringify([item.region || "세종", item.complex || "-", item.dealType || "-", getReportPyeongGroup(item)]))
     .map(([key, rows]) => {
-      const [complex, dealType, pyeongGroup] = JSON.parse(key);
-      return { complex, dealType, pyeongGroup, count: rows.length };
+      const [region, complex, dealType, pyeongGroup] = JSON.parse(key);
+      return { region, complex, dealType, pyeongGroup, count: rows.length };
     })
     .sort(
       (a, b) =>
+        String(a.region).localeCompare(String(b.region), "ko") ||
         String(a.complex).localeCompare(String(b.complex), "ko") ||
         String(a.dealType).localeCompare(String(b.dealType), "ko") ||
         groupOrder(a.pyeongGroup) - groupOrder(b.pyeongGroup) ||
@@ -2416,13 +2418,14 @@ function getCustomerTrendGroups(items) {
 }
 
 function getCustomerTrendRows(group) {
-  return state.rows.filter(
+  const rows = state.datasets[group.region]?.rows || [];
+  return rows.filter(
     (row) => row.complex === group.complex && row.dealType === group.dealType && getReportPyeongGroup(row) === group.pyeongGroup,
   );
 }
 
 function getCustomerTrendTitle(group) {
-  return `${shortName(group.complex)} · ${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
+  return `${group.region} · ${shortName(group.complex)} · ${group.dealType} · ${group.pyeongGroup} ${group.dealType === "월세" ? "환산가" : "호가"} 추이`;
 }
 
 function getReportPyeongGroup(item) {
