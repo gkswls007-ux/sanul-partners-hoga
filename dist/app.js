@@ -26,34 +26,16 @@ const labels = {
 
 const regionLabels = {
   세종: {
-    eyebrow: "세종 산울동·해밀동 호가 데이터",
-    signage: "세종 산울·해밀동 주요 단지 최신 등록 매물 기준",
-    footer: "세종 산울·해밀동 매물 정보",
+    selector: "산울동",
+    eyebrow: "세종 산울동 호가 데이터",
+    signage: "세종 산울동 주요 단지 최신 등록 매물 기준",
+    footer: "세종 산울동 매물 정보",
   },
   수원: {
+    selector: "수원시",
     eyebrow: "수원 구운동·호매실동 호가 데이터",
     signage: "수원 주요 단지 최신 등록 매물 기준",
     footer: "수원 매물 정보",
-  },
-  대전: {
-    eyebrow: "대전 주요 단지 호가 데이터",
-    signage: "대전 주요 단지 최신 등록 매물 기준",
-    footer: "대전 매물 정보",
-  },
-  고운동: {
-    eyebrow: "세종 고운동 호가 데이터",
-    signage: "고운동 주요 단지 최신 등록 매물 기준",
-    footer: "고운동 매물 정보",
-  },
-  한솔동: {
-    eyebrow: "세종 한솔동 호가 데이터",
-    signage: "한솔동 주요 단지 최신 등록 매물 기준",
-    footer: "한솔동 매물 정보",
-  },
-  종촌동: {
-    eyebrow: "세종 종촌동 호가 데이터",
-    signage: "종촌동 주요 단지 최신 등록 매물 기준",
-    footer: "종촌동 매물 정보",
   },
 };
 
@@ -134,24 +116,16 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, suwon, daejeon, goun, hansol, jongchon, floorplans, unitAreas] = await Promise.all([
-    loadDataset("./data/listings.json", "세종"),
+  const [sejong, suwon, floorplans, unitAreas] = await Promise.all([
+    loadDataset("./data/listings.json", "세종", { complexPrefix: "산울" }),
     loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
-    loadDataset("./data/listings-daejeon.json", "대전", { optional: true }),
-    loadDataset("./data/listings-goun.json", "고운동", { optional: true }),
-    loadDataset("./data/listings-hansol.json", "한솔동", { optional: true }),
-    loadDataset("./data/listings-jongchon.json", "종촌동", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
-  if (daejeon?.rows.length) state.datasets.대전 = daejeon;
   if (suwon?.rows.length) state.datasets.수원 = suwon;
-  if (goun?.rows.length) state.datasets.고운동 = goun;
-  if (hansol?.rows.length) state.datasets.한솔동 = hansol;
-  if (jongchon?.rows.length) state.datasets.종촌동 = jongchon;
   state.floorplans = floorplans;
-  state.unitAreas = unitAreas;
+  state.unitAreas = unitAreas.filter((row) => String(row.complex || "").startsWith("산울"));
   loadSavedWork();
 
   fillRegionFilter();
@@ -170,11 +144,14 @@ async function loadDataset(src, region, options = {}) {
       throw new Error(`${region} 데이터를 불러오지 못했습니다.`);
     }
     const payload = await response.json();
+    const matchesRegion = (row) => !options.complexPrefix || String(row.complex || "").startsWith(options.complexPrefix);
     return {
-      rows: (payload.rows || []).map((row) => normalizeRow({ ...row, region })).filter((row) => row.complex),
+      rows: (payload.rows || [])
+        .map((row) => normalizeRow({ ...row, region }))
+        .filter((row) => row.complex && matchesRegion(row)),
       realTransactions: (payload.realTransactions || [])
         .map((row) => normalizeRealTransaction({ ...row, region }))
-        .filter((row) => row.complex),
+        .filter((row) => row.complex && matchesRegion(row)),
       brokerMap: payload.brokerMap || {},
       meta: payload.meta || {},
     };
@@ -187,7 +164,7 @@ async function loadDataset(src, region, options = {}) {
 function fillRegionFilter() {
   if (!el.region) return;
   el.region.innerHTML = Object.keys(state.datasets)
-    .map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(region)}</option>`)
+    .map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(regionLabels[region]?.selector || region)}</option>`)
     .join("");
   el.region.value = state.activeRegion;
 }

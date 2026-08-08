@@ -4,11 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import refresh_data
-import refresh_daejeon_data
 import refresh_floorplans
-import refresh_goun_data
-import refresh_hansol_data
-import refresh_jongchon_data
 import refresh_suwon_data
 import refresh_unit_areas
 
@@ -27,10 +23,6 @@ def copy_file(source_name, target_name=None):
 def main():
     refresh_data.main()
     refresh_suwon_data.main()
-    refresh_daejeon_data.main()
-    refresh_goun_data.main()
-    refresh_hansol_data.main()
-    refresh_jongchon_data.main()
     refresh_floorplans.main()
     refresh_unit_areas.main()
 
@@ -46,7 +38,16 @@ def main():
 
     copy_file("app.js")
     copy_file("styles.css")
-    shutil.copytree(ROOT / "data", DIST / "data")
+    shutil.copytree(
+        ROOT / "data",
+        DIST / "data",
+        ignore=shutil.ignore_patterns(
+            "listings-daejeon.json",
+            "listings-goun.json",
+            "listings-hansol.json",
+            "listings-jongchon.json",
+        ),
+    )
     if (ROOT / "assets").exists():
         shutil.copytree(ROOT / "assets", DIST / "assets")
 
