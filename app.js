@@ -26,10 +26,10 @@ const labels = {
 
 const regionLabels = {
   세종: {
-    selector: "산울동",
-    eyebrow: "세종 산울동 호가 데이터",
-    signage: "세종 산울동 주요 단지 최신 등록 매물 기준",
-    footer: "세종 산울동 매물 정보",
+    selector: "세종 6생활권",
+    eyebrow: "세종 6생활권(산울동·해밀동) 호가 데이터",
+    signage: "세종 6생활권 주요 단지 최신 등록 매물 기준",
+    footer: "세종 6생활권 매물 정보",
   },
   수원: {
     selector: "수원시",
@@ -117,7 +117,7 @@ init();
 
 async function init() {
   const [sejong, suwon, floorplans, unitAreas] = await Promise.all([
-    loadDataset("./data/listings.json", "세종", { complexPrefix: "산울" }),
+    loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
@@ -125,7 +125,7 @@ async function init() {
   state.datasets.세종 = sejong;
   if (suwon?.rows.length) state.datasets.수원 = suwon;
   state.floorplans = floorplans;
-  state.unitAreas = unitAreas.filter((row) => String(row.complex || "").startsWith("산울"));
+  state.unitAreas = unitAreas;
   loadSavedWork();
 
   fillRegionFilter();
