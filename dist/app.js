@@ -33,7 +33,7 @@ const regionLabels = {
   },
   수원: {
     selector: "수원시",
-    eyebrow: "수원 구운동·호매실동 호가 데이터",
+    eyebrow: "수원 구운동·금곡동·호매실동 호가 데이터",
     signage: "수원 주요 단지 최신 등록 매물 기준",
     footer: "수원 매물 정보",
   },
