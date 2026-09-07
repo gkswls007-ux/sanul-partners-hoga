@@ -519,16 +519,16 @@ function getUnitRealTransactions(row) {
   const typeName = String(row.typeName || "").trim();
   const exclusiveArea = Number(row.exclusiveArea);
   const pyeong = Number(row.pyeong);
-  return state.realTransactions
-    .filter((item) => {
+  return groupRealTransactionRows(state.realTransactions)
+    .filter((group) => group.sourceRows.some((item) => {
       if (item.complex !== row.complex) return false;
       const sameType = typeName && item.supplyArea === typeName;
       const sameExclusive = Number.isFinite(exclusiveArea) && Number.isFinite(item.exclusiveArea) && Math.abs(item.exclusiveArea - exclusiveArea) < 0.5;
       const samePyeong = Number.isFinite(pyeong) && Number.isFinite(item.pyeong) && Math.round(item.pyeong) === Math.round(pyeong);
       return sameType || (sameExclusive && samePyeong);
-    })
+    }))
     .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
-    .slice(0, 10);
+    .slice(0, 15);
 }
 
 function renderUnitRealTransactions(row) {
@@ -538,7 +538,7 @@ function renderUnitRealTransactions(row) {
       <div class="unit-section-head">
         <div>
           <h3>최근 실거래</h3>
-          <p class="panel-note">같은 단지와 타입 기준 최근 실거래 ${rows.length.toLocaleString("ko-KR")}건</p>
+          <p class="panel-note">같은 단지 · 타입 후보 또는 유사 전용면적 · 최근 ${rows.length.toLocaleString("ko-KR")}개 조건 묶음</p>
         </div>
       </div>
       <div class="table-scroll">
@@ -561,7 +561,7 @@ function renderUnitRealTransactions(row) {
                         <tr>
                           <td>${escapeHtml(formatContractDate(item.contractDate))}</td>
                           <td>${escapeHtml(item.dealType || "-")}</td>
-                          <td>${escapeHtml(formatRealTransactionArea(item))}</td>
+                          <td>${renderRealTransactionArea(item)}</td>
                           <td>${Number.isFinite(item.floor) ? `${item.floor}층` : "-"}</td>
                           <td>${escapeHtml(formatRealTransactionPrice(item))}</td>
                         </tr>
@@ -1289,7 +1289,7 @@ function renderTrendChart() {
   const chartW = width - pad.left - pad.right;
   const chartH = height - pad.top - pad.bottom;
   const weekIndex = new Map(grouped.map((item, index) => [item.date, index]));
-  const realPoints = getFilteredRealTransactions({ ignoreDate: true })
+  const realPoints = getDisplayRealTransactions()
     .map((row) => ({
       row,
       week: getContractWeek(row.contractDate),
@@ -1384,13 +1384,13 @@ function getTrendRows() {
 function renderRealTransactions() {
   if (!el.realTransactionBody) return;
 
-  const rows = getFilteredRealTransactions({ ignoreDate: true })
+  const rows = getDisplayRealTransactions()
     .sort((a, b) => String(b.contractDate || "").localeCompare(String(a.contractDate || "")))
     .slice(0, 15);
 
   if (el.realTransactionNote) {
     el.realTransactionNote.textContent = rows.length
-      ? `현재 선택 조건 기준 최근 실거래 ${rows.length.toLocaleString("ko-KR")}건`
+      ? `단지·거래·평형·타입 기준 최근 ${rows.length.toLocaleString("ko-KR")}개 조건 묶음 · 원본 ${rows.reduce((sum, row) => sum + row.sourceRows.length, 0)}행 · 만원`
       : "현재 선택 조건에 맞는 실거래가 없습니다.";
   }
 
@@ -1402,7 +1402,7 @@ function renderRealTransactions() {
               <td>${escapeHtml(formatContractDate(row.contractDate))}</td>
               <td>${escapeHtml(shortName(row.complex))}</td>
               <td>${escapeHtml(row.dealType || "-")}</td>
-              <td>${escapeHtml(formatRealTransactionArea(row))}</td>
+              <td>${renderRealTransactionArea(row)}</td>
               <td>${Number.isFinite(row.floor) ? `${row.floor}층` : "-"}</td>
               <td>${escapeHtml(formatRealTransactionPrice(row))}</td>
             </tr>
@@ -1413,19 +1413,46 @@ function renderRealTransactions() {
 }
 
 function getFilteredRealTransactions({ ignoreDate = false } = {}) {
-  const query = el.search.value.trim().toLowerCase();
   return state.realTransactions.filter((row) => {
     const matchesDate = ignoreDate || el.date.value === labels.all || row.surveyDate === el.date.value;
     const matchesComplex = matchesSelectedComplex(row);
     const matchesDeal = el.deal.value === labels.all || row.dealType === el.deal.value;
     const matchesPyeong = el.pyeong.value === labels.all || getReportPyeongGroup(row) === el.pyeong.value;
     const matchesType = matchesSelectedType(row);
-    const haystack = [row.complex, row.supplyArea, row.dealType, row.contractDate, row.baseMonth]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query);
+    return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType;
   });
+}
+
+function groupRealTransactionRows(rows) {
+  const groups = new Map();
+  rows.forEach((row, index) => {
+    const valid = row.complex && /^\d{4}-\d{2}-\d{2}$/.test(row.contractDate || "")
+      && Number.isFinite(row.exclusiveArea) && Number.isFinite(row.floor)
+      && Number.isFinite(realTransactionChartPrice(row));
+    // This is a display group, not a unique transaction identifier.
+    const key = valid ? JSON.stringify([
+      row.region || "세종", row.complex, row.dealType, row.contractDate,
+      row.exclusiveArea, row.floor, row.salePrice, row.deposit, row.monthlyRent,
+    ]) : `unmatched-${index}`;
+    if (!groups.has(key)) groups.set(key, { ...row, sourceRows: [], candidateTypes: [] });
+    const group = groups.get(key);
+    group.sourceRows.push(row);
+    if (row.supplyArea && !group.candidateTypes.includes(String(row.supplyArea))) group.candidateTypes.push(String(row.supplyArea));
+  });
+  return [...groups.values()];
+}
+
+function getDisplayRealTransactions() {
+  const filtered = new Set(getFilteredRealTransactions({ ignoreDate: true }));
+  return groupRealTransactionRows(state.realTransactions).filter((group) => group.sourceRows.some((row) => filtered.has(row)));
+}
+
+function renderRealTransactionArea(row) {
+  const area = escapeHtml(formatRealTransactionArea(row));
+  if (!row.sourceRows || row.sourceRows.length < 2) return area;
+  return `${area}<details class="real-source"><summary>동일 조건 원본 ${row.sourceRows.length}행</summary><ul>${row.sourceRows.map((source) =>
+    `<li>${escapeHtml([source.surveyDate, source.supplyArea, formatRealTransactionPrice(source)].filter(Boolean).join(" · "))}</li>`
+  ).join("")}</ul></details>`;
 }
 
 function realTransactionChartPrice(row) {
@@ -1456,7 +1483,7 @@ function getContractWeek(value) {
 
 function formatRealTransactionArea(row) {
   return [
-    row.supplyArea ? `${row.supplyArea}` : "",
+    row.candidateTypes?.length > 1 ? `후보 ${row.candidateTypes.join(", ")}` : row.supplyArea ? `${row.supplyArea}` : "",
     Number.isFinite(row.exclusiveArea) ? `전용 ${formatPlainNumber(row.exclusiveArea)}` : "",
     Number.isFinite(row.pyeong) ? `${formatPlainNumber(row.pyeong)}평` : "",
   ]
