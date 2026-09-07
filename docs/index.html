@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>호가 브리핑</title>
-    <link rel="stylesheet" href="./styles.css?v=202609071140" />
+    <link rel="stylesheet" href="./styles.css?v=202609071218" />
   </head>
   <body>
     <main class="shell">
@@ -61,6 +61,25 @@
           검색
           <input id="searchInput" type="search" placeholder="동, 특징, 타입 검색" />
         </label>
+        <div class="toolbar-extra floor-controls" aria-label="층 필터">
+          <span>층 구분</span>
+          <button class="filter-button active" data-floor="전체" type="button">전체</button>
+          <button class="filter-button active" data-floor="저층" type="button">저층</button>
+          <button class="filter-button active" data-floor="중층" type="button">중층</button>
+          <button class="filter-button active" data-floor="고층" type="button">고층</button>
+        </div>
+        <details id="advancedFilters" class="toolbar-extra advanced-filters">
+          <summary>상세 조건</summary>
+          <div class="advanced-grid">
+            <label>최소 호가·보증금 (만원)<input id="priceMin" type="number" min="0" step="100" inputmode="numeric" /></label>
+            <label>최대 호가·보증금 (만원)<input id="priceMax" type="number" min="0" step="100" inputmode="numeric" /></label>
+            <label>최대 월세 (만원)<input id="rentMax" type="number" min="0" step="1" inputmode="numeric" /></label>
+            <label>방향<select id="directionFilter"></select></label>
+            <label>방수<select id="roomsFilter"><option>전체</option><option value="3">3개 이상</option><option value="4">4개 이상</option><option value="5">5개 이상</option></select></label>
+            <label>금액 변동 (월세 환산)<select id="priceChangeFilter"><option>전체</option><option value="down">인하</option><option value="up">인상</option><option value="same">변동 없음</option><option value="unknown">비교 자료 없음</option></select></label>
+          </div>
+          <div class="advanced-actions"><span id="filterError" role="status"></span><button id="resetAdvanced" type="button" class="ghost-button">상세 조건 초기화</button></div>
+        </details>
       </section>
 
       <section id="summaryTab" class="tab-panel active">
@@ -115,7 +134,7 @@
             <div class="panel-head">
               <div>
                 <h2>면적별 최소호가 & 최대호가</h2>
-                <p class="panel-note">평수·타입·전용면적별 최소/최대 호가와 평당 평균</p>
+                <p class="panel-note">금액 단위 만원 · 월세는 환산보증금 기준</p>
               </div>
             </div>
             <div class="table-wrap">
@@ -125,9 +144,10 @@
                     <th>평수</th>
                     <th>공급면적</th>
                     <th>전용면적</th>
+                    <th>거래</th>
                     <th>최소 호가</th>
                     <th>최대 호가</th>
-                    <th>평균(평당매매가)</th>
+                    <th>평균(만원/평)</th>
                     <th>매물 수</th>
                   </tr>
                 </thead>
@@ -139,7 +159,7 @@
       </section>
 
       <section id="briefingTab" class="tab-panel" hidden>
-      <section class="kpis" aria-label="핵심 지표">
+      <section id="priceKpis" class="kpis" aria-label="핵심 지표 · 금액 단위 만원">
         <article>
           <span>매물 수</span>
           <strong id="kpiCount">-</strong>
@@ -157,14 +177,15 @@
           <strong id="kpiPyeong">-</strong>
         </article>
       </section>
+      <div id="dealPriceBreakdown" class="table-wrap deal-breakdown" hidden></div>
 
       <section class="trend-section panel">
         <div class="panel-head">
           <div>
-            <h2>주차별 호가 변동 추이</h2>
-            <p class="panel-note">단지·거래·평형 조건 기준, 조사 주차 필터는 제외</p>
+            <h2 id="trendTitle">주차별 호가 변동 추이</h2>
+            <p class="panel-note">선택한 매물 조건 기준 · 조사 주차 제외 · 금액 단위 만원</p>
           </div>
-          <div class="legend">
+          <div id="trendLegend" class="legend">
             <span><i class="legend-line avg"></i><em id="trendAvgLabel">평균 호가</em></span>
             <span><i class="legend-line min"></i><em id="trendMinLabel">최저 호가</em></span>
             <span><i class="legend-bar"></i>매물 수</span>
@@ -184,12 +205,13 @@
         </div>
         <div class="table-wrap">
           <table class="summary-table real-transaction-table">
+            <caption>동일 조건은 계약일·전용면적·층·금액 기준이며, 실제 거래 건수와 다를 수 있습니다. 매물의 층 구분·검색·예산·방향 조건은 제외됩니다.</caption>
             <thead>
               <tr>
                 <th>계약일</th>
                 <th>단지</th>
                 <th>거래</th>
-                <th>타입/평형</th>
+                <th>타입 후보/평형</th>
                 <th>층</th>
                 <th>실거래금액</th>
               </tr>
@@ -203,14 +225,14 @@
         <article class="panel">
           <div class="panel-head">
             <h2>단지별 호가 분포</h2>
-            <span>평균 기준</span>
+            <span>평균 · 만원 (월세는 환산)</span>
           </div>
           <div id="complexBars" class="bars"></div>
         </article>
         <article class="panel">
           <div class="panel-head">
             <h2>평형별 분위</h2>
-            <span>최저·평균·최고</span>
+            <span>최저·평균·최고 · 만원</span>
           </div>
           <div id="pyeongCards" class="mini-cards"></div>
         </article>
@@ -218,14 +240,8 @@
 
       <section class="list-section">
         <div class="panel-head">
-          <h2>추천 제시 매물</h2>
+          <div><h2>추천 제시 매물</h2><p id="listingCount" class="panel-note" aria-live="polite"></p></div>
           <div class="listing-controls">
-            <div class="floor-controls" aria-label="층 필터">
-              <button class="filter-button active" data-floor="전체" type="button">전체</button>
-              <button class="filter-button" data-floor="저층" type="button">저층</button>
-              <button class="filter-button" data-floor="중층" type="button">중층</button>
-              <button class="filter-button" data-floor="고층" type="button">고층</button>
-            </div>
             <div class="sort-controls" aria-label="정렬">
               <button class="sort-button active" data-sort="priceAsc" type="button">낮은 호가</button>
               <button class="sort-button" data-sort="priceDesc" type="button">높은 호가</button>
@@ -234,6 +250,7 @@
           </div>
         </div>
         <div id="listingGrid" class="listing-grid"></div>
+        <div class="listing-pagination"><button id="showMoreListings" class="plan-button" type="button" hidden>24건 더 보기</button></div>
       </section>
 
       <section class="work-section">
@@ -267,6 +284,9 @@
               <button id="exportContacts" class="plan-button" type="button">중개사용 엑셀</button>
               <button id="exportCustomerDoc" class="plan-button" type="button">고객용 워드</button>
               <button id="clearContacts" class="ghost-button" type="button">비우기</button>
+              <button id="backupWork" class="ghost-button" type="button" title="모든 고객 목록을 이 컴퓨터에 백업">백업</button>
+              <button id="restoreWork" class="ghost-button" type="button">복원</button>
+              <input id="restoreWorkFile" type="file" accept=".json,application/json" hidden />
             </div>
           </div>
           <div id="contactList" class="work-list"></div>
@@ -392,6 +412,6 @@
     </div>
 
     <script src="./assets/docx.iife.js?v=20260616-1"></script>
-    <script src="./app.js?v=202609071140"></script>
+    <script src="./app.js?v=202609071218"></script>
   </body>
 </html>
