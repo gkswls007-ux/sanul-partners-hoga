@@ -1,3 +1,4 @@
+import argparse
 import re
 import shutil
 from datetime import datetime
@@ -19,10 +20,17 @@ def copy_file(source_name, target_name=None):
     shutil.copy2(ROOT / source_name, DIST / target_name)
 
 
-def main():
-    refresh_data.main()
-    refresh_floorplans.main()
-    refresh_unit_areas.main()
+def main(skip_refresh=False):
+    if not skip_refresh:
+        refresh_data.main()
+        refresh_floorplans.main()
+        refresh_unit_areas.main()
+
+    root = ROOT.resolve()
+    for target in [DIST, DOCS, DIST / "data", DIST / "assets"]:
+        resolved = target.resolve()
+        if resolved == root or root not in resolved.parents:
+            raise ValueError(f"배포 대상이 작업 폴더 밖을 가리킵니다: {resolved}")
 
     DIST.mkdir(exist_ok=True)
     for name in ["index.html", "app.js", "styles.css", "netlify.toml"]:
@@ -88,4 +96,6 @@ for = "/*.html"
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--skip-refresh", action="store_true", help="원본을 다시 읽지 않고 현재 JSON으로 앱만 배포합니다.")
+    main(skip_refresh=parser.parse_args().skip_refresh)

@@ -1045,6 +1045,7 @@ function getAvailableTypes() {
       map.set(value, {
         value,
         label: `${multipleComplexes ? `${shortName(row.complex)} · ` : ""}${formatTypeLabel(row)}`,
+        typeName: String(row.supplyArea),
         pyeong: row.pyeong,
         exclusiveArea: row.exclusiveArea,
       });
@@ -1284,6 +1285,8 @@ function renderAreaPriceRange() {
 
 function renderTrendChart() {
   const trendRows = getTrendRows();
+  document.querySelector("#trendTitle").textContent = el.deal.value === labels.all ? "주차별 거래 현황" : "주차별 호가 변동 추이";
+  document.querySelector("#trendLegend").hidden = el.deal.value === labels.all;
   if (el.deal.value === labels.all) {
     const weeks = groupBy(trendRows, "surveyDate").sort(([a], [b]) => parseKoreanWeek(b) - parseKoreanWeek(a));
     el.trendChart.innerHTML = `<table class="summary-table"><caption>거래별 주차 현황 · 금액 단위 만원</caption><thead><tr><th>조사 주차</th><th>거래</th><th>매물 수</th><th>최저</th><th>평균</th></tr></thead><tbody>${weeks.flatMap(([week, rows]) => ["매매", "전세", "월세"].map((deal) => {
@@ -1819,7 +1822,8 @@ function loadSavedWork() {
   try {
     state.basket = JSON.parse(localStorage.getItem("hogaBasket") || "[]");
     state.contacts = JSON.parse(localStorage.getItem("hogaContacts") || "[]");
-    if (!Array.isArray(state.basket) || !Array.isArray(state.contacts)) throw new Error("Invalid saved work");
+    if (!Array.isArray(state.basket) || !Array.isArray(state.contacts)
+      || [...state.basket, ...state.contacts].some((item) => !item || typeof item !== "object" || Array.isArray(item))) throw new Error("Invalid saved work");
   } catch {
     state.basket = [];
     state.contacts = [];
@@ -3607,7 +3611,7 @@ function compareTypeOptions(a, b) {
     return exclusiveA - exclusiveB;
   }
 
-  return compareType(a.value, b.value);
+  return compareType(a.typeName ?? a.value, b.typeName ?? b.value) || String(a.label).localeCompare(String(b.label), "ko");
 }
 
 function normalizeBuilding(value) {
