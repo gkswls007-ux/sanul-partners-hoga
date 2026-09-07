@@ -15,6 +15,7 @@ const state = {
   selectedComplexes: new Set(),
   selectedTypes: new Set(),
   workReadError: false,
+  listingLimit: 24,
   signage: {
     screen: "overview",
     selectedComplexes: new Set(),
@@ -152,10 +153,12 @@ async function loadDataset(src, region, options = {}) {
     }
     const payload = await response.json();
     const matchesRegion = (row) => !options.complexPrefix || String(row.complex || "").startsWith(options.complexPrefix);
-    return {
-      rows: (payload.rows || [])
+    const rows = (payload.rows || [])
         .map((row) => normalizeRow({ ...row, region }))
-        .filter((row) => row.complex && matchesRegion(row)),
+        .filter((row) => row.complex && matchesRegion(row));
+    return {
+      rows,
+      listingHistory: buildListingHistory(rows),
       realTransactions: (payload.realTransactions || [])
         .map((row) => normalizeRealTransaction({ ...row, region }))
         .filter((row) => row.complex && matchesRegion(row)),
@@ -189,6 +192,7 @@ function activateRegion(region, options = {}) {
   state.selectedTypes.clear();
   state.floors = new Set(["저층", "중층", "고층"]);
   if (el.search) el.search.value = "";
+  resetAdvancedFilters();
   if (el.region) el.region.value = region;
 
   fillFilters();
@@ -323,6 +327,7 @@ function fillFilters() {
   setOptions(el.pyeong, getAvailablePyeongGroups(), labels.all);
   renderMultiSelect("complex", unique("complex"));
   renderMultiSelect("type", getAvailableTypes());
+  setOptions(document.querySelector("#directionFilter"), unique("direction"), labels.all);
 }
 
 function fillUnitLookup() {
@@ -735,10 +740,14 @@ function bindEvents() {
   [el.search].forEach((control) => {
     control.addEventListener("input", applyFilters);
   });
+  document.querySelectorAll("#advancedFilters input, #advancedFilters select").forEach((control) => control.addEventListener("input", applyFilters));
+  document.querySelector("#resetAdvanced")?.addEventListener("click", () => { resetAdvancedFilters(); applyFilters(); });
+  document.querySelector("#showMoreListings")?.addEventListener("click", () => { state.listingLimit += 24; renderListings(); });
 
   el.sortButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.sort = button.dataset.sort;
+      state.listingLimit = 24;
       el.sortButtons.forEach((item) => item.classList.toggle("active", item === button));
       renderListings();
     });
@@ -1058,16 +1067,16 @@ function typeIdentity(row) {
 
 function matchesListingFilters(row, { ignoreDate = false, ignoreDeal = false } = {}) {
   const query = el.search.value.trim().toLowerCase();
-    const matchesDate = ignoreDate || el.date.value === labels.all || row.surveyDate === el.date.value;
-    const matchesComplex = matchesSelectedComplex(row);
-    const matchesDeal = ignoreDeal || el.deal.value === labels.all || row.dealType === el.deal.value;
-    const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
-    const matchesType = matchesSelectedType(row);
-    const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn, row.direction, row.representativeListingId]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query) && matchesFloor(row);
+  const matchesDate = ignoreDate || el.date.value === labels.all || row.surveyDate === el.date.value;
+  const matchesComplex = matchesSelectedComplex(row);
+  const matchesDeal = ignoreDeal || el.deal.value === labels.all || row.dealType === el.deal.value;
+  const matchesPyeong = el.pyeong.value === labels.all || row.pyeongGroup === el.pyeong.value;
+  const matchesType = matchesSelectedType(row);
+  const haystack = [row.complex, row.supplyArea, row.building, row.floor, row.features, row.moveIn, row.direction, row.representativeListingId]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return matchesDate && matchesComplex && matchesDeal && matchesPyeong && matchesType && haystack.includes(query) && matchesFloor(row) && matchesAdvancedFilters(row);
 }
 
 function matchesFloor(row) {
@@ -1075,6 +1084,11 @@ function matchesFloor(row) {
 }
 
 function applyFilters() {
+  state.listingLimit = 24;
+  const min = toNumber(document.querySelector("#priceMin")?.value);
+  const max = toNumber(document.querySelector("#priceMax")?.value);
+  const error = document.querySelector("#filterError");
+  if (error) error.textContent = min !== null && max !== null && min > max ? "최소 금액이 최대 금액보다 큽니다." : "";
   state.filtered = state.rows.filter((row) => matchesListingFilters(row));
   render();
 }
@@ -1597,13 +1611,87 @@ function renderPyeongCards() {
 
 function renderListings() {
   syncFloorButtons();
-  const rows = state.filtered
+  const allRows = state.filtered
     .filter(matchesFloor)
-    .sort(sortListings)
-    .slice(0, 24);
+    .sort(sortListings);
+  const rows = allRows.slice(0, state.listingLimit);
+  const count = document.querySelector("#listingCount");
+  if (count) count.textContent = `${allRows.length.toLocaleString("ko-KR")}건 중 ${rows.length.toLocaleString("ko-KR")}건`;
+  const more = document.querySelector("#showMoreListings");
+  if (more) more.hidden = rows.length >= allRows.length;
   el.listingGrid.innerHTML = rows.length
     ? rows.map(renderListingCard).join("")
     : `<div class="empty">조건에 맞는 매물이 없습니다. 필터를 조금 넓혀보세요.</div>`;
+}
+
+function resetAdvancedFilters() {
+  ["priceMin", "priceMax", "rentMax"].forEach((id) => { const control = document.querySelector(`#${id}`); if (control) control.value = ""; });
+  ["directionFilter", "roomsFilter", "priceChangeFilter"].forEach((id) => { const control = document.querySelector(`#${id}`); if (control) control.value = labels.all; });
+}
+
+function matchesAdvancedFilters(row) {
+  const min = toNumber(document.querySelector("#priceMin")?.value);
+  const max = toNumber(document.querySelector("#priceMax")?.value);
+  const rent = toNumber(document.querySelector("#rentMax")?.value);
+  if (min !== null && (!Number.isFinite(row.price) || row.price < min)) return false;
+  if (max !== null && (!Number.isFinite(row.price) || row.price > max)) return false;
+  if (rent !== null && (row.dealType !== "월세" || !Number.isFinite(row.monthlyRent) || row.monthlyRent > rent)) return false;
+  const direction = document.querySelector("#directionFilter")?.value || labels.all;
+  if (direction !== labels.all && row.direction !== direction) return false;
+  const rooms = document.querySelector("#roomsFilter")?.value || labels.all;
+  const plan = state.floorplans[getFloorplanKey(row)];
+  if (rooms !== labels.all) {
+    const count = Number(String(plan?.roomsBaths || "").match(/^(\d+)/)?.[1]);
+    if (!Number.isFinite(count) || count < Number(rooms)) return false;
+  }
+  const change = document.querySelector("#priceChangeFilter")?.value || labels.all;
+  if (change !== labels.all) {
+    const delta = getListingPriceChange(row);
+    if (change === "unknown") return delta === null;
+    if (delta === null || (change === "down" && delta >= 0) || (change === "up" && delta <= 0) || (change === "same" && delta !== 0)) return false;
+  }
+  return true;
+}
+
+function listingHistoryKey(row) {
+  return row.representativeListingId ? JSON.stringify([row.region || "세종", row.complex, row.dealType, row.representativeListingId]) : null;
+}
+
+function buildListingHistory(rows) {
+  const history = new Map();
+  rows.forEach((row) => {
+    const key = listingHistoryKey(row);
+    if (!key || !parseKoreanWeek(row.surveyDate)) return;
+    if (!history.has(key)) history.set(key, new Map());
+    const weeks = history.get(key);
+    const prior = weeks.get(row.surveyDate);
+    if (!weeks.has(row.surveyDate)) weeks.set(row.surveyDate, row);
+    else if (prior && (prior.price !== row.price || prior.monthlyRent !== row.monthlyRent)) weeks.set(row.surveyDate, null);
+  });
+  return new Map([...history].map(([key, weeks]) => [key, [...weeks.values()].filter(Boolean).sort((a, b) => parseKoreanWeek(a.surveyDate) - parseKoreanWeek(b.surveyDate))]));
+}
+
+function getListingHistory(row) {
+  const history = state.datasets[row.region || "세종"]?.listingHistory?.get(listingHistoryKey(row)) || [];
+  return history.filter((item) => parseKoreanWeek(item.surveyDate) <= parseKoreanWeek(row.surveyDate));
+}
+
+function getListingPriceChange(row) {
+  const history = getListingHistory(row);
+  if (!history.some((item) => item.surveyDate === row.surveyDate)) return null;
+  const prior = history.filter((item) => parseKoreanWeek(item.surveyDate) < parseKoreanWeek(row.surveyDate)).at(-1);
+  if (!prior) return null;
+  const currentPrice = analysisPrice(row);
+  const previousPrice = analysisPrice(prior);
+  return Number.isFinite(currentPrice) && Number.isFinite(previousPrice) ? currentPrice - previousPrice : null;
+}
+
+function renderListingHistory(row) {
+  const history = getListingHistory(row);
+  if (!history.length) return "";
+  const delta = getListingPriceChange(row);
+  const change = delta === null ? "비교 자료 없음" : delta === 0 ? "금액 변동 없음" : `직전 관측 대비 ${delta > 0 ? "+" : "-"}${formatPrice(Math.abs(delta))}만원${row.dealType === "월세" ? " (환산)" : ""}`;
+  return `<details class="listing-history"><summary>조사 이력 · ${history.length}주 <span>${change}</span></summary><table class="summary-table"><caption>같은 대표매물번호 · 금액 단위 만원</caption><thead><tr><th>조사 주차</th><th>호가 / 보증금·월세</th></tr></thead><tbody>${[...history].reverse().map((item) => `<tr><td>${escapeHtml(item.surveyDate)}</td><td>${formatPrice(item.price)}${item.dealType === "월세" ? ` / 월 ${formatPrice(item.monthlyRent)}` : ""}</td></tr>`).join("")}</tbody></table></details>`;
 }
 
 function toggleFloorFilter(value) {
@@ -1656,7 +1744,9 @@ function renderListingCard(row) {
         <div class="fact"><span>방향</span><strong>${escapeHtml(row.direction || "-")}</strong></div>
         <div class="fact"><span>입주</span><strong>${escapeHtml(formatMoveIn(row.moveIn))}</strong></div>
       </div>
+      ${plan ? `<div class="listing-attributes">${escapeHtml([plan.roomsBaths ? `방/욕실 ${plan.roomsBaths}` : "", plan.householdCount ? `타입 전체 ${plan.householdCount}` : ""].filter(Boolean).join(" · "))}</div>` : ""}
       <div class="features">${escapeHtml(row.features || "특징 정보 없음")}</div>
+      ${renderListingHistory(row)}
       <div class="card-actions">
         <button class="basket-button${inBasket ? " saved" : ""}" type="button" data-add-basket="${escapeHtml(rowKey)}">
           ${inBasket ? "담김" : "담기"}

@@ -207,6 +207,72 @@ caption {
   padding-left: 18px;
 }
 
+.advanced-filters {
+  display: block;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.advanced-filters > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.advanced-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--red);
+  font-size: 13px;
+}
+
+.listing-attributes {
+  color: var(--muted);
+  font-size: 12px;
+  padding-bottom: 8px;
+}
+
+.listing-history {
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+  margin-bottom: 10px;
+  font-size: 12px;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.listing-history summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.listing-history summary span {
+  display: block;
+  color: var(--blue);
+  margin: 6px 0;
+}
+
+.listing-pagination {
+  text-align: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .advanced-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 label {
   display: grid;
   gap: 6px;

@@ -68,6 +68,18 @@
           <button class="filter-button active" data-floor="중층" type="button">중층</button>
           <button class="filter-button active" data-floor="고층" type="button">고층</button>
         </div>
+        <details id="advancedFilters" class="toolbar-extra advanced-filters">
+          <summary>상세 조건</summary>
+          <div class="advanced-grid">
+            <label>최소 호가·보증금 (만원)<input id="priceMin" type="number" min="0" step="100" inputmode="numeric" /></label>
+            <label>최대 호가·보증금 (만원)<input id="priceMax" type="number" min="0" step="100" inputmode="numeric" /></label>
+            <label>최대 월세 (만원)<input id="rentMax" type="number" min="0" step="1" inputmode="numeric" /></label>
+            <label>방향<select id="directionFilter"></select></label>
+            <label>방수<select id="roomsFilter"><option>전체</option><option value="3">3개 이상</option><option value="4">4개 이상</option><option value="5">5개 이상</option></select></label>
+            <label>금액 변동 (월세 환산)<select id="priceChangeFilter"><option>전체</option><option value="down">인하</option><option value="up">인상</option><option value="same">변동 없음</option><option value="unknown">비교 자료 없음</option></select></label>
+          </div>
+          <div class="advanced-actions"><span id="filterError" role="status"></span><button id="resetAdvanced" type="button" class="ghost-button">상세 조건 초기화</button></div>
+        </details>
       </section>
 
       <section id="summaryTab" class="tab-panel active">
@@ -228,7 +240,7 @@
 
       <section class="list-section">
         <div class="panel-head">
-          <h2>추천 제시 매물</h2>
+          <div><h2>추천 제시 매물</h2><p id="listingCount" class="panel-note" aria-live="polite"></p></div>
           <div class="listing-controls">
             <div class="sort-controls" aria-label="정렬">
               <button class="sort-button active" data-sort="priceAsc" type="button">낮은 호가</button>
@@ -238,6 +250,7 @@
           </div>
         </div>
         <div id="listingGrid" class="listing-grid"></div>
+        <div class="listing-pagination"><button id="showMoreListings" class="plan-button" type="button" hidden>24건 더 보기</button></div>
       </section>
 
       <section class="work-section">

@@ -126,3 +126,40 @@ test("basket and contacts survive reload with recovery copy", () => {
   assert.equal(a.run("state.basket.length"), 1);
   assert.ok(a.storage.get("hogaWorkRecovery"));
 });
+
+test("budget, monthly rent, direction and room filters use known data only", () => {
+  const a = app();
+  a.node("#priceMax").value = "5000";
+  a.node("#rentMax").value = "100";
+  a.node("#directionFilter").value = "남향";
+  a.node("#roomsFilter").value = "3";
+  a.run('state.floorplans["A|84A"] = {roomsBaths:"3개/2개"}; const row = {complex:"A",supplyArea:"84A",price:5000,monthlyRent:90,direction:"남향",dealType:"월세"};');
+  assert.equal(a.run("matchesAdvancedFilters(row)"), true);
+  assert.equal(a.run('matchesAdvancedFilters({...row, dealType:"매매"})'), false);
+  assert.equal(a.run('matchesAdvancedFilters({...row, price:null})'), false);
+  assert.equal(a.run('matchesAdvancedFilters({...row, supplyArea:"unknown"})'), false);
+});
+
+test("observed price history never includes future weeks or other complexes", () => {
+  const a = app();
+  a.run(`const observations = [
+    {surveyDate:"26년 8월 4주차",price:80000},
+    {surveyDate:"26년 9월 1주차",price:79000},
+    {surveyDate:"26년 9월 2주차",price:78000}
+  ].map(item => ({...item,complex:"A",dealType:"매매",region:"세종",representativeListingId:"123"}));
+  state.datasets.세종 = {listingHistory:buildListingHistory(observations)};`);
+  assert.equal(a.run("getListingHistory(observations[1]).length"), 2);
+  assert.equal(a.run("getListingPriceChange(observations[1])"), -1000);
+  assert.equal(a.run('getListingHistory({...observations[1],complex:"B"}).length'), 0);
+  assert.equal(a.run("getListingPriceChange(observations[0])"), null);
+});
+
+test("all matching listings are reachable beyond 24 results", () => {
+  const a = app();
+  a.run('state.filtered = Array.from({length:55}, (_, i) => ({complex:"A",price:i,floorGroup:"저층"})); renderListingCard = () => "<article></article>"; renderListings();');
+  assert.equal((a.node("#listingGrid").innerHTML.match(/<article>/g) || []).length, 24);
+  assert.equal(a.node("#showMoreListings").hidden, false);
+  a.run("state.listingLimit = 72; renderListings();");
+  assert.equal((a.node("#listingGrid").innerHTML.match(/<article>/g) || []).length, 55);
+  assert.equal(a.node("#showMoreListings").hidden, true);
+});
