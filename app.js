@@ -24,6 +24,8 @@ const labels = {
   all: "전체",
 };
 
+const activeRegions = ["세종"];
+
 const regionLabels = {
   세종: {
     selector: "세종 6생활권",
@@ -116,17 +118,20 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, suwon, floorplans, unitAreas] = await Promise.all([
+  const [sejong, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
-    loadDataset("./data/listings-suwon.json", "수원", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
-  if (suwon?.rows.length) state.datasets.수원 = suwon;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();
+  // Archived data is only needed for previously saved customer work.
+  if (state.contacts.some((item) => item.region === "수원") || activeRegions.includes("수원")) {
+    const suwon = await loadDataset("./data/listings-suwon.json", "수원", { optional: true });
+    if (suwon) state.datasets.수원 = suwon;
+  }
 
   fillRegionFilter();
   activateRegion("세종", { render: false });
@@ -163,7 +168,7 @@ async function loadDataset(src, region, options = {}) {
 
 function fillRegionFilter() {
   if (!el.region) return;
-  el.region.innerHTML = Object.keys(state.datasets)
+  el.region.innerHTML = activeRegions.filter((region) => state.datasets[region])
     .map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(regionLabels[region]?.selector || region)}</option>`)
     .join("");
   el.region.value = state.activeRegion;
@@ -171,7 +176,7 @@ function fillRegionFilter() {
 
 function activateRegion(region, options = {}) {
   const dataset = state.datasets[region];
-  if (!dataset) return;
+  if (!dataset || !activeRegions.includes(region)) return;
 
   state.activeRegion = region;
   state.rows = dataset.rows;
