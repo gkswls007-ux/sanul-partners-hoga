@@ -794,6 +794,7 @@ function bindEvents() {
       addContactDraft(saveButton.dataset.saveContact);
     }
   });
+  [el.customerName, el.customerPhone].forEach((input) => input?.addEventListener("input", renderWorkLists));
 
   el.contactList?.addEventListener("click", (event) => {
     const customerButton = event.target.closest("[data-select-customer]");
