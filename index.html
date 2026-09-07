@@ -61,6 +61,13 @@
           검색
           <input id="searchInput" type="search" placeholder="동, 특징, 타입 검색" />
         </label>
+        <div class="toolbar-extra floor-controls" aria-label="층 필터">
+          <span>층 구분</span>
+          <button class="filter-button active" data-floor="전체" type="button">전체</button>
+          <button class="filter-button active" data-floor="저층" type="button">저층</button>
+          <button class="filter-button active" data-floor="중층" type="button">중층</button>
+          <button class="filter-button active" data-floor="고층" type="button">고층</button>
+        </div>
       </section>
 
       <section id="summaryTab" class="tab-panel active">
@@ -115,7 +122,7 @@
             <div class="panel-head">
               <div>
                 <h2>면적별 최소호가 & 최대호가</h2>
-                <p class="panel-note">평수·타입·전용면적별 최소/최대 호가와 평당 평균</p>
+                <p class="panel-note">금액 단위 만원 · 월세는 환산보증금 기준</p>
               </div>
             </div>
             <div class="table-wrap">
@@ -125,9 +132,10 @@
                     <th>평수</th>
                     <th>공급면적</th>
                     <th>전용면적</th>
+                    <th>거래</th>
                     <th>최소 호가</th>
                     <th>최대 호가</th>
-                    <th>평균(평당매매가)</th>
+                    <th>평균(만원/평)</th>
                     <th>매물 수</th>
                   </tr>
                 </thead>
@@ -139,7 +147,7 @@
       </section>
 
       <section id="briefingTab" class="tab-panel" hidden>
-      <section class="kpis" aria-label="핵심 지표">
+      <section id="priceKpis" class="kpis" aria-label="핵심 지표 · 금액 단위 만원">
         <article>
           <span>매물 수</span>
           <strong id="kpiCount">-</strong>
@@ -157,12 +165,13 @@
           <strong id="kpiPyeong">-</strong>
         </article>
       </section>
+      <div id="dealPriceBreakdown" class="table-wrap deal-breakdown" hidden></div>
 
       <section class="trend-section panel">
         <div class="panel-head">
           <div>
             <h2>주차별 호가 변동 추이</h2>
-            <p class="panel-note">단지·거래·평형 조건 기준, 조사 주차 필터는 제외</p>
+            <p class="panel-note">선택한 매물 조건 기준 · 조사 주차 제외 · 금액 단위 만원</p>
           </div>
           <div class="legend">
             <span><i class="legend-line avg"></i><em id="trendAvgLabel">평균 호가</em></span>
@@ -203,14 +212,14 @@
         <article class="panel">
           <div class="panel-head">
             <h2>단지별 호가 분포</h2>
-            <span>평균 기준</span>
+            <span>평균 · 만원 (월세는 환산)</span>
           </div>
           <div id="complexBars" class="bars"></div>
         </article>
         <article class="panel">
           <div class="panel-head">
             <h2>평형별 분위</h2>
-            <span>최저·평균·최고</span>
+            <span>최저·평균·최고 · 만원</span>
           </div>
           <div id="pyeongCards" class="mini-cards"></div>
         </article>
@@ -220,12 +229,6 @@
         <div class="panel-head">
           <h2>추천 제시 매물</h2>
           <div class="listing-controls">
-            <div class="floor-controls" aria-label="층 필터">
-              <button class="filter-button active" data-floor="전체" type="button">전체</button>
-              <button class="filter-button" data-floor="저층" type="button">저층</button>
-              <button class="filter-button" data-floor="중층" type="button">중층</button>
-              <button class="filter-button" data-floor="고층" type="button">고층</button>
-            </div>
             <div class="sort-controls" aria-label="정렬">
               <button class="sort-button active" data-sort="priceAsc" type="button">낮은 호가</button>
               <button class="sort-button" data-sort="priceDesc" type="button">높은 호가</button>
