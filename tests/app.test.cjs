@@ -85,3 +85,44 @@ test("listing text does not hide otherwise matching real transactions", () => {
   a.run('state.realTransactions = [{complex:"A"}];');
   assert.equal(a.run("getFilteredRealTransactions({ignoreDate:true}).length"), 1);
 });
+
+test("broker candidates survive refresh and snapshots do not alias source data", () => {
+  const a = app();
+  a.run(`state.datasets.세종 = {brokerMap:{"123":[{brokerName:"사무소A",individualListingIds:["456"]}]}};
+    const saved = toSavedListing({complex:"A",region:"세종",representativeListingId:"123"});
+    state.datasets.세종.brokerMap["123"][0].individualListingIds.push("999");
+    state.datasets.세종.brokerMap = {};
+    state.contacts = [saved];`);
+  assert.equal(a.run('getBrokerOptions(state.contacts[0])[0].individualListingIds.join(",")'), "456");
+  assert.equal(a.run('getBrokerOptions({region:"수원",brokerName:"이전 사무소",individualListingIds:["777"]})[0].brokerName'), "이전 사무소");
+});
+
+test("work backup merge keeps existing customer edits and permits another customer on same listing", () => {
+  const a = app();
+  a.run(`state.contacts = [{id:"a",contactId:"c",complex:"A",customerName:"고객1",customerPhone:"0101",memo:"기존메모"}];
+    const incoming = {format:"hoga-work",version:1,basket:[],contacts:[
+      {id:"a",contactId:"c",complex:"A",customerName:"고객1",customerPhone:"0101",memo:"옛메모"},
+      {id:"a",contactId:"c",complex:"A",customerName:"고객2",customerPhone:"0102"}
+    ]}; const merged = mergeWorkBackup(incoming);`);
+  assert.equal(a.run("merged.contacts.length"), 2);
+  assert.equal(a.run("merged.contacts[0].memo"), "기존메모");
+  assert.notEqual(a.run("merged.contacts[1].contactId"), "c");
+  assert.equal(a.run("state.contacts.length"), 1);
+});
+
+test("corrupt backup never mutates saved work", () => {
+  const a = app();
+  assert.throws(() => a.run('mergeWorkBackup({format:"hoga-work",version:1,basket:[],contacts:[{id:"bad"}]})'));
+  assert.equal(a.run("state.contacts.length"), 0);
+  a.storage.set("hogaContacts", "not-json");
+  a.run("loadSavedWork(); saveWork();");
+  assert.equal(a.storage.get("hogaContacts"), "not-json");
+});
+
+test("basket and contacts survive reload with recovery copy", () => {
+  const a = app();
+  a.storage.set("hogaContacts", '[]');
+  a.run('state.basket = [{id:"a",complex:"A"}]; saveWork(); state.basket = []; loadSavedWork();');
+  assert.equal(a.run("state.basket.length"), 1);
+  assert.ok(a.storage.get("hogaWorkRecovery"));
+});

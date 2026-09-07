@@ -14,6 +14,7 @@ const state = {
   floors: new Set(["저층", "중층", "고층"]),
   selectedComplexes: new Set(),
   selectedTypes: new Set(),
+  workReadError: false,
   signage: {
     screen: "overview",
     selectedComplexes: new Set(),
@@ -128,10 +129,11 @@ async function init() {
   state.unitAreas = unitAreas;
   loadSavedWork();
   // Archived data is only needed for previously saved customer work.
-  if (state.contacts.some((item) => item.region === "수원") || activeRegions.includes("수원")) {
+  if ([...state.contacts, ...state.basket].some((item) => item.region === "수원") || activeRegions.includes("수원")) {
     const suwon = await loadDataset("./data/listings-suwon.json", "수원", { optional: true });
     if (suwon) state.datasets.수원 = suwon;
   }
+  snapshotSavedBrokers();
 
   fillRegionFilter();
   activateRegion("세종", { render: false });
@@ -799,6 +801,14 @@ function bindEvents() {
   el.contactList?.addEventListener("input", (event) => {
     const select = event.target.closest("[data-contact-broker]");
     if (select) updateContactBroker(select.dataset.contactBroker, select.value);
+    const field = event.target.closest("[data-contact-field]");
+    if (field) {
+      const item = state.contacts.find((contact) => contact.contactId === field.dataset.contactId);
+      if (item && ["status", "memo"].includes(field.dataset.contactField)) {
+        item[field.dataset.contactField] = field.value;
+        saveWork();
+      }
+    }
   });
 
   el.contactList?.addEventListener("change", (event) => {
@@ -841,6 +851,7 @@ function bindEvents() {
   });
 
   el.clearBasket?.addEventListener("click", () => {
+    if (state.basket.length && !confirm("물건 리스트를 비울까요? 고객 연락 리스트는 유지됩니다.")) return;
     state.basket = [];
     saveWork();
     renderWorkLists();
@@ -852,6 +863,9 @@ function bindEvents() {
 
   el.exportContacts?.addEventListener("click", exportContacts);
   el.exportCustomerDoc?.addEventListener("click", exportCustomerDocx);
+  document.querySelector("#backupWork")?.addEventListener("click", backupWork);
+  document.querySelector("#restoreWork")?.addEventListener("click", () => document.querySelector("#restoreWorkFile").click());
+  document.querySelector("#restoreWorkFile")?.addEventListener("change", restoreWorkFile);
 
   el.signageScreenButtons?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-signage-screen]");
@@ -1712,17 +1726,124 @@ function decodeListingKey(value) {
 
 function loadSavedWork() {
   try {
-    state.basket = [];
-    localStorage.removeItem("hogaBasket");
+    state.basket = JSON.parse(localStorage.getItem("hogaBasket") || "[]");
     state.contacts = JSON.parse(localStorage.getItem("hogaContacts") || "[]");
+    if (!Array.isArray(state.basket) || !Array.isArray(state.contacts)) throw new Error("Invalid saved work");
   } catch {
     state.basket = [];
     state.contacts = [];
+    state.workReadError = true;
+    alert("저장된 고객 자료를 읽지 못했습니다. 원본 저장값은 보존했습니다. 백업 파일을 확인해주세요.");
   }
 }
 
 function saveWork() {
-  localStorage.setItem("hogaContacts", JSON.stringify(state.contacts));
+  if (state.workReadError) {
+    alert("기존 저장값 보호를 위해 저장을 중단했습니다. 현재 목록을 백업한 뒤 저장 자료를 확인해주세요.");
+    return false;
+  }
+  try {
+    const previous = { basket: localStorage.getItem("hogaBasket"), contacts: localStorage.getItem("hogaContacts") };
+    if (!localStorage.getItem("hogaWorkRecovery")) localStorage.setItem("hogaWorkRecovery", JSON.stringify(previous));
+    localStorage.setItem("hogaWorkPrevious", JSON.stringify(previous));
+    localStorage.setItem("hogaContacts", JSON.stringify(state.contacts));
+    localStorage.setItem("hogaBasket", JSON.stringify(state.basket));
+    return true;
+  } catch {
+    alert("브라우저 저장 공간이 부족하거나 저장할 수 없습니다. 목록 백업을 먼저 진행해주세요.");
+    return false;
+  }
+}
+
+function snapshotSavedBrokers() {
+  let changed = false;
+  [...state.basket, ...state.contacts].forEach((item) => {
+    if (Array.isArray(item.brokerOptions)) return;
+    const options = getBrokerOptions(item);
+    if (!options.length) return;
+    item.brokerOptions = options;
+    changed = true;
+  });
+  if (changed) saveWork();
+}
+
+function backupWork() {
+  if (!confirm("백업 파일에는 모든 고객의 이름·전화번호·연락 메모가 포함됩니다. 이 컴퓨터에 저장할까요?")) return;
+  const payload = { format: "hoga-work", version: 1, exportedAt: new Date().toISOString(), basket: state.basket, contacts: state.contacts };
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), `호가앱_고객목록_백업_${new Date().toISOString().slice(0, 10)}.json`);
+}
+
+function validateWorkBackup(payload) {
+  if (payload?.format !== "hoga-work" || payload.version !== 1 || !Array.isArray(payload.basket) || !Array.isArray(payload.contacts)) throw new Error("호가앱 목록 백업 파일이 아닙니다.");
+  if (payload.basket.length + payload.contacts.length > 20000) throw new Error("백업 항목 수가 너무 많습니다.");
+  const strings = ["id", "region", "surveyDate", "complex", "dealType", "supplyArea", "pyeongGroup", "building", "floor", "floorGroup", "features", "moveIn", "direction", "representativeListingId", "contactId", "customerName", "customerPhone", "brokerName", "savedAt", "status", "memo"];
+  const numbers = ["exclusiveArea", "pyeong", "price", "monthlyRent", "convertedDeposit", "pricePerPyeong", "brokerCount"];
+  const clean = (item, contact) => {
+    if (!item || typeof item.id !== "string" || !item.id || typeof item.complex !== "string" || (contact && (typeof item.contactId !== "string" || !item.contactId || typeof item.customerName !== "string" || typeof item.customerPhone !== "string"))) throw new Error("고객 또는 매물 항목 형식이 올바르지 않습니다.");
+    const result = {};
+    strings.forEach((key) => {
+      if (item[key] == null) return;
+      if (!["string", "number"].includes(typeof item[key]) || String(item[key]).length > 10000) throw new Error("텍스트 항목이 올바르지 않습니다.");
+      result[key] = String(item[key]);
+    });
+    numbers.forEach((key) => {
+      if (item[key] == null) return;
+      const value = toNumber(item[key]);
+      if (value === null) throw new Error("금액 또는 면적 항목이 올바르지 않습니다.");
+      result[key] = value;
+    });
+    const ids = (values) => {
+      if (!Array.isArray(values) || values.some((id) => typeof id !== "string" || id.length > 200)) throw new Error("중개사 매물번호가 올바르지 않습니다.");
+      return [...values];
+    };
+    if (item.individualListingIds !== undefined) result.individualListingIds = ids(item.individualListingIds);
+    if (item.brokerOptions !== undefined) {
+      if (!Array.isArray(item.brokerOptions)) throw new Error("중개사 목록이 올바르지 않습니다.");
+      result.brokerOptions = item.brokerOptions.map((broker) => {
+        if (!broker || typeof broker.brokerName !== "string" || broker.brokerName.length > 1000) throw new Error("중개사명이 올바르지 않습니다.");
+        return { brokerName: broker.brokerName, individualListingIds: ids(broker.individualListingIds || []) };
+      });
+    }
+    return result;
+  };
+  return { basket: payload.basket.map((item) => clean(item, false)), contacts: payload.contacts.map((item) => clean(item, true)) };
+}
+
+function mergeWorkBackup(payload) {
+  const incoming = validateWorkBackup(payload);
+  const basket = [...state.basket];
+  const contacts = [...state.contacts];
+  incoming.basket.forEach((item) => { if (!basket.some((saved) => saved.id === item.id)) basket.push(item); });
+  incoming.contacts.forEach((item) => {
+    if (contacts.some((saved) => saved.id === item.id && getCustomerKey(saved) === getCustomerKey(item))) return;
+    let contactId = item.contactId;
+    while (contacts.some((saved) => saved.contactId === contactId)) contactId += "-restored";
+    contacts.push({ ...item, contactId });
+  });
+  return { basket, contacts };
+}
+
+async function restoreWorkFile(event) {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  try {
+    if (file.size > 10 * 1024 * 1024) throw new Error("10MB 이하의 백업 파일만 복원할 수 있습니다.");
+    const merged = mergeWorkBackup(JSON.parse(await file.text()));
+    if (!confirm(`현재 목록은 유지하고 물건 ${merged.basket.length - state.basket.length}건, 연락 ${merged.contacts.length - state.contacts.length}건을 추가할까요? 동일 고객의 동일 매물은 기존 기록을 유지합니다.`)) return;
+    const previous = { basket: state.basket, contacts: state.contacts };
+    state.basket = merged.basket;
+    state.contacts = merged.contacts;
+    if (!saveWork()) {
+      state.basket = previous.basket;
+      state.contacts = previous.contacts;
+      return;
+    }
+    renderWorkLists();
+    renderListings();
+  } catch (error) {
+    alert(`복원하지 않았습니다. ${error.message}`);
+  }
 }
 
 function addBasketItem(rowId) {
@@ -1782,6 +1903,8 @@ function clearActiveContactGroup() {
   const groups = groupBy(activeContacts, getCustomerKey);
   const targetKey = groups.length <= 1 ? groups[0]?.[0] : state.selectedCustomerKey || groups[0]?.[0];
   if (!targetKey) return;
+  const customer = activeContacts.find((item) => getCustomerKey(item) === targetKey);
+  if (!confirm(`${customer?.customerName || "선택 고객"}님의 연락 리스트만 비울까요?`)) return;
   state.contacts = state.contacts.filter((item) => getCustomerKey(item) !== targetKey);
   if (!state.contacts.some((item) => getCustomerKey(item) === state.selectedCustomerKey)) {
     state.selectedCustomerKey = state.contacts.length ? getCustomerKey(state.contacts[0]) : "";
@@ -1851,6 +1974,8 @@ function toSavedListing(row) {
     moveIn: row.moveIn,
     direction: row.direction,
     representativeListingId: row.representativeListingId,
+    convertedDeposit: row.convertedDeposit,
+    brokerOptions: getBrokerOptions(row),
   };
 }
 
@@ -1965,18 +2090,23 @@ function renderContactItem(item) {
       <div class="work-controls">
         <select data-contact-broker="${escapeHtml(item.contactId)}" ${brokers.length ? "" : "disabled"}>${brokerOptions}</select>
         <div class="contact-meta">
-        <span>${escapeHtml(item.status || "미연락")}</span>
+        <select aria-label="연락 상태" data-contact-field="status" data-contact-id="${escapeHtml(item.contactId)}">${[...new Set(["미연락", "연락완료", "방문예정", "보류", "종료", item.status || "미연락"])].map((status) => `<option ${status === (item.status || "미연락") ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}</select>
         <button type="button" class="ghost-button" data-remove-contact="${escapeHtml(item.contactId)}">삭제</button>
         </div>
+        <input type="text" aria-label="내부 연락 메모" placeholder="내부 연락 메모" maxlength="1000" data-contact-field="memo" data-contact-id="${escapeHtml(item.contactId)}" value="${escapeHtml(item.memo || "")}" />
       </div>
     </article>
   `;
 }
 
 function getBrokerOptions(item) {
-  if (!item.representativeListingId) return [];
   const dataset = state.datasets[item.region || "세종"];
-  return dataset?.brokerMap?.[item.representativeListingId] || [];
+  const source = item.brokerOptions ?? dataset?.brokerMap?.[item.representativeListingId] ?? [];
+  const options = source.map((broker) => ({ brokerName: broker.brokerName, individualListingIds: [...(broker.individualListingIds || [])] }));
+  if (item.brokerName && !options.some((broker) => broker.brokerName === item.brokerName)) {
+    options.push({ brokerName: item.brokerName, individualListingIds: [...(item.individualListingIds || [])] });
+  }
+  return options;
 }
 
 function getCustomerKey(item) {
@@ -2010,8 +2140,9 @@ function exportContacts() {
     "입주가능일",
     "매물특징",
     "저장일시",
+    "내부 연락 메모",
   ];
-  const excelTextColumns = new Set([1, 4, 5, 13, 14, 18]);
+  const excelTextColumns = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
   const rows = contacts.map((item) => [
     item.customerName || "",
     item.customerPhone || "",
@@ -2032,6 +2163,7 @@ function exportContacts() {
     formatMoveIn(item.moveIn),
     item.features || "",
     item.savedAt || "",
+    item.memo || "",
   ]);
   const html = `
     <html>
@@ -2066,6 +2198,7 @@ function exportContacts() {
 function relatedListingIds(item) {
   const ids = new Set();
   if (item.representativeListingId) ids.add(item.representativeListingId);
+  (item.individualListingIds || []).forEach((id) => ids.add(id));
   getBrokerOptions(item).forEach((broker) => {
     (broker.individualListingIds || []).forEach((id) => ids.add(id));
   });
