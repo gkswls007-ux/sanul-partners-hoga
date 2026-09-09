@@ -33,7 +33,7 @@ def main(skip_refresh=False):
             raise ValueError(f"배포 대상이 작업 폴더 밖을 가리킵니다: {resolved}")
 
     DIST.mkdir(exist_ok=True)
-    for name in ["index.html", "app.js", "styles.css", "netlify.toml"]:
+    for name in ["index.html", "app.js", "signage.js", "styles.css", "netlify.toml"]:
         target = DIST / name
         if target.exists():
             target.unlink()
@@ -43,6 +43,7 @@ def main(skip_refresh=False):
             shutil.rmtree(target)
 
     copy_file("app.js")
+    copy_file("signage.js")
     copy_file("styles.css")
     shutil.copytree(
         ROOT / "data",
@@ -61,6 +62,7 @@ def main(skip_refresh=False):
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     html = re.sub(r"styles\.css\?v=[^\"']+", f"styles.css?v={version}", html)
     html = re.sub(r"app\.js\?v=[^\"']+", f"app.js?v={version}", html)
+    html = re.sub(r"signage\.js\?v=[^\"']+", f"signage.js?v={version}", html)
     (DIST / "index.html").write_text(html, encoding="utf-8")
 
     (DIST / "netlify.toml").write_text(

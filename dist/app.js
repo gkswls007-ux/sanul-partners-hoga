@@ -889,7 +889,7 @@ function bindEvents() {
     const input = event.target.closest("[data-signage-complex]");
     if (!input) return;
     if (input.checked) {
-      if (state.signage.selectedComplexes.size >= 4) {
+      if (!window.HogaSignage && state.signage.selectedComplexes.size >= 4) {
         input.checked = false;
         if (el.signageSaveStatus) el.signageSaveStatus.textContent = "사이니지에는 단지를 최대 4개까지 표시할 수 있습니다.";
       } else {
@@ -907,6 +907,16 @@ function bindEvents() {
     renderSignage();
   });
   el.downloadSignage?.addEventListener("click", downloadSignagePng);
+  document.querySelector("#signagePage")?.addEventListener("change", (event) => {
+    state.signage.page = Number(event.target.value);
+    renderSignage();
+  });
+  document.querySelectorAll("[data-signage-step]").forEach((button) => button.addEventListener("click", () => {
+    state.signage.page = (state.signage.page || 0) + Number(button.dataset.signageStep);
+    renderSignage();
+  }));
+  document.querySelector("#downloadSignageAll")?.addEventListener("click", () => downloadSignageStudio(true));
+  if (window.lucide) window.lucide.createIcons();
 
   document.querySelectorAll("[data-close-floorplan]").forEach((button) => {
     button.addEventListener("click", closeFloorplan);
@@ -3072,7 +3082,7 @@ function renderSignageComplexOptions() {
     shortName(a).localeCompare(shortName(b), "ko", { numeric: true }),
   );
   const selectedCount = state.signage.selectedComplexes.size;
-  const atLimit = selectedCount >= 4;
+  const atLimit = !window.HogaSignage && selectedCount >= 4;
   el.signageComplexOptions.innerHTML = complexes
     .map(
       (name) => `
@@ -3086,11 +3096,17 @@ function renderSignageComplexOptions() {
     )
     .join("");
   if (el.signageComplexNote) {
-    el.signageComplexNote.textContent = `선택한 단지만 화면에 표시됩니다. 현재 ${selectedCount}개 선택 · 최대 4개까지 표시됩니다.`;
+    el.signageComplexNote.textContent = window.HogaSignage
+      ? `${selectedCount}개 단지 선택`
+      : `선택한 단지만 화면에 표시됩니다. 현재 ${selectedCount}개 선택 · 최대 4개까지 표시됩니다.`;
   }
 }
 
 function renderSignage() {
+  if (window.HogaSignage) {
+    renderSignageStudio();
+    return;
+  }
   const canvas = el.signageCanvas;
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -3110,6 +3126,71 @@ function renderSignage() {
 
 function getSignageLatestDate() {
   return unique("surveyDate")[0] || "";
+}
+
+function getSignageSlides() {
+  return window.HogaSignage.createSlides({
+    rows: state.rows,
+    complexes: [...state.signage.selectedComplexes],
+    deal: el.signageDeal.value,
+    pyeong: el.signagePyeong.value,
+    screen: state.signage.screen,
+    region: regionLabels[state.activeRegion]?.selector || state.activeRegion,
+  });
+}
+
+function renderSignageStudio() {
+  const slides = getSignageSlides();
+  const signature = JSON.stringify([state.activeRegion, state.signage.screen, el.signageDeal.value, el.signagePyeong.value, [...state.signage.selectedComplexes]]);
+  if (state.signage.signature !== signature) state.signage.page = 0;
+  state.signage.signature = signature;
+  state.signage.page = Math.max(0, Math.min(state.signage.page || 0, slides.length - 1));
+  const slide = slides[state.signage.page];
+  window.HogaSignage.render(el.signageCanvas, slide);
+  const picker = document.querySelector("#signagePage");
+  picker.innerHTML = slides.map((item, i) => `<option value="${i}">${i + 1} / ${slides.length} · ${escapeHtml(item.groups.map((group) => window.HogaSignage.complexName(group.name)).join(" · "))}</option>`).join("");
+  picker.value = String(state.signage.page);
+  picker.disabled = !slides.length;
+  document.querySelector('[data-signage-step="-1"]').disabled = state.signage.page <= 0;
+  document.querySelector('[data-signage-step="1"]').disabled = state.signage.page >= slides.length - 1;
+  el.downloadSignage.disabled = !slide?.hasData || Boolean(state.signage.exporting);
+  document.querySelector("#downloadSignageAll").disabled = !slides.some((item) => item.hasData) || Boolean(state.signage.exporting);
+  const unavailable = slides.filter((item) => !item.hasData).length;
+  document.querySelector("#signagePageStatus").textContent = `${slides.length}장${unavailable ? ` · 조사 자료 없는 화면 ${unavailable}장` : ""}`;
+  if (!state.signage.exporting) el.signageSaveStatus.textContent = !slides.length ? "표시할 단지를 선택해주세요." : !slide?.hasData ? "이 화면은 저장할 조사 자료가 없습니다." : "";
+}
+
+async function downloadSignageStudio(all) {
+  if (state.signage.exporting) return;
+  const slides = getSignageSlides();
+  const candidates = all ? slides.filter((slide) => slide.hasData) : [slides[state.signage.page || 0]].filter((slide) => slide?.hasData);
+  if (!candidates.length) return;
+  state.signage.exporting = true;
+  renderSignageStudio();
+  try {
+    await document.fonts.ready;
+    const names = { overview: "매물현황", comparison: "평수별호가", trend: "호가추이" };
+    const base = safeFilename(`사이니지_${candidates[0].region}_${names[candidates[0].screen]}_${candidates[0].deal}_${candidates[0].pyeong}_${candidates[0].latest}`);
+    const zip = all ? new window.JSZip() : null;
+    for (let i = 0; i < candidates.length; i += 1) {
+      el.signageSaveStatus.textContent = `${i + 1} / ${candidates.length}장 저장 준비 중`;
+      const slide = all ? { ...candidates[i], index: i, total: candidates.length } : candidates[i];
+      const canvas = document.createElement("canvas");
+      window.HogaSignage.render(canvas, slide);
+      const blob = await new Promise((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("이미지 생성 실패")), "image/png"));
+      const filename = `${String(slide.index + 1).padStart(2, "0")}_${base}.png`;
+      if (zip) zip.file(filename, await blob.arrayBuffer());
+      else downloadBlob(blob, filename);
+    }
+    if (zip) downloadBlob(await zip.generateAsync({ type: "blob", compression: "STORE" }), `${base}_${candidates.length}장.zip`);
+    el.signageSaveStatus.textContent = `${candidates.length}장 저장 완료${all && candidates.length < slides.length ? " · 자료 없는 화면 제외" : ""}`;
+  } catch (error) {
+    el.signageSaveStatus.textContent = `저장 실패: ${error.message}`;
+  } finally {
+    state.signage.exporting = false;
+    el.downloadSignage.disabled = !getSignageSlides()[state.signage.page || 0]?.hasData;
+    document.querySelector("#downloadSignageAll").disabled = !getSignageSlides().some((slide) => slide.hasData);
+  }
 }
 
 function getSignagePriceLabel(dealType) {
@@ -3531,6 +3612,7 @@ function roundedRect(ctx, x, y, width, height, radius, fill, stroke = null) {
 }
 
 function downloadSignagePng() {
+  if (window.HogaSignage) return downloadSignageStudio(false);
   if (!el.signageCanvas) return;
   const screenNames = { overview: "시장요약", comparison: "단지별호가", trend: "호가추이" };
   const dealType = el.signageDeal?.value || "전체";
