@@ -2687,6 +2687,12 @@ function getReportPyeongGroup(item) {
   return "50평대";
 }
 
+function getCustomerTrendLabelIndices(length, chartWidth) {
+  const count = Math.min(length, Math.max(2, Math.floor(chartWidth / 82) + 1));
+  return new Set(Array.from({ length: count }, (_, index) =>
+    Math.round(index * (length - 1) / Math.max(count - 1, 1))));
+}
+
 async function renderCustomerTrendChart(group) {
   const rows = getCustomerTrendRows(group);
   const grouped = groupBy(rows, "surveyDate")
@@ -2731,6 +2737,7 @@ async function renderCustomerTrendChart(group) {
   const lastIndex = grouped.length - 1;
   const lastItem = grouped[lastIndex];
   const title = getCustomerTrendTitle(group);
+  const labelIndices = getCustomerTrendLabelIndices(grouped.length, chartW);
   const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         ${ticks
@@ -2745,8 +2752,8 @@ async function renderCustomerTrendChart(group) {
           .map((item, index) => {
             const barHeight = pad.top + chartH - yCount(item.count);
             return `<rect x="${x(index) - barW / 2}" y="${yCount(item.count)}" width="${barW}" height="${barHeight}" rx="3" fill="#c7dedf"></rect>
-              <text x="${x(index)}" y="${height - 26}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${escapeHtml(shortWeek(item.date))}</text>
-              <text x="${x(index)}" y="${height - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${item.count.toLocaleString("ko-KR")}건</text>`;
+              ${labelIndices.has(index) ? `<text x="${x(index)}" y="${height - 26}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${escapeHtml(shortWeek(item.date))}</text>
+              <text x="${x(index)}" y="${height - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${item.count.toLocaleString("ko-KR")}건</text>` : ""}`;
           })
           .join("")}
         <polyline points="${minPoints}" fill="none" stroke="#b77916" stroke-width="2" stroke-dasharray="5 5"></polyline>
@@ -2755,7 +2762,7 @@ async function renderCustomerTrendChart(group) {
           .map(
             (item, index) => `<circle cx="${x(index)}" cy="${yPrice(item.minPrice)}" r="3" fill="#b77916"></circle>
               <circle cx="${x(index)}" cy="${yPrice(item.avgPrice)}" r="4" fill="#245f98"></circle>
-              <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
+              ${labelIndices.has(index) ? `<text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="${index === 0 ? "start" : index === lastIndex ? "end" : "middle"}" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>` : ""}`,
           )
           .join("")}
         <text x="${x(lastIndex)}" y="${yPrice(lastItem.minPrice) + 14}" text-anchor="end" font-size="10" font-weight="800" fill="#b77916">${formatPrice(lastItem.minPrice)}</text>
@@ -2767,6 +2774,7 @@ async function renderCustomerTrendChart(group) {
       <p class="chart-title">${escapeHtml(title)}</p>
       ${chartImage ? `<img class="chart-image" src="${chartImage}" width="600" height="189" style="width:15.87cm;height:5cm;border:0;" alt="${escapeHtml(title)}" />` : svg}
       <p class="chart-note">파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수</p>
+      ${grouped.length > labelIndices.size ? `<p class="chart-note">전체 ${grouped.length}개 조사 주차 반영 · 숫자와 주차는 간격을 두고 표시 (금액: 만원)</p>` : ""}
       ${group.dealType === "월세" ? `<p class="chart-note">환산보증금 : 월세 1만원 당 보증금 200만원 (연6% 전월세 전환율 가정)</p>` : ""}
     </div>
   `;
@@ -2846,6 +2854,7 @@ async function renderCustomerTrendChartImage(group) {
   const lastIndex = grouped.length - 1;
   const lastItem = grouped[lastIndex];
   const title = getCustomerTrendTitle(group);
+  const labelIndices = getCustomerTrendLabelIndices(grouped.length, chartW);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <rect width="${width}" height="${height}" fill="#ffffff"></rect>
@@ -2861,8 +2870,8 @@ async function renderCustomerTrendChartImage(group) {
         .map((item, index) => {
           const barHeight = pad.top + chartH - yCount(item.count);
           return `<rect x="${x(index) - barW / 2}" y="${yCount(item.count)}" width="${barW}" height="${barHeight}" rx="3" fill="#c7dedf"></rect>
-            <text x="${x(index)}" y="${height - 26}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${escapeHtml(shortWeek(item.date))}</text>
-            <text x="${x(index)}" y="${height - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${item.count.toLocaleString("ko-KR")}건</text>`;
+            ${labelIndices.has(index) ? `<text x="${x(index)}" y="${height - 26}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${escapeHtml(shortWeek(item.date))}</text>
+            <text x="${x(index)}" y="${height - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">${item.count.toLocaleString("ko-KR")}건</text>` : ""}`;
         })
         .join("")}
       <polyline points="${minPoints}" fill="none" stroke="#b77916" stroke-width="2" stroke-dasharray="5 5"></polyline>
@@ -2871,7 +2880,7 @@ async function renderCustomerTrendChartImage(group) {
         .map(
           (item, index) => `<circle cx="${x(index)}" cy="${yPrice(item.minPrice)}" r="3" fill="#b77916"></circle>
             <circle cx="${x(index)}" cy="${yPrice(item.avgPrice)}" r="4" fill="#245f98"></circle>
-            <text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="middle" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>`,
+            ${labelIndices.has(index) ? `<text x="${x(index)}" y="${yPrice(item.avgPrice) - 7}" text-anchor="${index === 0 ? "start" : index === lastIndex ? "end" : "middle"}" font-size="10" font-weight="800" fill="#111827">${formatPrice(item.avgPrice)}</text>` : ""}`,
         )
         .join("")}
       <text x="${x(lastIndex)}" y="${yPrice(lastItem.minPrice) + 14}" text-anchor="end" font-size="10" font-weight="800" fill="#b77916">${formatPrice(lastItem.minPrice)}</text>
@@ -2880,7 +2889,7 @@ async function renderCustomerTrendChartImage(group) {
   return {
     title,
     image: await svgToPngDataUrl(svg, width, height),
-    note: `파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수`,
+    note: `파란선: 평균 ${group.dealType === "월세" ? "환산가" : "호가"} · 점선: 최저 ${group.dealType === "월세" ? "환산가" : "호가"} · 막대: 매물 수 (금액: 만원)${grouped.length > labelIndices.size ? `\n전체 ${grouped.length}개 조사 주차 반영 · 숫자와 주차는 간격을 두고 표시` : ""}`,
   };
 }
 
