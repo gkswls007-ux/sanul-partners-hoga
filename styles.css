@@ -886,6 +886,14 @@ input {
   white-space: nowrap;
 }
 
+.move-in-picker { position: relative; min-width: 0; }
+.move-in-picker summary { cursor: pointer; list-style: none; }
+.move-in-picker summary::-webkit-details-marker { display: none; }
+.move-in-picker[open] { z-index: 10; }
+.move-in-options { position: absolute; right: 0; top: 100%; width: 340px; max-width: 75vw; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 8px 24px #0002; padding: 8px; }
+.move-in-options button { display: block; width: 100%; text-align: left; padding: 10px; background: white; border: 0; border-bottom: 1px solid #e2e8f0; color: #182c40; white-space: normal; overflow-wrap: anywhere; }
+.move-in-options button:hover, .move-in-options button[aria-pressed="true"] { background: #e8f3f2; }
+.move-in-options small, .move-in-source { display: block; margin-top: 4px; overflow-wrap: anywhere; }
 .facts {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -1,3 +1,4 @@
+const moveInSelections = new Map();
 const state = {
   datasets: {},
   activeRegion: "세종",
@@ -162,7 +163,7 @@ async function loadDataset(src, region, options = {}) {
       realTransactions: (payload.realTransactions || [])
         .map((row) => normalizeRealTransaction({ ...row, region }))
         .filter((row) => row.complex && matchesRegion(row)),
-      brokerMap: payload.brokerMap || {},
+      brokerMap: normalizeBrokerMap(payload.brokerMap || {}),
       meta: payload.meta || {},
     };
   } catch (error) {
@@ -770,6 +771,11 @@ function bindEvents() {
   });
 
   el.listingGrid.addEventListener("click", (event) => {
+    const moveInOption = event.target.closest("[data-move-in-option]");
+    if (moveInOption) {
+      selectListingMoveIn(moveInOption.dataset.moveInRow, Number(moveInOption.dataset.moveInOption));
+      return;
+    }
     const planButton = event.target.closest("[data-plan-key]");
     if (planButton) {
       openFloorplan(planButton.dataset.planKey, planButton.dataset.listingKey);
@@ -1756,7 +1762,7 @@ function renderListingCard(row) {
         <div class="fact"><span>${pyeongPriceLabel}</span><strong>${Number.isFinite(pyeongPrice) ? Math.round(pyeongPrice).toLocaleString("ko-KR") : "-"}</strong></div>
         <div class="fact"><span>중개수</span><strong>${row.brokerCount ? `${row.brokerCount}곳` : "-"}</strong></div>
         <div class="fact"><span>방향</span><strong>${escapeHtml(row.direction || "-")}</strong></div>
-        <div class="fact"><span>입주</span><strong>${escapeHtml(formatMoveIn(row.moveIn))}</strong></div>
+        ${renderMoveInPicker(row)}
       </div>
       ${plan ? `<div class="listing-attributes">${escapeHtml([plan.roomsBaths ? `방/욕실 ${plan.roomsBaths}` : "", plan.householdCount ? `타입 전체 ${plan.householdCount}` : ""].filter(Boolean).join(" · "))}</div>` : ""}
       <div class="features">${escapeHtml(row.features || "특징 정보 없음")}</div>
@@ -1773,6 +1779,51 @@ function renderListingCard(row) {
       </div>
     </article>
   `;
+}
+
+function getMoveInOptions(row) {
+  return getBrokerOptions(row).flatMap(broker => broker.individualListings
+    .filter(listing => listing.moveIn)
+    .map(listing => ({ selectedMoveIn: listing.moveIn, moveInBroker: broker.brokerName, moveInListingId: listing.listingId })));
+}
+
+function renderMoveInPicker(row) {
+  const key = getListingId(row);
+  const selected = moveInSelections.get(key) || state.basket.find(item => item.id === key);
+  const options = getMoveInOptions(row);
+  return `<details class="fact move-in-picker"><summary><span>입주 ▾</span><strong>${escapeHtml(selected?.selectedMoveIn || formatMoveIn(row.moveIn))}</strong></summary>
+    <div class="move-in-options">${options.length ? options.map((option, index) => `<button type="button" data-move-in-row="${escapeHtml(key)}" data-move-in-option="${index}" aria-pressed="${selected?.moveInListingId === option.moveInListingId && selected?.moveInBroker === option.moveInBroker}"><strong>${escapeHtml(option.selectedMoveIn)}</strong><small>${escapeHtml(option.moveInBroker)} · ${escapeHtml(option.moveInListingId)}</small></button>`).join("") : `<p>중개사별 입주 정보가 없습니다.</p>`}
+    <button type="button" data-move-in-row="${escapeHtml(key)}" data-move-in-option="-1">선택 해제</button></div></details>`;
+}
+
+function selectListingMoveIn(key, index) {
+  const row = state.rows.find(item => getListingId(item) === key);
+  if (!row) return;
+  const selection = index === -1 ? { selectedMoveIn: "", moveInBroker: "", moveInListingId: "" } : getMoveInOptions(row)[index];
+  if (!selection) return;
+  moveInSelections.set(key, { ...selection });
+  const saved = state.basket.find(item => item.id === key);
+  if (saved) {
+    Object.assign(saved, selection);
+    saveWork();
+    renderWorkLists();
+  }
+  renderListings();
+}
+
+function getCustomerMoveIn(item) {
+  if (item.selectedMoveIn) return item.selectedMoveIn;
+  const value = String(getContactMoveIn(item) || "").trim();
+  return !value || value === "-" || /상이|매물번호/.test(value) || /\d{8,}:/.test(value)
+    ? "입주 일정 확인 필요" : value;
+}
+
+function renderMoveInSource(item) {
+  if (!item.selectedMoveIn) return "";
+  const current = getMoveInOptions({ region: item.region, representativeListingId: item.representativeListingId });
+  const match = current.find(option => option.moveInListingId === item.moveInListingId && option.moveInBroker === item.moveInBroker);
+  const changed = !match || match.selectedMoveIn !== item.selectedMoveIn;
+  return `<small class="move-in-source">입주일 출처: ${escapeHtml(item.moveInBroker)} · ${escapeHtml(item.moveInListingId)}${changed ? " · 최신 자료와 차이 있음, 재확인 필요" : ""}</small>`;
 }
 
 function formatListingCardPrice(row) {
@@ -1883,6 +1934,7 @@ function validateWorkBackup(payload) {
   if (payload.basket.length + payload.contacts.length > 20000) throw new Error("백업 항목 수가 너무 많습니다.");
   const strings = ["id", "region", "surveyDate", "complex", "dealType", "supplyArea", "pyeongGroup", "building", "floor", "floorGroup", "features", "moveIn", "direction", "representativeListingId", "contactId", "customerName", "customerPhone", "brokerName", "savedAt", "status", "memo"];
   const numbers = ["exclusiveArea", "pyeong", "price", "monthlyRent", "convertedDeposit", "pricePerPyeong", "brokerCount"];
+  strings.push("selectedMoveIn", "moveInBroker", "moveInListingId");
   const clean = (item, contact) => {
     if (!item || typeof item.id !== "string" || !item.id || typeof item.complex !== "string" || (contact && (typeof item.contactId !== "string" || !item.contactId || typeof item.customerName !== "string" || typeof item.customerPhone !== "string"))) throw new Error("고객 또는 매물 항목 형식이 올바르지 않습니다.");
     const result = {};
@@ -1901,12 +1953,28 @@ function validateWorkBackup(payload) {
       if (!Array.isArray(values) || values.some((id) => typeof id !== "string" || id.length > 200)) throw new Error("중개사 매물번호가 올바르지 않습니다.");
       return [...values];
     };
+    const listings = (values) => {
+      if (!Array.isArray(values)) throw new Error("중개사별 입주정보가 올바르지 않습니다.");
+      return values.map((listing) => {
+        if (!listing || typeof listing !== "object" || Array.isArray(listing)) throw new Error("중개사별 입주정보가 올바르지 않습니다.");
+        const listingId = String(listing.listingId || "");
+        const moveIn = String(listing.moveIn || "");
+        const moveInCategory = String(listing.moveInCategory || "");
+        if (!listingId || listingId.length > 200 || moveIn.length > 1000 || moveInCategory.length > 200) throw new Error("중개사별 입주정보가 올바르지 않습니다.");
+        return { listingId, moveIn, moveInCategory };
+      });
+    };
     if (item.individualListingIds !== undefined) result.individualListingIds = ids(item.individualListingIds);
+    if (item.individualListings !== undefined) result.individualListings = listings(item.individualListings);
     if (item.brokerOptions !== undefined) {
       if (!Array.isArray(item.brokerOptions)) throw new Error("중개사 목록이 올바르지 않습니다.");
       result.brokerOptions = item.brokerOptions.map((broker) => {
         if (!broker || typeof broker.brokerName !== "string" || broker.brokerName.length > 1000) throw new Error("중개사명이 올바르지 않습니다.");
-        return { brokerName: broker.brokerName, individualListingIds: ids(broker.individualListingIds || []) };
+        return {
+          brokerName: broker.brokerName,
+          individualListingIds: ids(broker.individualListingIds || []),
+          individualListings: listings(broker.individualListings || []),
+        };
       });
     }
     return result;
@@ -1988,6 +2056,7 @@ function addContactDraft(rowId) {
     customerPhone,
     brokerName: "",
     individualListingIds: [],
+    individualListings: [],
     savedAt: new Date().toLocaleString("ko-KR"),
     status: "미연락",
   };
@@ -2024,7 +2093,9 @@ function updateContactBroker(contactId, brokerName) {
   const broker = getBrokerOptions(item).find((option) => option.brokerName === brokerName);
   item.brokerName = brokerName;
   item.individualListingIds = broker?.individualListingIds || [];
+  item.individualListings = broker?.individualListings || [];
   saveWork();
+  renderWorkLists();
 }
 
 function updateContactCustomer(customerKey, field, value) {
@@ -2081,6 +2152,7 @@ function toSavedListing(row) {
     representativeListingId: row.representativeListingId,
     convertedDeposit: row.convertedDeposit,
     brokerOptions: getBrokerOptions(row),
+    ...(moveInSelections.get(getListingId(row)) || {}),
   };
 }
 
@@ -2164,7 +2236,8 @@ function renderBasketItem(item) {
       <div>
         <strong>${escapeHtml(shortName(item.complex))}</strong>
         <p>${escapeHtml(formatListingLine(item))}</p>
-        <small>${escapeHtml([item.region || "세종", item.direction, formatMoveIn(item.moveIn), item.features].filter(Boolean).join(" · "))}</small>
+        <small>${escapeHtml([item.region || "세종", item.direction, formatMoveIn(item.selectedMoveIn || item.moveIn), item.features].filter(Boolean).join(" · "))}</small>
+        ${renderMoveInSource(item)}
       </div>
       <div class="work-controls">
         <button type="button" class="plan-button" data-save-contact="${escapeHtml(item.id)}" ${inContacts ? "disabled" : ""}>${inContacts ? "연락 리스트 담김" : "연락 리스트로"}</button>
@@ -2190,7 +2263,8 @@ function renderContactItem(item) {
       <div>
         <strong>${escapeHtml(shortName(item.complex))}</strong>
         <p>${escapeHtml(formatListingLine(item))}</p>
-        <small>${escapeHtml([item.region || "세종", `대표매물번호 ${item.representativeListingId || "-"}`, item.direction, formatMoveIn(item.moveIn), item.savedAt].filter(Boolean).join(" · "))}</small>
+        <small>${escapeHtml([item.region || "세종", `대표매물번호 ${item.representativeListingId || "-"}`, item.direction, formatMoveIn(getContactMoveIn(item)), item.savedAt].filter(Boolean).join(" · "))}</small>
+        ${renderMoveInSource(item)}
       </div>
       <div class="work-controls">
         <select data-contact-broker="${escapeHtml(item.contactId)}" ${brokers.length ? "" : "disabled"}>${brokerOptions}</select>
@@ -2207,11 +2281,53 @@ function renderContactItem(item) {
 function getBrokerOptions(item) {
   const dataset = state.datasets[item.region || "세종"];
   const source = item.brokerOptions ?? dataset?.brokerMap?.[item.representativeListingId] ?? [];
-  const options = source.map((broker) => ({ brokerName: broker.brokerName, individualListingIds: [...(broker.individualListingIds || [])] }));
+  const options = source.map(normalizeBrokerOption);
   if (item.brokerName && !options.some((broker) => broker.brokerName === item.brokerName)) {
-    options.push({ brokerName: item.brokerName, individualListingIds: [...(item.individualListingIds || [])] });
+    options.push(normalizeBrokerOption({
+      brokerName: item.brokerName,
+      individualListingIds: item.individualListingIds,
+      individualListings: item.individualListings,
+    }));
   }
   return options;
+}
+
+function normalizeBrokerMap(source) {
+  return Object.fromEntries(
+    Object.entries(source || {}).map(([representativeId, brokers]) => [
+      normalizeListingId(representativeId),
+      Array.isArray(brokers) ? brokers.map(normalizeBrokerOption) : [],
+    ]),
+  );
+}
+
+function normalizeBrokerOption(broker = {}) {
+  const individualListingIds = [...new Set((broker.individualListingIds || []).map(normalizeListingId).filter(Boolean))];
+  const individualListings = Array.isArray(broker.individualListings)
+    ? broker.individualListings
+        .map((listing) => ({
+          listingId: normalizeListingId(listing?.listingId),
+          moveIn: String(listing?.moveIn || "").trim(),
+          moveInCategory: String(listing?.moveInCategory || "").trim(),
+        }))
+        .filter((listing) => listing.listingId)
+    : [];
+  individualListings.forEach((listing) => {
+    if (!individualListingIds.includes(listing.listingId)) individualListingIds.push(listing.listingId);
+  });
+  return { brokerName: String(broker.brokerName || "").trim(), individualListingIds, individualListings };
+}
+
+function getContactMoveIn(item) {
+  if (item.selectedMoveIn) return item.selectedMoveIn;
+  if (!item.brokerName) return item.moveIn;
+  const broker = getBrokerOptions(item).find((option) => option.brokerName === item.brokerName);
+  const listings = broker?.individualListings?.length ? broker.individualListings : item.individualListings || [];
+  const known = listings.filter((listing) => listing.moveIn);
+  if (!known.length) return item.moveIn;
+  const unique = [...new Set(known.map((listing) => listing.moveIn))];
+  if (unique.length === 1) return unique[0];
+  return known.map((listing) => `${listing.listingId}: ${listing.moveIn}`).join(" / ");
 }
 
 function getCustomerKey(item) {
@@ -2265,7 +2381,7 @@ function exportContacts() {
     item.building || "",
     item.floor || "",
     item.direction || "",
-    formatMoveIn(item.moveIn),
+    formatMoveIn(getContactMoveIn(item)),
     item.features || "",
     item.savedAt || "",
     item.memo || "",
@@ -2450,7 +2566,7 @@ async function exportCustomerDocx() {
           { value: formatReportPrice(item), bold: true },
           formatAreaDetail(item),
           [item.building, item.floor].filter(Boolean).join(" ") || "-",
-          formatMoveIn(item.moveIn),
+          formatMoveIn(getCustomerMoveIn(item)),
         ]),
       ],
       [1700, 800, 1100, 2916, 1701, 2268],
@@ -2479,7 +2595,7 @@ async function exportCustomerDocx() {
         [
           [{ value: "거래", header: true }, item.dealType || "-", { value: "호가(단위: 만원)", header: true }, formatReportPrice(item)],
           [{ value: "타입/평형", header: true }, formatAreaDetail(item), { value: "동/층", header: true }, [item.building, item.floor].filter(Boolean).join(" ") || "-"],
-          [{ value: "방향", header: true }, item.direction || "-", { value: "입주가능일", header: true }, formatMoveIn(item.moveIn)],
+          [{ value: "방향", header: true }, item.direction || "-", { value: "입주가능일", header: true }, formatMoveIn(getCustomerMoveIn(item))],
         ],
         [1300, 3380, 1600, 3080],
       ),
@@ -2623,7 +2739,7 @@ function renderCustomerSummaryTable(items) {
                 <td><strong>${escapeHtml(formatReportPrice(item))}</strong></td>
                 <td>${escapeHtml(formatAreaDetail(item))}</td>
                 <td>${escapeHtml([item.building, item.floor].filter(Boolean).join(" ") || "-")}</td>
-                <td>${escapeHtml(formatMoveIn(item.moveIn))}</td>
+                <td>${escapeHtml(formatMoveIn(getCustomerMoveIn(item)))}</td>
               </tr>
             `,
           )
@@ -2910,7 +3026,7 @@ async function renderCustomerDocListing(item, index) {
       <table>
         <tr><th>거래</th><td>${escapeHtml(item.dealType || "-")}</td><th>호가(단위 : 만원)</th><td>${escapeHtml(formatPrice(item.price))}${item.dealType === "월세" && Number.isFinite(item.monthlyRent) ? ` / 월 ${escapeHtml(formatPrice(item.monthlyRent))}` : ""}</td></tr>
         <tr><th>타입/평형</th><td>${escapeHtml(formatAreaDetail(item))}</td><th>동/층</th><td>${escapeHtml([item.building, item.floor].filter(Boolean).join(" ") || "-")}</td></tr>
-        <tr><th>방향</th><td>${escapeHtml(item.direction || "-")}</td><th>입주가능일</th><td>${escapeHtml(formatMoveIn(item.moveIn))}</td></tr>
+        <tr><th>방향</th><td>${escapeHtml(item.direction || "-")}</td><th>입주가능일</th><td>${escapeHtml(formatMoveIn(getCustomerMoveIn(item)))}</td></tr>
       </table>
       <div class="features">${escapeHtml(item.features || "특징 정보 없음")}</div>
       ${

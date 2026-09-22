@@ -26,6 +26,15 @@ function app() {
   return { run: (code) => vm.runInContext(code, context), node, storage };
 }
 
+test("customer move-in selection overrides broker changes and survives backup", () => {
+  const a = app();
+  a.run(`globalThis.chosen = {id:"A", complex:"A", selectedMoveIn:"10월 말", moveInBroker:"중개사A", moveInListingId:"123", moveIn:"중개사별 상이", customerName:"A",customerPhone:"000",contactId:"A1"};`);
+  assert.equal(a.run('getCustomerMoveIn(chosen)'), '10월 말');
+  assert.equal(a.run('getCustomerMoveIn({moveIn:"중개사별 상이"})'), '입주 일정 확인 필요');
+  assert.equal(a.run('getCustomerMoveIn({moveIn:"즉시입주 협의가능"})'), '즉시입주 협의가능');
+  assert.equal(a.run('validateWorkBackup({format:"hoga-work",version:1,basket:[],contacts:[chosen]}).contacts[0].selectedMoveIn'), '10월 말');
+});
+
 test("same type name in two complexes stays independently selectable", () => {
   const a = app();
   a.run(`state.rows = [
@@ -88,13 +97,40 @@ test("listing text does not hide otherwise matching real transactions", () => {
 
 test("broker candidates survive refresh and snapshots do not alias source data", () => {
   const a = app();
-  a.run(`state.datasets.세종 = {brokerMap:{"123":[{brokerName:"사무소A",individualListingIds:["456"]}]}};
+  a.run(`state.datasets.세종 = {brokerMap:{"123":[{brokerName:"사무소A",individualListingIds:["456"],individualListings:[{listingId:"456",moveIn:"2026년 11월 30일 협의가능",moveInCategory:"협의"}]}]}};
     const saved = toSavedListing({complex:"A",region:"세종",representativeListingId:"123"});
     state.datasets.세종.brokerMap["123"][0].individualListingIds.push("999");
+    state.datasets.세종.brokerMap["123"][0].individualListings[0].moveIn = "즉시입주";
     state.datasets.세종.brokerMap = {};
     state.contacts = [saved];`);
   assert.equal(a.run('getBrokerOptions(state.contacts[0])[0].individualListingIds.join(",")'), "456");
+  assert.equal(a.run('getBrokerOptions(state.contacts[0])[0].individualListings[0].moveIn'), "2026년 11월 30일 협의가능");
   assert.equal(a.run('getBrokerOptions({region:"수원",brokerName:"이전 사무소",individualListingIds:["777"]})[0].brokerName'), "이전 사무소");
+});
+
+test("selected broker controls move-in text and differing ads remain explicit", () => {
+  const a = app();
+  a.run(`state.contacts = [{
+    id:"a",contactId:"c",complex:"A",region:"세종",moveIn:"중개사별 상이",brokerName:"사무소A",
+    brokerOptions:[
+      {brokerName:"사무소A",individualListingIds:["1"],individualListings:[{listingId:"1",moveIn:"2026년 8월 1일 협의가능",moveInCategory:"협의"}]},
+      {brokerName:"사무소B",individualListingIds:["2","3"],individualListings:[
+        {listingId:"2",moveIn:"즉시입주",moveInCategory:"즉시입주"},
+        {listingId:"3",moveIn:"2026년 9월 30일",moveInCategory:"날짜지정"}
+      ]}
+    ]
+  }];`);
+  assert.equal(a.run("getContactMoveIn(state.contacts[0])"), "2026년 8월 1일 협의가능");
+  a.run('updateContactBroker("c", "사무소B")');
+  assert.equal(a.run("getContactMoveIn(state.contacts[0])"), "2: 즉시입주 / 3: 2026년 9월 30일");
+});
+
+test("work backup preserves broker-specific move-in details", () => {
+  const a = app();
+  a.run(`const restored = validateWorkBackup({format:"hoga-work",version:1,basket:[{
+    id:"a",complex:"A",brokerOptions:[{brokerName:"사무소A",individualListingIds:["1"],individualListings:[{listingId:"1",moveIn:"즉시입주",moveInCategory:"즉시입주"}]}]
+  }],contacts:[]});`);
+  assert.equal(a.run("restored.basket[0].brokerOptions[0].individualListings[0].moveIn"), "즉시입주");
 });
 
 test("work backup merge keeps existing customer edits and permits another customer on same listing", () => {

@@ -81,6 +81,8 @@ def load_broker_map(workbook):
         representative_id = clean_listing_id(item.get("대표매물번호"))
         individual_id = clean_listing_id(item.get("개별매물번호"))
         broker_name = str(item.get("공인중개사사무소명") or "").strip()
+        move_in = str(item.get("입주가능일") or "").strip()
+        move_in_category = str(item.get("입주구분") or "").strip()
         if not representative_id or not broker_name:
             continue
 
@@ -93,10 +95,27 @@ def load_broker_map(workbook):
             broker = {
                 "brokerName": broker_name,
                 "individualListingIds": [],
+                "individualListings": [],
             }
             broker_map[representative_id].append(broker)
         if individual_id and individual_id not in broker["individualListingIds"]:
             broker["individualListingIds"].append(individual_id)
+        if individual_id:
+            listing = next(
+                (entry for entry in broker["individualListings"] if entry["listingId"] == individual_id),
+                None,
+            )
+            if listing is None:
+                broker["individualListings"].append(
+                    {
+                        "listingId": individual_id,
+                        "moveIn": move_in,
+                        "moveInCategory": move_in_category,
+                    }
+                )
+            elif move_in and not listing["moveIn"]:
+                listing["moveIn"] = move_in
+                listing["moveInCategory"] = move_in_category
 
     return broker_map
 
