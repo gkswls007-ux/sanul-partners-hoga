@@ -26,6 +26,28 @@ function app() {
   return { run: (code) => vm.runInContext(code, context), node, storage };
 }
 
+test("move-in options sort immediate, chronological, unknown without mutating saved choices", () => {
+  const a = app();
+  a.run(`globalThis.saved = {selectedMoveIn:"2028년 08월 하순 협의가능", brokerOptions: [
+    {brokerName:"나중개사",individualListings:[
+      {listingId:"1",moveIn:"2028년 08월 하순 협의가능"},
+      {listingId:"2",moveIn:"입주협의"},
+      {listingId:"3",moveIn:"2028년 08월 중순 협의가능"},
+      {listingId:"4",moveIn:"즉시입주"},
+      {listingId:"5",moveIn:"2027년 12월 31일"},
+      {listingId:"6",moveIn:"2028년 08월 초순"},
+      {listingId:"7",moveIn:"2028년 8월 10일"}]},
+    {brokerName:"가중개사",individualListings:[{listingId:"8",moveIn:"즉시입주 협의가능"}]}
+  ]};`);
+  assert.equal(a.run('getMoveInOptions(saved).map(x=>x.moveInListingId).join(",")'), '8,4,5,6,7,3,1,2');
+  assert.equal(a.run('saved.brokerOptions[0].individualListings[0].listingId'), '1');
+  assert.equal(a.run('saved.selectedMoveIn'), '2028년 08월 하순 협의가능');
+  assert.equal(a.run('getMoveInSortKey("즉시 입주 협의가능")'), 0);
+  assert.equal(a.run('getMoveInSortKey("2028-08-15")'), 20280815);
+  assert.equal(a.run('getMoveInSortKey("2028년 13월 1일")'), Number.MAX_SAFE_INTEGER);
+  assert.equal(a.run('getMoveInSortKey("2027년 2월 29일")'), Number.MAX_SAFE_INTEGER);
+});
+
 test("customer move-in selection overrides broker changes and survives backup", () => {
   const a = app();
   a.run(`globalThis.chosen = {id:"A", complex:"A", selectedMoveIn:"10월 말", moveInBroker:"중개사A", moveInListingId:"123", moveIn:"중개사별 상이", customerName:"A",customerPhone:"000",contactId:"A1"};`);

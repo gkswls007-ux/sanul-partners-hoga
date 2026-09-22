@@ -1784,7 +1784,25 @@ function renderListingCard(row) {
 function getMoveInOptions(row) {
   return getBrokerOptions(row).flatMap(broker => broker.individualListings
     .filter(listing => listing.moveIn)
-    .map(listing => ({ selectedMoveIn: listing.moveIn, moveInBroker: broker.brokerName, moveInListingId: listing.listingId })));
+    .map(listing => ({ selectedMoveIn: listing.moveIn, moveInBroker: broker.brokerName, moveInListingId: listing.listingId })))
+    .sort((a, b) => getMoveInSortKey(a.selectedMoveIn) - getMoveInSortKey(b.selectedMoveIn)
+      || a.moveInBroker.localeCompare(b.moveInBroker, "ko")
+      || a.moveInListingId.localeCompare(b.moveInListingId, "ko", { numeric: true }));
+}
+
+function getMoveInSortKey(value) {
+  const text = String(value || "").trim();
+  if (/즉시\s*입주/.test(text)) return 0;
+  const match = text.match(/(\d{4})\s*년\s*(\d{1,2})\s*월(?:\s*(?:(\d{1,2})\s*일|(초순|중순|하순)))?/)
+    || text.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  // Approximate periods use their start day for ordering, never for display.
+  const day = match[3] ? Number(match[3]) : ({ 초순: 1, 중순: 11, 하순: 21 }[match[4]] || 1);
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return Number.MAX_SAFE_INTEGER;
+  return year * 10000 + month * 100 + day;
 }
 
 function renderMoveInPicker(row) {
