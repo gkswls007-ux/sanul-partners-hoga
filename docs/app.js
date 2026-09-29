@@ -27,7 +27,7 @@ const labels = {
   all: "전체",
 };
 
-const activeRegions = ["세종"];
+const activeRegions = ["세종", "세종외"];
 
 const regionLabels = {
   세종: {
@@ -35,6 +35,12 @@ const regionLabels = {
     eyebrow: "세종 6생활권(산울동·해밀동) 호가 데이터",
     signage: "세종 6생활권 주요 단지 최신 등록 매물 기준",
     footer: "세종 6생활권 매물 정보",
+  },
+  세종외: {
+    selector: "세종외",
+    eyebrow: "세종 6생활권 외 조사 매물",
+    signage: "세종 6생활권 외 주요 단지 최신 등록 매물 기준",
+    footer: "세종외 매물 정보",
   },
   수원: {
     selector: "수원시",
@@ -121,12 +127,14 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, floorplans, unitAreas] = await Promise.all([
+  const [sejong, sejongOther, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
+    loadDataset("./data/listings-sejong-other.json", "세종외", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
+  if (sejongOther) state.datasets.세종외 = sejongOther;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();

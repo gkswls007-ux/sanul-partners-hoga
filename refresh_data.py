@@ -67,11 +67,11 @@ def clean_listing_id(value):
     return str(value).strip()
 
 
-def load_broker_map(workbook):
-    if BROKER_SHEET_NAME not in workbook.sheetnames:
+def load_broker_map(workbook, sheet_name=BROKER_SHEET_NAME):
+    if sheet_name not in workbook.sheetnames:
         return {}
 
-    sheet = workbook[BROKER_SHEET_NAME]
+    sheet = workbook[sheet_name]
     rows = sheet.iter_rows(values_only=True)
     headers = [str(header).strip() for header in next(rows)]
     broker_map = {}
@@ -120,11 +120,11 @@ def load_broker_map(workbook):
     return broker_map
 
 
-def load_real_transactions(workbook):
-    if REAL_TRANSACTION_SHEET_NAME not in workbook.sheetnames:
+def load_real_transactions(workbook, sheet_name=REAL_TRANSACTION_SHEET_NAME):
+    if sheet_name not in workbook.sheetnames:
         return []
 
-    sheet = workbook[REAL_TRANSACTION_SHEET_NAME]
+    sheet = workbook[sheet_name]
     rows = sheet.iter_rows(values_only=True)
     headers = [str(header).strip() for header in next(rows)]
     data = []
@@ -143,14 +143,16 @@ def load_real_transactions(workbook):
     return data
 
 
-def main():
-    workbook = load_workbook(SOURCE, read_only=True, data_only=True)
-    sheet = workbook[SHEET_NAME]
+def main(source=SOURCE, output=OUTPUT, sheet_name=SHEET_NAME,
+         broker_sheet_name=BROKER_SHEET_NAME,
+         real_transaction_sheet_name=REAL_TRANSACTION_SHEET_NAME):
+    workbook = load_workbook(source, read_only=True, data_only=True)
+    sheet = workbook[sheet_name]
     rows = sheet.iter_rows(values_only=True)
     headers = [str(header).strip() for header in next(rows)]
     data = []
-    broker_map = load_broker_map(workbook)
-    real_transactions = load_real_transactions(workbook)
+    broker_map = load_broker_map(workbook, broker_sheet_name)
+    real_transactions = load_real_transactions(workbook, real_transaction_sheet_name)
 
     for row in rows:
         item = {}
@@ -166,12 +168,12 @@ def main():
         if has_value:
             data.append(item)
 
-    OUTPUT.parent.mkdir(exist_ok=True)
-    OUTPUT.write_text(
+    output.parent.mkdir(exist_ok=True)
+    output.write_text(
         json.dumps(
             {
                 "meta": {
-                    "source": f"{SOURCE.name} / {SHEET_NAME}",
+                    "source": f"{source.name} / {sheet_name}",
                     "rowCount": len(data),
                     "headers": headers,
                     "brokerMatchCount": len(broker_map),
@@ -186,7 +188,7 @@ def main():
         ),
         encoding="utf-8",
     )
-    print(f"{len(data):,}건 업데이트 완료: {OUTPUT}")
+    print(f"{len(data):,}건 업데이트 완료: {output}")
 
 
 if __name__ == "__main__":
