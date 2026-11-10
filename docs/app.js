@@ -27,7 +27,7 @@ const labels = {
   all: "전체",
 };
 
-const activeRegions = ["세종", "세종외"];
+const activeRegions = ["세종", "세종외", "6생활권외2"];
 
 const regionLabels = {
   세종: {
@@ -42,11 +42,11 @@ const regionLabels = {
     signage: "세종 6생활권 외 주요 단지 최신 등록 매물 기준",
     footer: "세종외 매물 정보",
   },
-  수원: {
-    selector: "수원시",
-    eyebrow: "수원 구운동·금곡동·호매실동 호가 데이터",
-    signage: "수원 주요 단지 최신 등록 매물 기준",
-    footer: "수원 매물 정보",
+  "6생활권외2": {
+    selector: "6생활권외2",
+    eyebrow: "세종 6생활권 외 월세 조사 매물",
+    signage: "세종 6생활권 외 월세 매물 기준",
+    footer: "6생활권외2 매물 정보",
   },
 };
 
@@ -127,22 +127,19 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, sejongOther, floorplans, unitAreas] = await Promise.all([
+  const [sejong, sejongOther, sejongOther2, floorplans, unitAreas] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-sejong-other.json", "세종외", { optional: true }),
+    loadDataset("./data/listings-sejong-other2.json", "6생활권외2", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
   ]);
   state.datasets.세종 = sejong;
   if (sejongOther) state.datasets.세종외 = sejongOther;
+  if (sejongOther2) state.datasets["6생활권외2"] = sejongOther2;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
   loadSavedWork();
-  // Archived data is only needed for previously saved customer work.
-  if ([...state.contacts, ...state.basket].some((item) => item.region === "수원") || activeRegions.includes("수원")) {
-    const suwon = await loadDataset("./data/listings-suwon.json", "수원", { optional: true });
-    if (suwon) state.datasets.수원 = suwon;
-  }
   snapshotSavedBrokers();
 
   fillRegionFilter();
@@ -330,9 +327,10 @@ function analysisPyeongValues(rows) {
 function fillFilters() {
   const dates = unique("surveyDate");
   const latestDate = dates[0] || labels.all;
+  const deals = unique("dealType");
 
   setOptions(el.date, dates, latestDate);
-  setOptions(el.deal, unique("dealType"), "매매");
+  setOptions(el.deal, deals, deals.includes("매매") ? "매매" : deals.length === 1 ? deals[0] : labels.all);
   setOptions(el.pyeong, getAvailablePyeongGroups(), labels.all);
   renderMultiSelect("complex", unique("complex"));
   renderMultiSelect("type", getAvailableTypes());

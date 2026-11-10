@@ -6,6 +6,7 @@ from pathlib import Path
 
 import refresh_data
 import refresh_floorplans
+import refresh_sejong_other2
 import refresh_unit_areas
 
 
@@ -23,6 +24,7 @@ def copy_file(source_name, target_name=None):
 def main(skip_refresh=False):
     if not skip_refresh:
         refresh_data.main()
+        refresh_sejong_other2.main()
         refresh_floorplans.main()
         refresh_unit_areas.main()
 

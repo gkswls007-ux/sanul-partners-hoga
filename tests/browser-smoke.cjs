@@ -36,9 +36,13 @@ const server = http.createServer(async (req, res) => {
     const url = `http://127.0.0.1:${server.address().port}`;
     await page.goto(url);
     await page.waitForFunction(() => document.querySelector("#sourceCount").textContent !== "-");
-    assert.equal(await page.locator("#regionFilter option").count(), 2);
-    assert.deepEqual(await page.locator("#regionFilter option").allTextContents(), ["세종 6생활권", "세종외"]);
+    assert.deepEqual(await page.locator("#regionFilter option").allTextContents(), ["세종 6생활권", "세종외", "6생활권외2"]);
     assert.ok(!requests.some((request) => request.includes("listings-suwon")));
+    await page.locator("#regionFilter").selectOption("6생활권외2");
+    assert.equal(await page.locator("#dealFilter").inputValue(), "월세");
+    assert.ok(await page.evaluate(() => state.filtered.length > 0 && state.filtered.every(row => row.region === "6생활권외2" && row.dealType === "월세")));
+    await page.locator('[data-tab="briefing"]').click();
+    assert.ok(await page.locator(".listing-card").count() > 0);
     await page.locator("#regionFilter").selectOption("세종외");
     assert.ok(await page.evaluate(() => state.rows.length > 0 && state.rows.every(row => row.region === "세종외") && state.realTransactions.length > 0));
     await page.locator("#dealFilter").selectOption("전체");
