@@ -469,6 +469,7 @@ input {
 
 .overview-wide {
   grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .table-wrap {
@@ -508,6 +509,17 @@ input {
   font-size: 13px;
   font-weight: 800;
   background: #c7edf8;
+}
+
+.area-price-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.area-price-table thead {
+  position: relative;
+  z-index: 1;
+  transform: translateY(var(--area-header-offset, 0px));
 }
 
 .summary-table td {

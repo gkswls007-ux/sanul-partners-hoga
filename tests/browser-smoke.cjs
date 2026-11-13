@@ -68,6 +68,34 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await typeRow("111A").locator("td").nth(6).textContent(), "71,500");
     assert.equal(await typeRow("111DD").locator("td").nth(6).textContent(), "68,000");
     assert.equal(await typeRow("150DA").locator("td").nth(6).textContent(), "시세 없음");
+    const checkAreaHeader = async (controlsSelector) => {
+      await page.evaluate(() => scrollTo(0, scrollY + document.querySelector(".area-price-table").getBoundingClientRect().top + 160));
+      await page.waitForFunction(selector => {
+        const header = document.querySelector(".area-price-table thead").getBoundingClientRect();
+        const controls = document.querySelector(selector).getBoundingClientRect();
+        return Math.abs(header.top - controls.bottom) <= 1 && header.height > 0;
+      }, controlsSelector);
+    };
+    await checkAreaHeader("#mainToolbar");
+    await page.locator("#advancedFilters > summary").click();
+    await checkAreaHeader("#mainToolbar");
+    await page.locator("#advancedFilters > summary").click();
+    await checkAreaHeader("#mainToolbar");
+    await page.screenshot({ path: path.join(output, "desktop-area-sticky-header.png") });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await checkAreaHeader(".view-tabs");
+    const horizontalHeader = await page.locator(".area-price-table").evaluate(table => {
+      const wrap = table.parentElement;
+      wrap.scrollLeft = wrap.scrollWidth;
+      const header = table.querySelector("[data-area-kb-column]").getBoundingClientRect();
+      const cell = table.tBodies[0].rows[0].cells[6].getBoundingClientRect();
+      return { scrollLeft: wrap.scrollLeft, leftDifference: header.left - cell.left, widthDifference: header.width - cell.width };
+    });
+    assert.ok(horizontalHeader.scrollLeft > 0 && Math.abs(horizontalHeader.leftDifference) <= 1 && Math.abs(horizontalHeader.widthDifference) <= 1, JSON.stringify(horizontalHeader));
+    await page.screenshot({ path: path.join(output, "mobile-area-sticky-header.png") });
+    await page.locator(".area-price-table").evaluate(table => { table.parentElement.scrollLeft = 0; });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.evaluate(() => scrollTo(0, 0));
     await page.locator("#dealFilter").selectOption("전세");
     assert.equal(await typeRow("78A").locator("td").nth(6).textContent(), "25,500");
     await page.locator("#dealFilter").selectOption("월세");

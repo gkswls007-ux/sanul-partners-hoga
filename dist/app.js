@@ -153,6 +153,32 @@ async function init() {
   fillSignageControls();
   bindEvents();
   applyFilters();
+  bindAreaPriceHeader();
+}
+
+function bindAreaPriceHeader() {
+  const table = el.areaPriceBody.closest("table");
+  const header = table.tHead;
+  const tabs = document.querySelector(".view-tabs");
+  let frame = 0;
+
+  const update = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (el.summaryTab.hidden) return;
+      const bounds = table.getBoundingClientRect();
+      const controlsBottom = Math.max(tabs.getBoundingClientRect().bottom, el.mainToolbar.getBoundingClientRect().bottom);
+      const offset = Math.max(0, Math.min(controlsBottom - bounds.top, bounds.height - header.offsetHeight));
+      header.style.setProperty("--area-header-offset", `${offset}px`);
+    });
+  };
+
+  // Keep the header in the table's horizontal scroll container.
+  const observer = new ResizeObserver(update);
+  [table, header, tabs, el.mainToolbar].forEach((element) => observer.observe(element));
+  window.addEventListener("scroll", update, { passive: true });
+  update();
 }
 
 async function loadDataset(src, region, options = {}) {
