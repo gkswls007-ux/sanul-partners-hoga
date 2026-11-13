@@ -1305,7 +1305,6 @@ function renderAreaPriceRange() {
         count: rows.length,
         minPrice: prices.length ? Math.min(...prices) : null,
         maxPrice: prices.length ? Math.max(...prices) : null,
-        avgPrice: prices.length ? avg(prices) : null,
         avgPricePerPyeong: pricePerPyeong.length ? avg(pricePerPyeong) : null,
       };
     })
@@ -1313,7 +1312,7 @@ function renderAreaPriceRange() {
     .sort(compareAreaItems);
 
   if (!grouped.length) {
-    el.areaPriceBody.innerHTML = `<tr><td colspan="${showKb ? 10 : 8}" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
+    el.areaPriceBody.innerHTML = `<tr><td colspan="${showKb ? 9 : 8}" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
     return;
   }
 
@@ -1327,7 +1326,7 @@ function renderAreaPriceRange() {
           <td>${escapeHtml(item.dealType === "월세" ? "월세(환산)" : item.dealType)}</td>
           <td>${formatPrice(item.minPrice)}</td>
           <td>${formatPrice(item.maxPrice)}</td>
-          ${showKb ? renderAreaKbCells(item, kbComplex.pricesByType) : ""}
+          ${showKb ? renderAreaKbCell(item, kbComplex.pricesByType) : ""}
           <td>${formatPlainNumber(item.avgPricePerPyeong)}</td>
           <td>${item.count.toLocaleString("ko-KR")}</td>
         </tr>
@@ -1336,14 +1335,12 @@ function renderAreaPriceRange() {
     .join("");
 }
 
-function renderAreaKbCells(item, pricesByType) {
-  if (item.dealType === "월세") return "<td>-</td><td>-</td>";
+function renderAreaKbCell(item, pricesByType) {
+  if (item.dealType === "월세") return "<td>-</td>";
   const type = String(item.supplyArea ?? "").trim().toUpperCase();
   const prices = pricesByType[type];
   const price = prices?.[item.dealType === "매매" ? "sale" : "lease"];
-  if (!Number.isFinite(price)) return `<td>${prices ? "시세 없음" : "미확인"}</td><td>-</td>`;
-  const difference = Math.round(item.avgPrice - price);
-  return `<td>${formatPrice(price)}</td><td>${difference > 0 ? "+" : ""}${formatPrice(difference)}</td>`;
+  return `<td>${Number.isFinite(price) ? formatPrice(price) : prices ? "시세 없음" : "미확인"}</td>`;
 }
 
 function renderTrendChart() {
