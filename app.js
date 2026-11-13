@@ -7,7 +7,7 @@ const state = {
   realTransactions: [],
   unitAreas: [],
   floorplans: {},
-  haemilKbPrices: null,
+  sejongKbPrices: null,
   brokerMap: {},
   basket: [],
   contacts: [],
@@ -128,20 +128,20 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, sejongOther, sejongOther2, floorplans, unitAreas, haemilKbPrices] = await Promise.all([
+  const [sejong, sejongOther, sejongOther2, floorplans, unitAreas, sejongKbPrices] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-sejong-other.json", "세종외", { optional: true }),
     loadDataset("./data/listings-sejong-other2.json", "6생활권외2", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
-    loadHaemilKbPrices(),
+    loadSejongKbPrices(),
   ]);
   state.datasets.세종 = sejong;
   if (sejongOther) state.datasets.세종외 = sejongOther;
   if (sejongOther2) state.datasets["6생활권외2"] = sejongOther2;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
-  state.haemilKbPrices = haemilKbPrices;
+  state.sejongKbPrices = sejongKbPrices;
   loadSavedWork();
   snapshotSavedBrokers();
 
@@ -219,12 +219,12 @@ function updateRegionUi() {
   if (!isSejong && el.unitLookupTab && !el.unitLookupTab.hidden) switchTab("summary");
 }
 
-async function loadHaemilKbPrices() {
+async function loadSejongKbPrices() {
   try {
-    const response = await fetch("./data/kb-haemil1.json", { cache: "no-store" });
+    const response = await fetch("./data/kb-sejong.json", { cache: "no-store" });
     if (!response.ok) return null;
     const snapshot = await response.json();
-    return snapshot.checkedDate && snapshot.pricesByType ? snapshot : null;
+    return snapshot.checkedDate && snapshot.complexes ? snapshot : null;
   } catch {
     return null;
   }
@@ -1276,13 +1276,20 @@ function renderAreaInventory() {
 }
 
 function renderAreaPriceRange() {
-  const snapshot = state.haemilKbPrices;
-  const showKb = Boolean(snapshot && state.activeRegion === "세종" && state.selectedComplexes.size === 1
-    && state.selectedComplexes.has("해밀1단지마스터힐스") && el.deal.value !== "월세");
+  const snapshot = state.sejongKbPrices;
+  const complex = state.selectedComplexes.values().next().value;
+  const kbComplex = snapshot?.complexes[complex];
+  const showKb = Boolean(kbComplex && state.activeRegion === "세종" && state.selectedComplexes.size === 1 && el.deal.value !== "월세");
   document.querySelectorAll("[data-area-kb-column]").forEach((header) => { header.hidden = !showKb; });
   const note = document.querySelector("#areaKbNote");
   note.hidden = !showKb;
-  note.querySelector("time").textContent = showKb ? snapshot.checkedDate : "";
+  if (showKb) {
+    const source = note.querySelector("a");
+    source.hidden = !kbComplex.kbId;
+    if (kbComplex.kbId) source.href = `https://kbland.kr/se/c/${kbComplex.kbId}`;
+    note.querySelector("span").hidden = Boolean(kbComplex.kbId);
+    note.querySelector("time").textContent = snapshot.checkedDate;
+  }
 
   const grouped = groupBy(getSummaryRows(), (row) => `${areaKey(row)}|${row.dealType}`)
     .map(([key, rows]) => {
@@ -1320,7 +1327,7 @@ function renderAreaPriceRange() {
           <td>${escapeHtml(item.dealType === "월세" ? "월세(환산)" : item.dealType)}</td>
           <td>${formatPrice(item.minPrice)}</td>
           <td>${formatPrice(item.maxPrice)}</td>
-          ${showKb ? renderAreaKbCells(item, snapshot.pricesByType) : ""}
+          ${showKb ? renderAreaKbCells(item, kbComplex.pricesByType) : ""}
           <td>${formatPlainNumber(item.avgPricePerPyeong)}</td>
           <td>${item.count.toLocaleString("ko-KR")}</td>
         </tr>
