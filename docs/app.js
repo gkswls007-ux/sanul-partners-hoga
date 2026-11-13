@@ -7,6 +7,7 @@ const state = {
   realTransactions: [],
   unitAreas: [],
   floorplans: {},
+  haemilKbPrices: null,
   brokerMap: {},
   basket: [],
   contacts: [],
@@ -127,18 +128,20 @@ const el = {
 init();
 
 async function init() {
-  const [sejong, sejongOther, sejongOther2, floorplans, unitAreas] = await Promise.all([
+  const [sejong, sejongOther, sejongOther2, floorplans, unitAreas, haemilKbPrices] = await Promise.all([
     loadDataset("./data/listings.json", "세종"),
     loadDataset("./data/listings-sejong-other.json", "세종외", { optional: true }),
     loadDataset("./data/listings-sejong-other2.json", "6생활권외2", { optional: true }),
     loadFloorplans(),
     loadUnitAreas(),
+    loadHaemilKbPrices(),
   ]);
   state.datasets.세종 = sejong;
   if (sejongOther) state.datasets.세종외 = sejongOther;
   if (sejongOther2) state.datasets["6생활권외2"] = sejongOther2;
   state.floorplans = floorplans;
   state.unitAreas = unitAreas;
+  state.haemilKbPrices = haemilKbPrices;
   loadSavedWork();
   snapshotSavedBrokers();
 
@@ -214,6 +217,17 @@ function updateRegionUi() {
   }
   if (el.unitLookupTabButton) el.unitLookupTabButton.hidden = !isSejong;
   if (!isSejong && el.unitLookupTab && !el.unitLookupTab.hidden) switchTab("summary");
+}
+
+async function loadHaemilKbPrices() {
+  try {
+    const response = await fetch("./data/kb-haemil1.json", { cache: "no-store" });
+    if (!response.ok) return null;
+    const snapshot = await response.json();
+    return snapshot.checkedDate && snapshot.pricesByType ? snapshot : null;
+  } catch {
+    return null;
+  }
 }
 
 async function loadFloorplans() {
@@ -1262,6 +1276,14 @@ function renderAreaInventory() {
 }
 
 function renderAreaPriceRange() {
+  const snapshot = state.haemilKbPrices;
+  const showKb = Boolean(snapshot && state.activeRegion === "세종" && state.selectedComplexes.size === 1
+    && state.selectedComplexes.has("해밀1단지마스터힐스") && el.deal.value !== "월세");
+  document.querySelectorAll("[data-area-kb-column]").forEach((header) => { header.hidden = !showKb; });
+  const note = document.querySelector("#areaKbNote");
+  note.hidden = !showKb;
+  note.querySelector("time").textContent = showKb ? snapshot.checkedDate : "";
+
   const grouped = groupBy(getSummaryRows(), (row) => `${areaKey(row)}|${row.dealType}`)
     .map(([key, rows]) => {
       const prices = analysisValues(rows);
@@ -1276,6 +1298,7 @@ function renderAreaPriceRange() {
         count: rows.length,
         minPrice: prices.length ? Math.min(...prices) : null,
         maxPrice: prices.length ? Math.max(...prices) : null,
+        avgPrice: prices.length ? avg(prices) : null,
         avgPricePerPyeong: pricePerPyeong.length ? avg(pricePerPyeong) : null,
       };
     })
@@ -1283,7 +1306,7 @@ function renderAreaPriceRange() {
     .sort(compareAreaItems);
 
   if (!grouped.length) {
-    el.areaPriceBody.innerHTML = `<tr><td colspan="8" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
+    el.areaPriceBody.innerHTML = `<tr><td colspan="${showKb ? 10 : 8}" class="empty-cell">조건에 맞는 타입별 호가 데이터가 없습니다.</td></tr>`;
     return;
   }
 
@@ -1297,12 +1320,23 @@ function renderAreaPriceRange() {
           <td>${escapeHtml(item.dealType === "월세" ? "월세(환산)" : item.dealType)}</td>
           <td>${formatPrice(item.minPrice)}</td>
           <td>${formatPrice(item.maxPrice)}</td>
+          ${showKb ? renderAreaKbCells(item, snapshot.pricesByType) : ""}
           <td>${formatPlainNumber(item.avgPricePerPyeong)}</td>
           <td>${item.count.toLocaleString("ko-KR")}</td>
         </tr>
       `,
     )
     .join("");
+}
+
+function renderAreaKbCells(item, pricesByType) {
+  if (item.dealType === "월세") return "<td>-</td><td>-</td>";
+  const type = String(item.supplyArea ?? "").trim().toUpperCase();
+  const prices = pricesByType[type];
+  const price = prices?.[item.dealType === "매매" ? "sale" : "lease"];
+  if (!Number.isFinite(price)) return `<td>${prices ? "시세 없음" : "미확인"}</td><td>-</td>`;
+  const difference = Math.round(item.avgPrice - price);
+  return `<td>${formatPrice(price)}</td><td>${difference > 0 ? "+" : ""}${formatPrice(difference)}</td>`;
 }
 
 function renderTrendChart() {
