@@ -117,7 +117,7 @@ const server = http.createServer(async (req, res) => {
     assert.ok(await page.locator("#priceKpis").isHidden());
     assert.equal(await page.locator("#dealPriceBreakdown tbody tr").count(), 3);
     assert.equal(await page.locator("#realTransactionBody > tr").count(), 15);
-    await page.evaluate(() => scrollTo(0, document.querySelector("#briefingTab").offsetTop - document.querySelector("#mainToolbar").offsetHeight - 12));
+    await page.evaluate(() => scrollTo(0, document.querySelector("#briefingTab").offsetTop - document.querySelector(".view-controls").offsetHeight - 12));
     await page.screenshot({ path: path.join(output, "desktop-all.png") });
     await page.locator(".panel").filter({ has: page.locator("#realTransactionBody") }).screenshot({ path: path.join(output, "real-transactions.png") });
     await page.locator("#dealFilter").selectOption("매매");
@@ -173,8 +173,19 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.evaluate(() => state.contacts.length), 2);
     await page.locator('[data-tab="briefing"]').click();
     assert.equal(await page.evaluate(() => state.contacts.find(item => item.customerName === '테스트 고객A').selectedMoveIn), selectedMoveIn);
-    await page.evaluate(() => scrollTo(0, document.querySelector("#listingGrid").offsetTop - document.querySelector("#mainToolbar").offsetHeight - 12));
+    await page.evaluate(() => scrollTo(0, document.querySelector("#listingGrid").offsetTop - document.querySelector(".view-controls").offsetHeight - 12));
     await page.screenshot({ path: path.join(output, "desktop-cards.png") });
+    await page.evaluate(() => scrollBy(0, 900));
+    const briefingScroll = await page.evaluate(() => scrollY);
+    const tabs = page.locator(".view-tabs");
+    assert.ok(Math.abs((await tabs.boundingBox()).y) <= 1);
+    assert.ok((await page.locator("#mainToolbar").boundingBox()).y >= (await tabs.boundingBox()).height);
+    await page.screenshot({ path: path.join(output, "desktop-sticky-tabs.png") });
+    await page.locator('[data-tab="summary"]').click();
+    assert.ok(await page.locator("#summaryTab").isVisible());
+    assert.ok(await page.evaluate(() => scrollY) < briefingScroll);
+    await page.locator('[data-tab="briefing"]').click();
+    assert.ok(Math.abs(await page.evaluate(() => scrollY) - briefingScroll) <= 1);
     await page.locator('[data-tab="signage"]').click();
     assert.ok(await page.evaluate(() => {
       const bytes = document.querySelector("#signageCanvas").getContext("2d").getImageData(0, 0, 1080, 1920).data;
@@ -186,6 +197,10 @@ const server = http.createServer(async (req, res) => {
     await page.screenshot({ path: path.join(output, "mobile-top.png") });
     const overflow = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
     assert.ok(overflow.scroll <= overflow.width + 1, JSON.stringify(overflow));
+    await page.evaluate(() => scrollTo(0, document.querySelector("#listingGrid").offsetTop + 400));
+    assert.ok(Math.abs((await tabs.boundingBox()).y) <= 1);
+    assert.ok((await page.locator("#mainToolbar").boundingBox()).y < 0);
+    await page.screenshot({ path: path.join(output, "mobile-sticky-tabs.png") });
     await page.locator(".listing-card").first().scrollIntoViewIfNeeded();
     await page.locator('.move-in-picker summary').first().click();
     const pickerBox = await page.locator('.move-in-options').first().boundingBox();

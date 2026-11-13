@@ -95,11 +95,19 @@ h2 {
   font-size: 24px;
 }
 
+.view-controls {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  margin: 18px 0;
+  background: var(--soft);
+}
+
 .view-tabs {
   display: flex;
   gap: 8px;
-  margin: 18px 0 0;
   border-bottom: 1px solid var(--line);
+  background: var(--soft);
 }
 
 .tab-button {
@@ -123,9 +131,6 @@ h2 {
 }
 
 .toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 3;
   display: grid;
   grid-template-columns:
     minmax(90px, 0.65fr)
@@ -137,7 +142,7 @@ h2 {
     minmax(200px, 1.25fr);
   gap: 12px;
   padding: 16px;
-  margin: 18px 0;
+  margin: 18px 0 0;
   border: 1px solid var(--line);
   background: var(--paper);
   box-shadow: 0 10px 24px rgba(23, 35, 52, 0.08);
@@ -1743,8 +1748,27 @@ body.modal-open {
     min-height: 30px;
   }
 
+  .view-controls {
+    display: contents;
+  }
+
+  .view-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 12;
+    margin: 18px 0;
+    gap: 0 4px;
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    flex: 1 1 auto;
+    padding: 0 4px;
+    font-size: 12px;
+  }
+
   .toolbar {
-    position: static;
+    margin: 0 0 18px;
   }
 
   .trend-chart svg {

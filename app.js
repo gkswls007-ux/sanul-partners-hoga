@@ -2,6 +2,8 @@ const moveInSelections = new Map();
 const state = {
   datasets: {},
   activeRegion: "세종",
+  activeTab: "summary",
+  tabScrollPositions: new Map(),
   rows: [],
   filtered: [],
   realTransactions: [],
@@ -1151,6 +1153,12 @@ function render() {
 
 function switchTab(tabName) {
   if (tabName === "unitLookup" && state.activeRegion !== "세종") tabName = "summary";
+  if (tabName === state.activeTab) return;
+  const currentScroll = window.scrollY;
+  const headerEnd = el.topbar.getBoundingClientRect().bottom + currentScroll;
+  const nextScroll = state.tabScrollPositions.get(tabName) ?? Math.min(currentScroll, headerEnd);
+  state.tabScrollPositions.set(state.activeTab, currentScroll);
+  state.activeTab = tabName;
   el.tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tabName));
   el.summaryTab.hidden = tabName !== "summary";
   el.briefingTab.hidden = tabName !== "briefing";
@@ -1158,6 +1166,7 @@ function switchTab(tabName) {
   if (el.signageTab) el.signageTab.hidden = tabName !== "signage";
   if (el.mainToolbar) el.mainToolbar.hidden = tabName === "unitLookup" || tabName === "signage";
   if (tabName === "signage") renderSignage();
+  window.scrollTo({ top: nextScroll, behavior: "instant" });
 }
 
 function updateHeroImage() {
