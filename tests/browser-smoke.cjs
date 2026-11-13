@@ -96,10 +96,23 @@ const server = http.createServer(async (req, res) => {
     await page.locator(".area-price-table").evaluate(table => { table.parentElement.scrollLeft = 0; });
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.evaluate(() => scrollTo(0, 0));
+    await page.locator('[data-tab="briefing"]').click();
+    const kbCard = page.locator(".listing-card").filter({ hasText: "78A타입" }).first();
+    const kbButton = kbCard.locator("[data-kb-price]");
+    const kbTip = kbCard.locator(".kb-price-tip");
+    assert.ok(await kbTip.isHidden());
+    await kbButton.hover();
+    assert.ok(await kbTip.isVisible());
+    assert.match(await kbTip.innerText(), /KB 매매시세 47,250만원/);
+    await page.screenshot({ path: path.join(output, "desktop-kb-price.png") });
     await page.locator("#dealFilter").selectOption("전세");
+    await kbButton.hover();
+    assert.match(await kbTip.innerText(), /KB 전세시세 25,500만원/);
+    await page.locator('[data-tab="summary"]').click();
     assert.equal(await typeRow("78A").locator("td").nth(6).textContent(), "25,500");
     await page.locator("#dealFilter").selectOption("월세");
     assert.ok(await kbNote.isHidden());
+    assert.equal(await page.locator("[data-kb-price]").count(), 0);
     await page.locator("#dealFilter").selectOption("매매");
     await page.locator("#complexFilterButton").click();
     await page.locator('#complexFilterMenu [data-multi-value="전체"]').click();
@@ -113,6 +126,7 @@ const server = http.createServer(async (req, res) => {
     await page.locator("#complexFilterButton").click();
     assert.ok(await kbNote.getByText("KB시세 미확인").isVisible());
     assert.match(await page.locator("#areaPriceBody").innerText(), /미확인/);
+    assert.equal(await page.locator("[data-kb-price]").count(), 0);
     await page.locator("#regionFilter").selectOption("세종외");
     assert.ok(await kbNote.isHidden());
     await page.locator("#regionFilter").selectOption("세종");
@@ -234,6 +248,29 @@ const server = http.createServer(async (req, res) => {
     const pickerBox = await page.locator('.move-in-options').first().boundingBox();
     assert.ok(pickerBox.x >= 0 && pickerBox.x + pickerBox.width <= 390);
     await page.screenshot({ path: path.join(output, "mobile-cards.png") });
+    const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    try {
+      await touch.route("**/*", (route) => route.request().url().startsWith(url) ? route.continue() : route.abort());
+      const mobile = await touch.newPage();
+      await mobile.goto(url);
+      await mobile.waitForFunction(() => document.querySelector("#sourceCount").textContent !== "-");
+      await mobile.locator('[data-tab="briefing"]').tap();
+      const card = mobile.locator(".listing-card").filter({ has: mobile.locator("[data-kb-price]") }).first();
+      const badge = card.locator("[data-kb-price]");
+      const tip = card.locator(".kb-price-tip");
+      await badge.tap();
+      assert.ok(await tip.isVisible());
+      const tipBox = await tip.boundingBox();
+      assert.ok(tipBox.x >= 0 && tipBox.x + tipBox.width <= 390);
+      await mobile.screenshot({ path: path.join(output, "mobile-kb-price.png") });
+      await badge.tap();
+      assert.ok(await tip.isHidden());
+      await badge.tap();
+      await card.locator(".complex-name").tap();
+      assert.ok(await tip.isHidden());
+    } finally {
+      await touch.close();
+    }
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ passed: true, screenshots: output, checks: "region, pagination, budgets, direction, floors, type identity, deals, real table, plan, customer separation, backup merge, persistence, signage, mobile" }));
     await context.close();

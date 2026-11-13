@@ -875,6 +875,8 @@ input {
 }
 
 .complex-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
   font-weight: 800;
   line-height: 1.35;
@@ -888,6 +890,59 @@ input {
   color: var(--teal);
   font-size: 12px;
   font-weight: 800;
+}
+
+.listing-tags {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.listing-kb-price {
+  position: relative;
+}
+
+.kb-price-button {
+  border: 1px solid #c8d9e9;
+  border-radius: 5px;
+  background: #f0f6fc;
+  color: var(--blue);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.kb-price-tip {
+  display: none;
+  position: absolute;
+  z-index: 11;
+  top: 100%;
+  right: 0;
+  min-width: 165px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #1d252f;
+  color: #fff;
+  box-shadow: 0 4px 12px #0002;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.kb-price-tip small {
+  display: block;
+  margin-top: 3px;
+  color: #dce7f0;
+}
+
+.kb-price-button[aria-expanded="true"] + .kb-price-tip,
+.kb-price-button:focus-visible + .kb-price-tip {
+  display: block;
+}
+
+@media (hover: hover) {
+  .listing-kb-price:hover .kb-price-tip {
+    display: block;
+  }
 }
 
 .price {

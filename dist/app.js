@@ -819,6 +819,13 @@ function bindEvents() {
   });
 
   el.listingGrid.addEventListener("click", (event) => {
+    const kbButton = event.target.closest("[data-kb-price]");
+    if (kbButton) {
+      const open = kbButton.getAttribute("aria-expanded") !== "true";
+      closeListingKbPrices();
+      kbButton.setAttribute("aria-expanded", String(open));
+      return;
+    }
     const moveInOption = event.target.closest("[data-move-in-option]");
     if (moveInOption) {
       selectListingMoveIn(moveInOption.dataset.moveInRow, Number(moveInOption.dataset.moveInOption));
@@ -979,10 +986,12 @@ function bindEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !el.floorplanModal.hidden) closeFloorplan();
     if (event.key === "Escape") closeMultiSelectMenus();
+    if (event.key === "Escape") closeListingKbPrices();
   });
 
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".multi-select")) closeMultiSelectMenus();
+    if (!event.target.closest(".listing-kb-price")) closeListingKbPrices();
   });
 }
 
@@ -1370,11 +1379,21 @@ function renderAreaPriceRange() {
     .join("");
 }
 
+function getKbTypePrices(item, pricesByType) {
+  const type = String(item.supplyArea ?? "").trim().toUpperCase();
+  return pricesByType?.[type];
+}
+
+function getKbDealPrice(dealType, prices) {
+  if (dealType === "매매") return prices?.sale;
+  if (dealType === "전세") return prices?.lease;
+  return null;
+}
+
 function renderAreaKbCell(item, pricesByType) {
   if (item.dealType === "월세") return "<td>-</td>";
-  const type = String(item.supplyArea ?? "").trim().toUpperCase();
-  const prices = pricesByType[type];
-  const price = prices?.[item.dealType === "매매" ? "sale" : "lease"];
+  const prices = getKbTypePrices(item, pricesByType);
+  const price = getKbDealPrice(item.dealType, prices);
   return `<td>${Number.isFinite(price) ? formatPrice(price) : prices ? "시세 없음" : "미확인"}</td>`;
 }
 
@@ -1832,7 +1851,10 @@ function renderListingCard(row) {
     <article class="listing-card">
       <div class="listing-top">
         <p class="complex-name">${escapeHtml(shortName(row.complex))}</p>
-        <span class="tag">${escapeHtml(row.dealType || "-")}</span>
+        <div class="listing-tags">
+          <span class="tag">${escapeHtml(row.dealType || "-")}</span>
+          ${renderListingKbPrice(row)}
+        </div>
       </div>
       <div class="price">${formatListingCardPrice(row)}</div>
       <div class="facts">
@@ -1858,6 +1880,24 @@ function renderListingCard(row) {
       </div>
     </article>
   `;
+}
+
+function renderListingKbPrice(row) {
+  if ((row.region || state.activeRegion) !== "세종") return "";
+  const snapshot = state.sejongKbPrices;
+  const prices = getKbTypePrices(row, snapshot?.complexes[row.complex]?.pricesByType);
+  const price = getKbDealPrice(row.dealType, prices);
+  if (!Number.isFinite(price)) return "";
+  const amount = `KB ${row.dealType}시세 ${formatPrice(price)}만원`;
+  const checked = `조회 ${snapshot.checkedDate}`;
+  return `<span class="listing-kb-price">
+    <button class="tag kb-price-button" type="button" data-kb-price aria-expanded="false" aria-label="${escapeHtml(`${amount}, ${checked}`)}">KB시세</button>
+    <span class="kb-price-tip" aria-hidden="true"><strong>${escapeHtml(amount)}</strong><small>${escapeHtml(checked)}</small></span>
+  </span>`;
+}
+
+function closeListingKbPrices() {
+  el.listingGrid.querySelectorAll('[data-kb-price][aria-expanded="true"]').forEach((button) => button.setAttribute("aria-expanded", "false"));
 }
 
 function getMoveInOptions(row) {
