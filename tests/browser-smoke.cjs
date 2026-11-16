@@ -124,8 +124,8 @@ const server = http.createServer(async (req, res) => {
     await page.locator('#complexFilterMenu [data-multi-value="전체"]').click();
     await page.locator('#complexFilterMenu [data-multi-value="산울8단지엘리프세종6-3"]').click();
     await page.locator("#complexFilterButton").click();
-    assert.ok(await kbNote.getByText("KB시세 미확인").isVisible());
-    assert.match(await page.locator("#areaPriceBody").innerText(), /미확인/);
+    assert.equal(await kbNote.locator("a").getAttribute("href"), "https://kbland.kr/se/c/491111");
+    assert.match(await page.locator("#areaPriceBody").innerText(), /시세 없음/);
     assert.equal(await page.locator("[data-kb-price]").count(), 0);
     await page.locator("#regionFilter").selectOption("세종외");
     assert.ok(await kbNote.isHidden());
